@@ -71,7 +71,7 @@ template<class type> type** ResourceBundle::readArrayArray(string cstr)
 		}
 		beg++;
 	}
-	
+
 	if(lookingFor!=LEFTBRACKET){
 		return 0;
 	}
@@ -87,14 +87,17 @@ template<class type> type** ResourceBundle::readArrayArray(string cstr)
 }
 
 ResourceBundle* ResourceBundle::getResource(char* file){
-	if(ResourceBundle::resourceRegister[file] == 0)
+	filesystem::path temp = filesystem::complete(string(file));
+	const char* complete_path = (temp.native_file_string()).c_str();
+
+	if(ResourceBundle::resourceRegister[complete_path] == 0)
 	{
 		ResourceBundle ** r = new ResourceBundle*[1];
-		r[0] = new ResourceBundle(file);
-		ResourceBundle::resourceRegister[file] = r;
+		r[0] = new ResourceBundle((char*)complete_path);
+		ResourceBundle::resourceRegister[complete_path] = r;
 	}
 
-	return ((ResourceBundle**)ResourceBundle::resourceRegister[file])[0];
+	return ((ResourceBundle**)ResourceBundle::resourceRegister[complete_path])[0];
 }
 
 void * ResourceBundle::operator[](const char * s)
@@ -145,10 +148,10 @@ void ResourceBundle::initSupportedTypes()
 	ResourceBundle::supportedTypes["numberofrects"] = INT;
 	ResourceBundle::supportedTypes["state"] = INT;
 	ResourceBundle::supportedTypes["numberofstates"] = INT;
-	
+
 	ResourceBundle::supportedTypes["rect"] = INTARR;
-	
-	
+
+
 }
 
 SDL_Surface * ResourceBundle::loadImage(char * filename)

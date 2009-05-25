@@ -25,7 +25,7 @@
 #define ACTION_SHOOT          0x00000010
 #define ACTION_SWITCH_AMMO    0x00000020
 
-#define ACTIONMASK uint32_t
+typedef uint32_t ACTIONMASK;
 
 class InputManager {
 public:

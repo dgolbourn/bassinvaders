@@ -33,7 +33,9 @@
 	#define RIGHT(z,i) ((z)[2*(i)])
 	#define LEFT(z,i) ((z)[2*(i)+1])
 
-// Macros for positive/negative frequencies in frequency domain data
+// Macros for positive/negative frequencies in frequency domain data.
+// Positive addresses from start of array, negative addresses from
+// end of array.
 	#define POSITIVE(i,size) (i)
 	#define NEGATIVE(i,size) ((i)>0?((size)-(i)):i)
 #endif /* AUDEFNMACROS_H_ */

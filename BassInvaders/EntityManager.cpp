@@ -11,7 +11,6 @@
 EntityManager::EntityManager(SDL_Surface* pScreen)
 {
 	this->pScreen = pScreen;
-	enemyCount = 0;
 }
 
 EntityManager::~EntityManager()
@@ -27,13 +26,11 @@ void EntityManager::setHero(Hero* pHero)
 void EntityManager::addBullet(Entity* pBullet)
 {
 	bullets.push_back(pBullet);
-	bulletCount++;
 }
 
 void EntityManager::addEnemy(Entity* pEnemy)
 {
 	enemies.push_back(pEnemy);
-	enemyCount++;
 }
 
 void EntityManager::addPowerUp(Entity* pPowerUp)
@@ -127,7 +124,6 @@ void EntityManager::removeInactiveEntities()
 		{
 			delete(*pos);
 			pos = bullets.erase(pos);
-			--bulletCount;
 		}
 		else
 		{
@@ -142,7 +138,6 @@ void EntityManager::removeInactiveEntities()
 			delete(*pos);
 			pos = enemies.erase(pos);
 			//DebugPrint(("deleted enemy\n"));
-			enemyCount--;
 		}
 		else
 		{

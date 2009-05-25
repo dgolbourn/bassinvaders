@@ -38,8 +38,6 @@ protected:
 private:
 	void loadBulletData();
 
-	static uint32_t bulletCount;
-	uint32_t number;
 };
 
 #endif /* BULLET_H_ */

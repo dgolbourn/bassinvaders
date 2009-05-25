@@ -9,12 +9,8 @@
 #include "WindowManager.h"
 #include "toolkit.h"
 
-uint32_t Bullet::bulletCount = 0;
-
 Bullet::Bullet(int32_t xpos, int32_t ypos)
 {
-	number = bulletCount++;
-
 	loadBulletData();
 
 	xvelocity = BULLET_X_SPEED;

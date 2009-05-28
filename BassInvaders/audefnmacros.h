@@ -6,10 +6,14 @@
  *
  *   Description: These macros are used to index the arrays used by audio data.
  *
- *   Audio data is in the form of RLRLRLRL... where L is left speaker, R is right speaker.
+ *   Audio data is in the form of an int16_t array where the ints are arranged as
+ *   RLRLRLRL... where L is left speaker, R is right speaker.  The array is often
+ *   passed around as a uint8_t*, char* or void* and needs casting back to int16_t
+ *   in order to use the LEFT/RIGHT macros below.
  *
- *   Frequency data is in the form of complex amplitudes (R,I) where R is real, I is
- *   imaginary.  The (R,I) amplitudes are ordered by frequencies as:
+ *   Frequency data is in an array of doubles in the form RIRIRIRI where R is real,
+ *   I is imaginary.  The RI pairs are ordered by frequency
+ *   from 0 to highest positive then from highest negative to lowest negative:
  *	 		0,
  *			lowest positive,
  *			...
@@ -29,7 +33,9 @@
 	#define RIGHT(z,i) ((z)[2*(i)])
 	#define LEFT(z,i) ((z)[2*(i)+1])
 
-// Macros for positive/negative frequencies in frequency domain data
+// Macros for positive/negative frequencies in frequency domain data.
+// Positive addresses from start of array, negative addresses from
+// end of array.
 	#define POSITIVE(i,size) (i)
 	#define NEGATIVE(i,size) ((i)>0?((size)-(i)):i)
 #endif /* AUDEFNMACROS_H_ */

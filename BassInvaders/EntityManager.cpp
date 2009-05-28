@@ -139,7 +139,7 @@ void EntityManager::removeInactiveEntities()
 		{
 			pos = enemies.erase(pos);
 			delete entity;
-			
+
 			//DebugPrint(("deleted enemy\n"));
 		}
 		else

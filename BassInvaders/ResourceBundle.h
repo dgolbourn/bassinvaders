@@ -18,13 +18,14 @@
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/filesystem.hpp>
 #include <vector>
 using namespace boost;
 using namespace std;
 
 /*
 Now, you might notice i've used the word parse here. This is a hack, a horrible hack. Though
-can be approximated to a LL1 consumption parser using the tokenizer in boost. 
+can be approximated to a LL1 consumption parser using the tokenizer in boost.
 
 Its bad, boost has a parser called spirit, we should use it, its good. For now this will do
 */

@@ -10,9 +10,9 @@
 #include "toolkit.h"
 #include "spline.h"
 
-double x[] = {-10, 220, 440,1760, 30000};
-double y[] = {1, 1, 1, 1, 1};
-spline pGE(x,y, 5);
+//double x[] = {-10, 220, 440,1760, 30000};
+//double y[] = {1, 1, 1, 1, 1};
+//spline pGE(x,y, 5);
 
 /*
  * This is called by SDL Music for chunkSampleSize x 4 bytes each time SDL needs it
@@ -25,8 +25,8 @@ void BassInvaders::MusicPlayer(void *udata, Uint8 *stream, int len)
 		SoundSample * sample = iter->next();
 		memcpy(stream, sample->sample, sample->len);
 
-		((BassInvaders*)udata)->fft->ingest(stream);
-		((BassInvaders*)udata)->fft->EQ(stream, spline::eq, (void*)&pGE);
+		//((BassInvaders*)udata)->fft->ingest(stream);
+		//((BassInvaders*)udata)->fft->EQ(stream, spline::eq, (void*)&pGE);
 
 		BeatDetector::process(((BassInvaders*)udata)->beat, stream, len);
 	}

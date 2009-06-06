@@ -2,7 +2,7 @@
  * Entity.cpp
  *
  *  Created on: 19-Apr-2009
- *      Author: spijderman
+ *      Author: spijderman, Darren Golbourn
  */
 
 #include "Entity.h"

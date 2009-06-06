@@ -17,8 +17,8 @@
 
 #define BODYSPRITE 0 //main body of hero is the first sprite in the vector
 
-#define HERO_X_SPEED 5
-#define HERO_Y_SPEED 5
+#define HERO_X_SPEED 8
+#define HERO_Y_SPEED 8
 
 #define DEAD_HEALTH 0
 #define DAMAGED_HEALTH 33

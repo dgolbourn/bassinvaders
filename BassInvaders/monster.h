@@ -21,20 +21,17 @@
 class monster: public Entity {
 public:
 	monster(int32_t);
-	virtual ~monster();
-
-	virtual bool isOffScreen(int32_t screenWidth, int32_t screenHeight);
-	virtual void render(SDL_Surface *pScreen);
-	virtual bool canBeRemoved();
-	virtual void doCollision(Entity* pOther);
-	virtual std::vector<Sprite> getActiveSpriteList();
-	virtual void reactToCollision(Entity* pOther);
+	~monster();
+	void render(SDL_Surface *pScreen);
+	void doCollision(Entity* pOther);
+	std::vector<Sprite> getActiveSpriteList();
 	static int32_t speed;
-protected:
-	virtual void updateStates();
+	void update();
 
 private:
+	void updateStates();
 	void loadMonsterData();
+	void reactToCollision(Entity* pOther);
 };
 
 #endif /* HERO_H_ */

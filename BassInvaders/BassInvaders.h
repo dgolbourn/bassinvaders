@@ -69,7 +69,7 @@ public:
 
 private:
 	void injectState(GameStates_t newState);
-	void updateStates();
+	void update();
 
 private:
 	void doPlayingState();

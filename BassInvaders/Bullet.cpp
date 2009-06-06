@@ -26,51 +26,34 @@ Bullet::Bullet(int32_t xpos, int32_t ypos)
 	attackDamage = 255;
 
 	this->velocityTicks = 10;
-
-
 }
 
 Bullet::~Bullet() {
-	// TODO Auto-generated destructor stub
 }
 
 void Bullet::loadBulletData()
 {
-	DebugPrint(("Loading bullet %u...", number));
 	ResourceBundle* resource = &(*(ResourceBundle::getResource("resources/sprites/bullet.info")));
-	DebugPrint(("Success\n"));
 	Sprite bulletBody(resource);
 	sprites.push_back(bulletBody);
 }
 
-bool Bullet::isOffScreen(int32_t screenWidth, int32_t screenHeight)
-{
-	return (xpos>(int32_t)screenWidth) ? true : false;
-}
-
 void Bullet::render(SDL_Surface* pScreen)
 {
-	updateStates();
-
-	uint32_t now = SDL_GetTicks();
-	uint32_t delta = now - lastTickCount;
-
-	if (delta > velocityTicks)
-	{
-		xpos += xvelocity;
-		ypos += yvelocity;
-		lastTickCount = now;
-	}
-
-	/* JG TODO:
-	 * happy little case-switch once we have
-	 * sorted out multiple sprites
-	 */
-
-	DebugPrint(("Rendering Bullet %u...", number));
 	sprites[BULLET_RED_SPRITE_INDEX].setLocation(xpos, ypos);
 	sprites[BULLET_RED_SPRITE_INDEX].renderSprite(pScreen);
-	DebugPrint(("success\n"));
+}
+
+std::vector<Sprite> Bullet::getActiveSpriteList()
+{
+	std::vector<Sprite> ret;
+	ret.push_back(sprites[BULLET_RED_SPRITE_INDEX]);
+	return ret;
+}
+
+void Bullet::update()
+{
+	updateStates();
 }
 
 void Bullet::updateStates()
@@ -91,25 +74,6 @@ void Bullet::updateStates()
 			sprites[BULLET_RED_SPRITE_INDEX].changeState(AS_DEAD);
 		}break;
 	}
-}
-
-/* bullets can be removed if they are off screen or
- * if they have been "killed"
- */
-bool Bullet::canBeRemoved()
-{
-	if (isOffScreen(SCREEN_WIDTH, SCREEN_HEIGHT)) //JG TODO fix this hack
-	{
-		return true;
-	}
-
-	if ((currentState == RS_DEAD) &&
-			(sprites[BULLET_RED_SPRITE_INDEX].getAnimationState() == AS_DEAD))
-	{
-		return true;
-	}
-
-	return false;
 }
 
 void Bullet::doCollision(Entity* pOther)
@@ -135,13 +99,6 @@ void Bullet::doCollision(Entity* pOther)
 	}
 }
 
-std::vector<Sprite> Bullet::getActiveSpriteList()
-{
-	std::vector<Sprite> ret;
-	ret.push_back(sprites[BULLET_RED_SPRITE_INDEX]);
-	return ret;
-}
-
 void Bullet::reactToCollision(Entity* pOther)
 {
 	switch(pOther->getType())
@@ -165,4 +122,3 @@ void Bullet::reactToCollision(Entity* pOther)
 		}
 	}
 }
-

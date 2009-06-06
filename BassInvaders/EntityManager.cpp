@@ -13,10 +13,7 @@ EntityManager::EntityManager(SDL_Surface* pScreen)
 	this->pScreen = pScreen;
 }
 
-EntityManager::~EntityManager()
-{
-
-}
+EntityManager::~EntityManager() {}
 
 void EntityManager::setHero(Hero* pHero)
 {
@@ -67,7 +64,50 @@ void EntityManager::render()
 	{
 		(*pos)->render(this->pScreen);
 	}
+}
 
+void EntityManager::move()
+{
+	std::deque<Entity*>::iterator pos;
+
+	for (pos = enemies.begin(); pos != enemies.end(); ++pos)
+	{
+		(*pos)->move();
+	}
+
+	pHero->move();
+
+	for (pos = bullets.begin(); pos != bullets.end(); ++pos)
+	{
+		(*pos)->move();
+	}
+
+	for (pos = powerups.begin(); pos != powerups.end(); ++pos)
+	{
+		(*pos)->move();
+	}
+}
+
+void EntityManager::update()
+{
+	std::deque<Entity*>::iterator pos;
+
+	for (pos = enemies.begin(); pos != enemies.end(); ++pos)
+	{
+		(*pos)->update();
+	}
+
+	pHero->update();
+
+	for (pos = bullets.begin(); pos != bullets.end(); ++pos)
+	{
+		(*pos)->update();
+	}
+
+	for (pos = powerups.begin(); pos != powerups.end(); ++pos)
+	{
+		(*pos)->update();
+	}
 }
 
 void EntityManager::doCollisions()

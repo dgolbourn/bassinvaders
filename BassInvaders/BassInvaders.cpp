@@ -8,11 +8,11 @@
 #include "BassInvaders.h"
 #include "WindowManager.h"
 #include "toolkit.h"
-#include "graphicalEqualiser.h"
+#include "spline.h"
 
 double x[] = {-10, 220, 440,1760, 30000};
-double y[] = {0.8, 0.9, 0.9, 0.9, 0.8};
-graphicalEqualiser pGE(x,y, 5);
+double y[] = {1, 1, 1, 1, 1};
+spline pGE(x,y, 5);
 
 /*
  * This is called by SDL Music for chunkSampleSize x 4 bytes each time SDL needs it
@@ -26,7 +26,7 @@ void BassInvaders::MusicPlayer(void *udata, Uint8 *stream, int len)
 		memcpy(stream, sample->sample, sample->len);
 
 		((BassInvaders*)udata)->fft->ingest(stream);
-		((BassInvaders*)udata)->fft->EQ(stream, graphicalEqualiser::eq, (void*)&pGE);
+		((BassInvaders*)udata)->fft->EQ(stream, spline::eq, (void*)&pGE);
 
 		BeatDetector::process(((BassInvaders*)udata)->beat, stream, len);
 	}
@@ -47,8 +47,7 @@ BassInvaders::BassInvaders()
 
 BassInvaders::~BassInvaders() {
 	delete pHero;
-	//delete pBG; //The background is being deleted wrongly and acting like a dick.
-					// TODO Background needs reworking to use the resourceBundle anyway.
+	//delete pBG; // TODO Background needs reworking to use the resourceBundle anyway.
 	delete dt;
 	delete fft;
 	delete soundSource;
@@ -59,7 +58,7 @@ void BassInvaders::goGameGo()
 {
 	while (running)
 	{
-		updateStates();
+		update();
 		switch (gameState)
 		{
 			case Loading:
@@ -96,7 +95,7 @@ void BassInvaders::injectState(GameStates_t newState)
 	nextState = newState;
 }
 
-void BassInvaders::updateStates()
+void BassInvaders::update()
 {
 	if (gameState != nextState)
 	{
@@ -242,7 +241,6 @@ void BassInvaders::doPlayingState()
 	/* move the hero about and let him shoot things*/
 	pHero->setActions(im.getCurrentActions());
 
-	//DebugPrint(("is beat?\n"));
 	if (beatIter->isBeat())
 	{
 		pRM->addEnemy(new monster(rand()%SCREEN_HEIGHT-50));
@@ -250,14 +248,15 @@ void BassInvaders::doPlayingState()
 	}
 
 	/* do collision detection */
-//	DebugPrint(("do collisions\n"));
 	pRM->doCollisions();
 
-//	DebugPrint(("render\n"));
+	pRM->update();
+
+	pRM->move();
+
 	/* draw all the active Entities */
 	pRM->render();
 
-//	DebugPrint(("remove inactives\n"));
 	/* remove the dead/off screen ones */
 	pRM->removeInactiveEntities();
 

@@ -23,6 +23,8 @@ public:
 	std::deque <Entity*> enemies;
 	std::deque <Entity*> powerups;
 
+	void update(); // update the state of entites
+	void move(); // move the entities
 	void render(); // draw all Entities
 	void doCollisions(); //check for (and act on) collisions between all Entities
 	void removeInactiveEntities(); // remove inactive Entities from the lists (e.g. off screen or dead)

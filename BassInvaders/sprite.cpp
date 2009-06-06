@@ -8,7 +8,7 @@
 #include "sprite.h"
 #include "toolkit.h"
 
-#define DEBUG_COLLISIONS
+//#define DEBUG_COLLISIONS
 
 Sprite::Sprite(ResourceBundle * resources/*, BassInvaders * game*/) {
 	/* take a text file as a parameter containing all the data for all the states
@@ -82,7 +82,7 @@ void Sprite::renderSprite(SDL_Surface *pScreen)
 {
 	AnimationStateData_t* pTempState;
 
-	updateStates();
+	update();
 
 	switch(currentState)
 	{
@@ -159,7 +159,7 @@ uint8_t Sprite::getNextAnimationStep(const AnimationStateData_t* pStateData)
 	}
 }
 
-void Sprite::updateStates()
+void Sprite::update()
 {
 	AnimationStateData_t* pCurrentState = &animationStateData[currentState];
 

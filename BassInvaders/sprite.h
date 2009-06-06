@@ -59,7 +59,7 @@ public:
 
 private:
 	void loadSpriteData(ResourceBundle * fp);
-	void updateStates();
+	void update();
 	uint8_t getNextAnimationStep(const AnimationStateData_t *pStateData);
 
 private:

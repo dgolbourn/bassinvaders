@@ -30,24 +30,19 @@ class Hero: public Entity {
 public:
 	uint32_t score;
 	Hero(ResourceBundle* filename, class EntityManager* pRM);
-	virtual ~Hero();
-
-	virtual bool isOffScreen(int32_t screenWidth, int32_t screenHeight);
-	virtual void render(SDL_Surface *pScreen);
-	virtual bool canBeRemoved();
+	~Hero();
+	void render(SDL_Surface *pScreen);
+	bool canBeRemoved();
 	void setActions(ACTIONMASK actions);
-	virtual void doCollision(Entity* pOther);
-	virtual std::vector<Sprite> getActiveSpriteList();
-	virtual void reactToCollision(Entity* pOther);
-
-protected:
-	virtual void updateStates();
+	void doCollision(Entity* pOther);
+	std::vector<Sprite> getActiveSpriteList();
+	void update();
 
 private:
+	void reactToCollision(Entity* pOther);
+	void updateStates();
 	void loadHeroData(ResourceBundle *fp);
 	void doActions();
-
-private:
 	class EntityManager* pRM; // the hero needs a handle to the RM so that it can add bullets to it
 	uint32_t fireRate; //number of ticks which must pass before another bullet can be fired
 	uint32_t lastFireTicks; //tickcount when the last bullet was fired

@@ -24,20 +24,16 @@
 class Bullet: public Entity {
 public:
 	Bullet(int32_t xpos, int32_t ypos);
-	virtual ~Bullet();
-	virtual bool isOffScreen(int32_t screenWidth, int32_t screenHeight);
-	virtual void render(SDL_Surface *pScreen);
-	virtual bool canBeRemoved();
-	virtual void doCollision(Entity* pOther);
-	virtual std::vector<Sprite> getActiveSpriteList();
-	virtual void reactToCollision(Entity* pOther);
-
-protected:
-	virtual void updateStates();
+	~Bullet();
+	void render(SDL_Surface *pScreen);
+	std::vector<Sprite> getActiveSpriteList();
+	void doCollision(Entity* pOther);
+	void update();
 
 private:
 	void loadBulletData();
-
+	void updateStates();
+	void reactToCollision(Entity* pOther);
 };
 
 #endif /* BULLET_H_ */

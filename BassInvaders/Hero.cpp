@@ -51,10 +51,10 @@ void Hero::loadHeroData(ResourceBundle* resource)
 	sprites.push_back(heroBody);
 }
 
-std::vector<Sprite> Hero::getActiveSpriteList()
+std::vector<Sprite*> Hero::getActiveSpriteList()
 {
-	std::vector<Sprite> ret;
-	ret.push_back(sprites[BODYSPRITE]);
+	std::vector<Sprite*> ret;
+	ret.push_back(&(sprites[BODYSPRITE]));
 	return ret;
 }
 

@@ -65,12 +65,12 @@ bool Entity::canBeRemoved()
 
 	if (currentState == RS_DEAD)
 	{
-		std::vector<Sprite> mySprites = this->getActiveSpriteList();
-		std::vector<Sprite>::iterator myPos;
+		std::vector<Sprite*> mySprites = this->getActiveSpriteList();
+		std::vector<Sprite*>::iterator myPos;
 
 		for (myPos = mySprites.begin(); myPos != mySprites.end(); ++myPos)
 		{
-			if (myPos->getAnimationState() != AS_DEAD)	return false;
+			if ((*myPos)->getAnimationState() != AS_DEAD)	return false;
 		}
 
 		return true;
@@ -109,17 +109,17 @@ bool Entity::isCollidingWith(Entity* pOther)
 	 * iterate comparing all to all...
 	 * return true if any collide
 	 */
-	std::vector<Sprite> mySprites = this->getActiveSpriteList();
-	std::vector<Sprite> otherSprites = pOther->getActiveSpriteList();
+	std::vector<Sprite*> mySprites = this->getActiveSpriteList();
+	std::vector<Sprite*> otherSprites = pOther->getActiveSpriteList();
 
-	std::vector<Sprite>::iterator myPos;
-	std::vector<Sprite>::iterator otherPos;
+	std::vector<Sprite*>::iterator myPos;
+	std::vector<Sprite*>::iterator otherPos;
 
 	for (myPos = mySprites.begin(); myPos != mySprites.end(); ++myPos)
 	{
 		for (otherPos = otherSprites.begin(); otherPos != otherSprites.end(); ++otherPos)
 		{
-			if (myPos->isCollidingWith(otherPos->getCollisionRects()))
+			if ((*myPos)->isCollidingWith((*otherPos)->getCollisionRects()))
 			{
 				return true;
 			}

@@ -59,7 +59,7 @@ public:
 	virtual void update() = 0;
 	virtual void render(SDL_Surface *pScreen) = 0;
 	virtual void doCollision(Entity* pOther)=0; //what to do when it collides with another Entity
-	virtual std::vector<Sprite> getActiveSpriteList() = 0; //which sprites are currently active in terms of collision detection
+	virtual std::vector<Sprite*> getActiveSpriteList() = 0; //which sprites are currently active in terms of collision detection
 	virtual void reactToCollision(Entity* pOther) = 0; // what this Entity does when it collides with another Entity
 	// NOTE: reactToCollision must only be called ONCE for every colliding Entity pair. Otherwise they will react twice to a collision
 	// It's up to the Entity manager to make sure this is not done

@@ -24,7 +24,7 @@ public:
 	~monster();
 	void render(SDL_Surface *pScreen);
 	void doCollision(Entity* pOther);
-	std::vector<Sprite> getActiveSpriteList();
+	std::vector<Sprite*> getActiveSpriteList();
 	static int32_t speed;
 	void update();
 

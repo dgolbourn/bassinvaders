@@ -26,7 +26,7 @@ public:
 	Bullet(int32_t xpos, int32_t ypos);
 	~Bullet();
 	void render(SDL_Surface *pScreen);
-	std::vector<Sprite> getActiveSpriteList();
+	std::vector<Sprite*> getActiveSpriteList();
 	void doCollision(Entity* pOther);
 	void update();
 

@@ -35,7 +35,7 @@ public:
 	bool canBeRemoved();
 	void setActions(ACTIONMASK actions);
 	void doCollision(Entity* pOther);
-	std::vector<Sprite> getActiveSpriteList();
+	std::vector<Sprite*> getActiveSpriteList();
 	void update();
 
 private:

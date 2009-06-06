@@ -49,10 +49,10 @@ void monster::render(SDL_Surface* pScreen)
 	sprites[MAIN_SPRITE].renderSprite(pScreen);
 }
 
-std::vector<Sprite> monster::getActiveSpriteList()
+std::vector<Sprite*> monster::getActiveSpriteList()
 {
-	std::vector<Sprite> ret;
-	ret.push_back(sprites[MAIN_SPRITE]);
+	std::vector<Sprite*> ret;
+	ret.push_back(&(sprites[MAIN_SPRITE]));
 	return ret;
 }
 

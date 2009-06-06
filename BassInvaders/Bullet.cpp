@@ -44,10 +44,10 @@ void Bullet::render(SDL_Surface* pScreen)
 	sprites[BULLET_RED_SPRITE_INDEX].renderSprite(pScreen);
 }
 
-std::vector<Sprite> Bullet::getActiveSpriteList()
+std::vector<Sprite*> Bullet::getActiveSpriteList()
 {
-	std::vector<Sprite> ret;
-	ret.push_back(sprites[BULLET_RED_SPRITE_INDEX]);
+	std::vector<Sprite*> ret;
+	ret.push_back(&(sprites[BULLET_RED_SPRITE_INDEX]));
 	return ret;
 }
 

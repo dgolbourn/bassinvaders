@@ -157,13 +157,14 @@ void EntityManager::removeInactiveEntities()
 	 * do undefined things (mostly crash...)
 	 */
 	std::deque<Entity*>::iterator pos;
-
+	Entity * entity;
 	for (pos = bullets.begin(); pos != bullets.end();)
 	{
-		if ((*pos)->canBeRemoved())
+		entity = *pos;
+		if (entity->canBeRemoved())
 		{
-			delete(*pos);
 			pos = bullets.erase(pos);
+			delete entity;
 		}
 		else
 		{
@@ -173,11 +174,11 @@ void EntityManager::removeInactiveEntities()
 
 	for (pos = enemies.begin(); pos != enemies.end();)
 	{
-		if ((*pos)->canBeRemoved())
+		entity = *pos;
+		if (entity->canBeRemoved())
 		{
-			delete(*pos);
 			pos = enemies.erase(pos);
-			//DebugPrint(("deleted enemy\n"));
+			delete entity;
 		}
 		else
 		{
@@ -187,10 +188,11 @@ void EntityManager::removeInactiveEntities()
 
 	for (pos = powerups.begin(); pos != powerups.end();)
 	{
-		if ((*pos)->canBeRemoved())
+		entity = *pos;
+		if (entity->canBeRemoved())
 		{
-			delete(*pos);
 			pos = powerups.erase(pos);
+			delete entity;
 		}
 		else
 		{

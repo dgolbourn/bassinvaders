@@ -8,6 +8,8 @@
 #include "Bullet.h"
 #include "WindowManager.h"
 #include "toolkit.h"
+#include "BassInvaders.h"
+
 
 Bullet::Bullet(int32_t xpos, int32_t ypos)
 {

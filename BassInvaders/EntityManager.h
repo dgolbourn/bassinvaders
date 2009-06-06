@@ -33,6 +33,7 @@ public:
 	void addBullet(Entity* pBullet);
 	void addEnemy(Entity* pEnemy);
 	void addPowerUp(Entity* pPowerUp);
+
 private:
 	SDL_Surface* pScreen; // pointer to main screen
 };

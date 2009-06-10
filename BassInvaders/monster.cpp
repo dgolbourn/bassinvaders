@@ -6,18 +6,12 @@
  */
 
 #include "monster.h"
-#include "toolkit.h"
-#include <fstream>
-#include "WindowManager.h"
-#include <iostream>
-
-int32_t monster::speed = MONSTER_X_SPEED;
 
 monster::monster(int32_t height)
 {
 	loadMonsterData();
 
-	xvelocity = speed;
+	xvelocity = MONSTER_X_SPEED;
 	yvelocity = MONSTER_Y_SPEED;
 	xpos = SCREEN_WIDTH;
 	ypos = height;
@@ -28,8 +22,10 @@ monster::monster(int32_t height)
 	/* JG TODO: put these in a file */
 	health = 10;
 	attackDamage = 10;
+	velocityTicks = 10;
 
-	this->velocityTicks = 10;
+	path = NULL;
+	s = 0;
 }
 
 monster::~monster() {
@@ -58,8 +54,17 @@ std::vector<Sprite*> monster::getActiveSpriteList()
 
 void monster::update()
 {
-	xvelocity = speed;
 	updateStates();
+}
+
+void monster::updatePosition()
+{
+	if (path == NULL)
+	{
+		xpos += xvelocity;
+		ypos += yvelocity;
+	}
+	else evalp(xpos, ypos, s, *path)
 }
 
 void monster::updateStates()

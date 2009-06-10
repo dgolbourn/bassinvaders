@@ -218,7 +218,6 @@ void BassInvaders::doPlayingState()
 			{
 				pBG->accelerate(10, 1);
 				BandPassFilterDT::alpha = 0.3;
-				monster::speed = -15;
 				if (!isRegistered)
 				{
 					Mix_RegisterEffect(MIX_CHANNEL_POST, BandPassFilterDT::lowPassFilterEffect, NULL, dt);
@@ -230,7 +229,6 @@ void BassInvaders::doPlayingState()
 			{
 				pBG->accelerate(1, 1);
 				BandPassFilterDT::alpha = 1.;
-				monster::speed = -10;
 			}
 		}
 	}
@@ -244,7 +242,7 @@ void BassInvaders::doPlayingState()
 	if (beatIter->isBeat())
 	{
 		pRM->addEnemy(new monster(rand()%SCREEN_HEIGHT-50));
-		pHero->score-=monster::speed;
+		pHero->score+=10;
 	}
 
 	/* do collision detection */

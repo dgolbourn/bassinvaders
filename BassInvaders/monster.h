@@ -12,6 +12,11 @@
 #include <vector>
 #include "InputManager.h"
 #include "ResourceBundle.h"
+#include "toolkit.h"
+#include <fstream>
+#include "WindowManager.h"
+#include <iostream>
+#include "spline.h"
 
 #define MONSTER_X_SPEED -10
 #define MONSTER_Y_SPEED 0
@@ -25,10 +30,13 @@ public:
 	void render(SDL_Surface *pScreen);
 	void doCollision(Entity* pOther);
 	std::vector<Sprite*> getActiveSpriteList();
-	static int32_t speed;
 	void update();
 
+	double s; // parametrizes the path
+	parametricFunctor *path; // the path the monster is going to take
+
 private:
+	void updatePosition();
 	void updateStates();
 	void loadMonsterData();
 	void reactToCollision(Entity* pOther);

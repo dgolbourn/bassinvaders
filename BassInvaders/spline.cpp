@@ -18,11 +18,11 @@ spline::~spline() {
 	gsl_interp_accel_free(accel);
 }
 
-double spline::get(double x){
+double spline::operator()(double x){
 	return gsl_spline_eval(function, x, accel);
 }
 
 double spline::eq(double freq, void* e)
 {
-	return ((spline*)e)->get(freq);
+	return (*(spline*)e)(freq);
 }

@@ -9,6 +9,8 @@
 
 #include "ResourceBundle.h"
 #include "toolkit.h"
+#include <iostream>
+#include <exception>
 
 int ResourceBundle::isInit = 0;
 map<string,DataType> ResourceBundle::supportedTypes;
@@ -23,7 +25,17 @@ template<class type> type* ResourceBundle::readArray(string cstr)
 		holder.push_back(lexical_cast<type>(*beg));
 	}
 
-	type * ret = new type[holder.size()];
+	type * ret;
+
+	try
+	{
+		ret = new type[holder.size()];
+	}
+	catch (std::exception& e)
+	{
+		std::cout << "Standard exception: " << e.what() << endl;
+	}
+
 	uint32_t index = 0;
 	while(index!=holder.size())
 	{
@@ -76,7 +88,17 @@ template<class type> type** ResourceBundle::readArrayArray(string cstr)
 		return 0;
 	}
 
-	type ** ret = new type*[holder.size()];
+	type ** ret;
+
+	try
+	{
+		ret = new type*[holder.size()];
+	}
+	catch (std::exception& e)
+	{
+		std::cout << "Standard exception: " << e.what() << endl;
+	}
+
 	uint32_t index = 0;
 	while(index!=holder.size())
 	{
@@ -92,8 +114,18 @@ ResourceBundle* ResourceBundle::getResource(char* file){
 
 	if(ResourceBundle::resourceRegister[complete_path] == 0)
 	{
-		ResourceBundle ** r = new ResourceBundle*[1];
-		r[0] = new ResourceBundle((char*)complete_path);
+		ResourceBundle ** r;
+
+		try
+		{
+			r = new ResourceBundle*[1];
+			r[0] = new ResourceBundle((char*)complete_path);
+		}
+		catch (std::exception& e)
+		{
+			std::cout << "Standard exception: " << e.what() << endl;
+		}
+
 		ResourceBundle::resourceRegister[complete_path] = r;
 	}
 
@@ -102,7 +134,11 @@ ResourceBundle* ResourceBundle::getResource(char* file){
 
 void * ResourceBundle::operator[](const char * s)
 {
-	return this->data[s];
+	std::map<std::string,void*>::iterator iter = data.find(s);
+	if( iter != data.end() ) return iter->second;
+
+	cout << "error" << endl;
+	return NULL;
 }
 
 ResourceBundle ** ResourceBundle::readResourceArray(string cstr)
@@ -117,7 +153,17 @@ ResourceBundle ** ResourceBundle::readResourceArray(string cstr)
 		holder.push_back(cstr);
 	}
 
-	ResourceBundle ** ret = new ResourceBundle*[holder.size()];
+	ResourceBundle ** ret;
+
+	try
+	{
+		ret = new ResourceBundle*[holder.size()];
+	}
+	catch (std::exception& e)
+	{
+		std::cout << "Standard exception: " << e.what() << endl;
+	}
+
 	vector<char*>::iterator itVectorData;
 	int index = 0;
 	for(itVectorData = holder.begin(); itVectorData != holder.end(); itVectorData++)
@@ -150,8 +196,6 @@ void ResourceBundle::initSupportedTypes()
 	ResourceBundle::supportedTypes["numberofstates"] = INT;
 
 	ResourceBundle::supportedTypes["rect"] = INTARR;
-
-
 }
 
 SDL_Surface * ResourceBundle::loadImage(char * filename)

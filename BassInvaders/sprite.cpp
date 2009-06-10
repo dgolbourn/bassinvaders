@@ -277,7 +277,7 @@ void Sprite::setLocation(uint32_t xpos, uint32_t ypos)
 
 	/* iterate through each sprite state, and then through each collision rect list,
 	 * updating the collision rect postions if we've changed position.
-	 * don't waste time doing any of this is the change is zero */
+	 * don't waste time doing any of this if the change is zero */
 	if ((ydelta != 0 ) || (xdelta != 0))
 	{
 		while(state < AS_STATES_SIZE)

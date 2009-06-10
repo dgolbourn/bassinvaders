@@ -29,7 +29,7 @@ typedef enum
 } AnimationState_t;
 
 
-typedef struct
+struct AnimationStateData_t
 {
 	AnimationState_t state; //if this is set to 0, it can be assumed that not data exists for this state
 	AnimationState_t nextState; //some states are transitional and only run once then move to the next state
@@ -42,7 +42,7 @@ typedef struct
 	uint32_t lastAnimTickCount;
 	SDL_Surface* spriteSheet;
 	std::vector<CollisionRect_t> collisionRects;
-}AnimationStateData_t;
+};
 
 class Sprite {
 public:

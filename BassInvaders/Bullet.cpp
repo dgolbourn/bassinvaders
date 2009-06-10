@@ -27,7 +27,7 @@ Bullet::Bullet(int32_t xpos, int32_t ypos)
 	health = 0;
 	attackDamage = 255;
 
-	this->velocityTicks = 10;
+	velocityTicks = 10;
 }
 
 Bullet::~Bullet() {

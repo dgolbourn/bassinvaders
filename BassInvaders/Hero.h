@@ -28,7 +28,6 @@
 
 class Hero: public Entity {
 public:
-	uint32_t score;
 	Hero(ResourceBundle* filename, class EntityManager* pRM);
 	~Hero();
 	void render(SDL_Surface *pScreen);
@@ -38,6 +37,7 @@ public:
 	std::vector<Sprite*> getActiveSpriteList();
 	void update();
 
+	uint32_t score;
 private:
 	void reactToCollision(Entity* pOther);
 	void updateStates();

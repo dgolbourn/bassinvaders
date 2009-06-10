@@ -11,8 +11,8 @@ monster::monster(int32_t height)
 {
 	loadMonsterData();
 
-	xvelocity = MONSTER_X_SPEED;
-	yvelocity = MONSTER_Y_SPEED;
+	//xvelocity = MONSTER_X_SPEED;
+	//yvelocity = MONSTER_Y_SPEED;
 	xpos = SCREEN_WIDTH;
 	ypos = height;
 	type = RT_ENEMY;
@@ -24,11 +24,21 @@ monster::monster(int32_t height)
 	attackDamage = 10;
 	velocityTicks = 10;
 
-	path = NULL;
-	s = 0;
+	/*
+	 * This is to set up the path the monster takes across the screen.
+	 */
+	x0 = xpos;	// Starting x position.
+	y0 = ypos;	// Starting y position.
+	path = new Path;	// Path of the monster.
+	path->x = new linear(MONSTER_X_SPEED);	// Linear motion in x.
+	path->y = new sine(40, SCREEN_WIDTH/4, rand()); // Sine wave motion in y.
+	s = 0; // Start at "time" s=0.
 }
 
 monster::~monster() {
+	delete path->x;
+	delete path->y;
+	delete path;
 }
 
 void monster::loadMonsterData()
@@ -54,17 +64,13 @@ std::vector<Sprite*> monster::getActiveSpriteList()
 
 void monster::update()
 {
+	s++; // increase "monster time" by 1.
 	updateStates();
 }
 
 void monster::updatePosition()
 {
-	if (path == NULL)
-	{
-		xpos += xvelocity;
-		ypos += yvelocity;
-	}
-	else evalp(xpos, ypos, s, *path)
+	evalpo(xpos, x0, ypos, y0, s, *path)
 }
 
 void monster::updateStates()

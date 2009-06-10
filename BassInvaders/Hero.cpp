@@ -9,6 +9,7 @@
 #include "toolkit.h"
 #include <fstream>
 #include <iostream>
+#include <new>
 
 Hero::Hero(ResourceBundle* resource, EntityManager* pRM)
 {
@@ -92,7 +93,7 @@ void Hero::setActions(ACTIONMASK actions)
 		xvelocity = 0;
 	}
 
-	if (actions & ACTION_SHOOT)
+	if ((actions & ACTION_SHOOT) && (canShoot == false))
 	{
 		uint32_t now = SDL_GetTicks();
 		uint32_t delta = now - lastFireTicks;
@@ -111,8 +112,13 @@ void Hero::doActions()
 		//DebugPrint(("Firing bullet\n"));
 		/* Create a new bullet, stick it in the Entity manager
 		 * the x and y pos are where we want the bullet to spawn (i.e. at the nose of the hero craft)*/
-		pRM->addBullet(new Bullet(xpos+100, ypos+50)); //JG TODO: magic numbers must go
-		canShoot = false;
+		Bullet *B = new(std::nothrow) Bullet(xpos+100, ypos+50); //JG TODO: magic numbers must go
+
+		if (B)
+		{
+			pRM->addBullet(B);
+			canShoot = false;
+		}
 	}
 }
 

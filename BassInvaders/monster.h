@@ -32,8 +32,13 @@ public:
 	std::vector<Sprite*> getActiveSpriteList();
 	void update();
 
-	double s; // parametrizes the path
-	parametricFunctor *path; // the path the monster is going to take
+	/*
+	 * variables and methods which manage the movement of the monster (used by overloaded updatePosition)
+	 */
+	double s; 		// "monster time" parametrizes the path
+	double x0;		// a place to store an offset for x
+	double y0;  	// a place to store an offset for y
+	Path *path; 	// the path the monster is going to take
 
 private:
 	void updatePosition();

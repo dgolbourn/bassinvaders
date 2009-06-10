@@ -9,6 +9,7 @@
 #include "WindowManager.h"
 #include "toolkit.h"
 #include "spline.h"
+#include <new>
 
 //double x[] = {-10, 220, 440,1760, 30000};
 //double y[] = {1, 1, 1, 1, 1};
@@ -28,7 +29,7 @@ void BassInvaders::MusicPlayer(void *udata, Uint8 *stream, int len)
 		//((BassInvaders*)udata)->fft->ingest(stream);
 		//((BassInvaders*)udata)->fft->EQ(stream, spline::eq, (void*)&pGE);
 
-		BeatDetector::process(((BassInvaders*)udata)->beat, stream, len);
+		BeatDetector::process(((BassInvaders*)udata)->beat, sample->sample   , len);
 	}
 }
 
@@ -241,8 +242,13 @@ void BassInvaders::doPlayingState()
 
 	if (beatIter->isBeat())
 	{
-		pRM->addEnemy(new monster(rand()%SCREEN_HEIGHT-50));
-		pHero->score+=10;
+		monster *M = new(std::nothrow) monster(rand()%SCREEN_HEIGHT-50);
+
+		if (M)
+		{
+			pRM->addEnemy(M);
+			pHero->score+=10;
+		}
 	}
 
 	/* do collision detection */

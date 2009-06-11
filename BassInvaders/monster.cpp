@@ -29,9 +29,18 @@ monster::monster(int32_t height)
 	 */
 	x0 = xpos;	// Starting x position.
 	y0 = ypos;	// Starting y position.
-	path = new Path;	// Path of the monster.
-	path->x = new linear(MONSTER_X_SPEED);	// Linear motion in x.
-	path->y = new sine(40, SCREEN_WIDTH/4, rand()); // Sine wave motion in y.
+
+	try
+	{
+		path = new Path;	// Path of the monster.
+		path->x = new linear(MONSTER_X_SPEED);	// Linear motion in x.
+		path->y = new sine(40, SCREEN_WIDTH/4, rand()); // Sine wave motion in y.
+	}
+	catch (std::exception& e)
+	{
+		std::cout << "Standard exception: " << e.what() << endl;
+	}
+
 	s = 0; // Start at "time" s=0.
 }
 

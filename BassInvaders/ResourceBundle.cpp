@@ -45,7 +45,6 @@ template<class type> type* ResourceBundle::readArray(string cstr)
 	return ret;
 }
 
-
 template<class type> type** ResourceBundle::readArrayArray(string cstr)
 {
 	char_separator<char> sep("","()",keep_empty_tokens);
@@ -301,7 +300,6 @@ void ResourceBundle::print()
 	ResourceBundle * b = this;
 	for(std::map<std::string, void*>::const_iterator it = b->data.begin(); it != b->data.end(); ++it)
 	{
-
 		if(b->supportedTypes[it->first] == STRING)
 		{
 			std::cout << it->first;
@@ -319,7 +317,6 @@ void ResourceBundle::print()
 		else{
 			std::cout << "OTHER!!" << std::endl;
 		}
-
     }
 }
 

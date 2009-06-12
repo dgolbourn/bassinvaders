@@ -29,7 +29,7 @@ void BassInvaders::MusicPlayer(void *udata, Uint8 *stream, int len)
 		//((BassInvaders*)udata)->fft->ingest(stream);
 		//((BassInvaders*)udata)->fft->EQ(stream, spline::eq, (void*)&pGE);
 
-		BeatDetector::process(((BassInvaders*)udata)->beat, sample->sample   , len);
+		BeatDetector::process(((BassInvaders*)udata)->beat, sample->sample , len);
 	}
 }
 
@@ -179,7 +179,6 @@ void BassInvaders::loadLevel()
 	// set up the beat detector.
 	int historyBuffer = (int) (1.0 / ((double)(chunkSampleLength)/(double)(soundSource->spec.freq)));
 	beat = new BeatDetector(historyBuffer, SENSITIVITY, chunkSampleLength );
-	beatIter = beat->iterator(COOLDOWN);
 
 	// hook the game in to the music via the MusicPlayer function.
 	Mix_HookMusic(BassInvaders::MusicPlayer, this);
@@ -188,6 +187,9 @@ void BassInvaders::loadLevel()
 	SDL_Color c = {55, 255, 25};
 	cout << "Loading HUD with font: " << (char*)((*level)["scorefont"]) << endl;
 	pHUD = new hud((char*)((*level)["scorefont"]), 20, c, wm.getWindowSurface());
+
+	/* set up the enemies, this is mostly debug currently, formations will be handled by scenes */
+	pF = new randomHorde();
 }
 
 /**************************
@@ -240,16 +242,7 @@ void BassInvaders::doPlayingState()
 	/* move the hero about and let him shoot things*/
 	pHero->setActions(im.getCurrentActions());
 
-	if (beatIter->isBeat())
-	{
-		monster *M = new(std::nothrow) monster(rand()%SCREEN_HEIGHT-50);
-
-		if (M)
-		{
-			pRM->addEnemy(M);
-			pHero->score+=10;
-		}
-	}
+	pF->update();
 
 	/* do collision detection */
 	pRM->doCollisions();

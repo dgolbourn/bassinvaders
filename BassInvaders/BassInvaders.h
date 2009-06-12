@@ -61,7 +61,6 @@ public:
 	BandPassFilterFFT *fft;
 	BandPassFilterDT *dt;
 	BeatDetector *beat;
-	BeatIterator *beatIter;
 	bool running;// is the main game loop still running?
 
 	Hero* pHero;
@@ -71,6 +70,7 @@ public:
 	hud *pHUD;
 	EntityManager* pRM;
 	static BassInvaders * theGame;
+	randomHorde *pF;
 	// End level class
 	static void MusicPlayer(void *udata, Uint8 *stream, int len);
 

@@ -100,7 +100,7 @@ public:
 class BeatListener{
 public:
 	virtual void onBeat() = 0;
-	virtual ~BeatListener() = 0;
+	virtual ~BeatListener() {};
 };
 
 /*

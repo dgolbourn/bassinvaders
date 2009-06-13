@@ -8,17 +8,23 @@
 #include "Formation.h"
 #include "BassInvaders.h"
 
-void randomHorde::update()
+randomHorde::randomHorde(int32_t xpos, int32_t ypos, Path path)
 {
-	if (BI->isBeat())
-	{
-		monster *M = new(std::nothrow) monster(rand()%SCREEN_HEIGHT-50);
+	BassInvaders::theGame->pRM->addEnemy(new monster(xpos, ypos, 0, path));
+}
 
-		if (M) BassInvaders::theGame->pRM->addEnemy(M);
+randomHorde::~randomHorde()
+{
+}
+
+monsterLine::monsterLine(int32_t xpos, int32_t ypos, Path path, uint8_t num)
+{
+	for (int i = 0; i < num; i++)
+	{
+		BassInvaders::theGame->pRM->addEnemy(new monster(xpos, ypos, -i*20, path));
 	}
 }
 
-randomHorde::randomHorde()
+monsterLine::~monsterLine()
 {
-	BI = BassInvaders::theGame->beat->iterator(COOLDOWN);
 }

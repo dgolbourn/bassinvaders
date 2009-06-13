@@ -53,7 +53,7 @@ public:
 
 	void goGameGo(); // main game loop
 
-	// These are called by SDL and need to be publically accessible
+	// These are called by SDL and need to be publicly accessible
 	// Write getters/setters if you are so inclined :-)
 	// This is the level class
 	SoundSource * soundSource;
@@ -61,6 +61,7 @@ public:
 	BandPassFilterFFT *fft;
 	BandPassFilterDT *dt;
 	BeatDetector *beat;
+	BeatIterator *beatIter;
 	bool running;// is the main game loop still running?
 
 	Hero* pHero;
@@ -70,7 +71,6 @@ public:
 	hud *pHUD;
 	EntityManager* pRM;
 	static BassInvaders * theGame;
-	randomHorde *pF;
 	// End level class
 	static void MusicPlayer(void *udata, Uint8 *stream, int len);
 

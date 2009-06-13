@@ -11,10 +11,6 @@
 #include "spline.h"
 #include <new>
 
-//double x[] = {-10, 220, 440,1760, 30000};
-//double y[] = {1, 1, 1, 1, 1};
-//spline pGE(x,y, 5);
-
 /*
  * This is called by SDL Music for chunkSampleSize x 4 bytes each time SDL needs it
  */
@@ -27,7 +23,6 @@ void BassInvaders::MusicPlayer(void *udata, Uint8 *stream, int len)
 		memcpy(stream, sample->sample, sample->len);
 
 		//((BassInvaders*)udata)->fft->ingest(stream);
-		//((BassInvaders*)udata)->fft->EQ(stream, spline::eq, (void*)&pGE);
 
 		BeatDetector::process(((BassInvaders*)udata)->beat, sample->sample , len);
 	}
@@ -43,7 +38,6 @@ BassInvaders::BassInvaders()
 	nextState = Loading;
 	running = true;
 	BassInvaders::theGame = this;
-	pRM = new EntityManager(wm.getWindowSurface());
 }
 
 BassInvaders::~BassInvaders() {
@@ -136,6 +130,8 @@ void BassInvaders::doLoadingState()
 
 void BassInvaders::loadLevel()
 {
+	pRM = new EntityManager(wm.getWindowSurface());
+
 	/* Load the level */
 	ResourceBundle *level = ResourceBundle::getResource("resources/levels/level-test.info");
 
@@ -179,6 +175,7 @@ void BassInvaders::loadLevel()
 	// set up the beat detector.
 	int historyBuffer = (int) (1.0 / ((double)(chunkSampleLength)/(double)(soundSource->spec.freq)));
 	beat = new BeatDetector(historyBuffer, SENSITIVITY, chunkSampleLength );
+	beatIter = beat->iterator(COOLDOWN);
 
 	// hook the game in to the music via the MusicPlayer function.
 	Mix_HookMusic(BassInvaders::MusicPlayer, this);
@@ -187,9 +184,6 @@ void BassInvaders::loadLevel()
 	SDL_Color c = {55, 255, 25};
 	cout << "Loading HUD with font: " << (char*)((*level)["scorefont"]) << endl;
 	pHUD = new hud((char*)((*level)["scorefont"]), 20, c, wm.getWindowSurface());
-
-	/* set up the enemies, this is mostly debug currently, formations will be handled by scenes */
-	pF = new randomHorde();
 }
 
 /**************************
@@ -242,7 +236,25 @@ void BassInvaders::doPlayingState()
 	/* move the hero about and let him shoot things*/
 	pHero->setActions(im.getCurrentActions());
 
-	pF->update();
+	/* this is just to test the monsters! This will eventually be managed by scenes! */
+	static int stuff = 1;
+	if (beatIter->isBeat())
+	{
+		Path path;
+		path.x = &(defaultFunctors::monsterLinearX);	// Linear motion in x.
+		if (stuff<8)
+		{
+			path.y = &(defaultFunctors::monsterConstantY); // constant motion in y.;
+			randomHorde m(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50), path);
+		}
+		else
+		{
+			path.y = &(defaultFunctors::monsterSineY); // constant motion in y.;
+			monsterLine m(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50), path, 5);
+			stuff = 0;
+		}
+		stuff++;
+	}
 
 	/* do collision detection */
 	pRM->doCollisions();

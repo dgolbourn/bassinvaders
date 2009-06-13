@@ -7,12 +7,26 @@
 
 #include "monster.h"
 
+monster::monster(int32_t x0, int32_t y0, double monsterTime, Path path)
+{
+	loadMonsterData();
+	this->x0 = x0;
+	this->y0 = y0;
+	type = RT_ENEMY;
+	currentState = RS_ACTIVE;
+	pendingState = RS_ACTIVE;
+	health = 10;
+	attackDamage = 10;
+	velocityTicks = 10;
+	this->path = path;
+	s = monsterTime;
+	updatePosition();
+	localPath = false;
+}
+
 monster::monster(int32_t height)
 {
 	loadMonsterData();
-
-	//xvelocity = MONSTER_X_SPEED;
-	//yvelocity = MONSTER_Y_SPEED;
 	xpos = SCREEN_WIDTH;
 	ypos = height;
 	type = RT_ENEMY;
@@ -30,24 +44,19 @@ monster::monster(int32_t height)
 	x0 = xpos;	// Starting x position.
 	y0 = ypos;	// Starting y position.
 
-	try
-	{
-		path = new Path;	// Path of the monster.
-		path->x = new linear(MONSTER_X_SPEED);	// Linear motion in x.
-		path->y = new sine(40, SCREEN_WIDTH/4, rand()); // Sine wave motion in y.
-	}
-	catch (std::exception& e)
-	{
-		std::cout << "Standard exception: " << e.what() << endl;
-	}
+	localPath = true; // monster manages its own path memory.
+	path.x = new linear(MONSTER_X_SPEED);	// Linear motion in x.
+	path.y = new constant(); // constant y
 
 	s = 0; // Start at "time" s=0.
 }
 
 monster::~monster() {
-	delete path->x;
-	delete path->y;
-	delete path;
+	if (localPath)
+	{
+		delete path.x;
+		delete path.y;
+	}
 }
 
 void monster::loadMonsterData()
@@ -79,7 +88,7 @@ void monster::update()
 
 void monster::updatePosition()
 {
-	evalpo(xpos, x0, ypos, y0, s, *path)
+	evalpo(xpos, x0, ypos, y0, s, path)
 }
 
 void monster::updateStates()

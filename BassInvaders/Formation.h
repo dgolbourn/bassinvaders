@@ -15,12 +15,12 @@
 
 #include "Entity.h"
 #include "BeatDetector.h"
+#include "spline.h"
 #include <list>
 
 class Formation {
 public:
 	virtual ~Formation() {};
-	std::list<Entity*> entities;
 };
 
 /*
@@ -28,17 +28,18 @@ public:
  * like we have used in testing.
  */
 class randomHorde : public Formation {
-	BeatIterator *BI;
 public:
-	randomHorde();
-	void update();
+	~randomHorde();
+	randomHorde(int32_t xpos, int32_t ypos, Path path);
 };
 
 /*
  * A monsterLine is a row of enemies that follow each other
  */
 class monsterLine: public Formation {
-	// TODO monster line!
+public:
+	~monsterLine();
+	monsterLine(int32_t xpos, int32_t ypos, Path path, uint8_t num);
 };
 
 #endif /* FORMATION_H_ */

@@ -6,6 +6,8 @@
  */
 
 #include "spline.h"
+#include "monster.h"
+#include "WindowManager.h"
 
 spline::spline( const double xa[], const double ya[], size_t size ){
 	accel = gsl_interp_accel_alloc();
@@ -26,3 +28,7 @@ double spline::eq(double freq, void* e)
 {
 	return (*(spline*)e)(freq);
 }
+
+linear defaultFunctors::monsterLinearX = linear(MONSTER_X_SPEED);
+sine defaultFunctors::monsterSineY = sine(50, SCREEN_WIDTH/6, 0);
+constant defaultFunctors::monsterConstantY = constant();

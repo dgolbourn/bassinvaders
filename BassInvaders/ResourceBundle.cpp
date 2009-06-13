@@ -25,16 +25,7 @@ template<class type> type* ResourceBundle::readArray(string cstr)
 		holder.push_back(lexical_cast<type>(*beg));
 	}
 
-	type * ret;
-
-	try
-	{
-		ret = new type[holder.size()];
-	}
-	catch (std::exception& e)
-	{
-		std::cout << "Standard exception: " << e.what() << endl;
-	}
+	type * ret = new type[holder.size()];
 
 	uint32_t index = 0;
 	while(index!=holder.size())
@@ -87,16 +78,7 @@ template<class type> type** ResourceBundle::readArrayArray(string cstr)
 		return 0;
 	}
 
-	type ** ret;
-
-	try
-	{
-		ret = new type*[holder.size()];
-	}
-	catch (std::exception& e)
-	{
-		std::cout << "Standard exception: " << e.what() << endl;
-	}
+	type ** ret = new type*[holder.size()];
 
 	uint32_t index = 0;
 	while(index!=holder.size())
@@ -111,21 +93,16 @@ ResourceBundle* ResourceBundle::getResource(char* file){
 	filesystem::path temp = filesystem::complete(string(file));
 	const char* complete_path = (temp.native_file_string()).c_str();
 
-	if(ResourceBundle::resourceRegister[complete_path] == 0)
+	map<string,void*>::iterator iter;
+
+	iter = ResourceBundle::resourceRegister.find(complete_path);
+
+	if(iter==ResourceBundle::resourceRegister.end())
 	{
-		ResourceBundle ** r;
+		ResourceBundle ** r = new ResourceBundle*[1];
+		r[0] = new ResourceBundle((char*)complete_path);
 
-		try
-		{
-			r = new ResourceBundle*[1];
-			r[0] = new ResourceBundle((char*)complete_path);
-		}
-		catch (std::exception& e)
-		{
-			std::cout << "Standard exception: " << e.what() << endl;
-		}
-
-		ResourceBundle::resourceRegister[complete_path] = r;
+		ResourceBundle::resourceRegister[complete_path] = (void*)r;
 	}
 
 	return ((ResourceBundle**)ResourceBundle::resourceRegister[complete_path])[0];
@@ -136,7 +113,7 @@ void * ResourceBundle::operator[](const char * s)
 	std::map<std::string,void*>::iterator iter = data.find(s);
 	if( iter != data.end() ) return iter->second;
 
-	cout << "error" << endl;
+	cout << "ResourceBundle:operator[] ***couldn't find data*** : " << s << endl;
 	return NULL;
 }
 
@@ -152,17 +129,7 @@ ResourceBundle ** ResourceBundle::readResourceArray(string cstr)
 		holder.push_back(cstr);
 	}
 
-	ResourceBundle ** ret;
-
-	try
-	{
-		ret = new ResourceBundle*[holder.size()];
-	}
-	catch (std::exception& e)
-	{
-		std::cout << "Standard exception: " << e.what() << endl;
-	}
-
+	ResourceBundle ** ret = new ResourceBundle*[holder.size()];
 	vector<char*>::iterator itVectorData;
 	int index = 0;
 	for(itVectorData = holder.begin(); itVectorData != holder.end(); itVectorData++)
@@ -273,11 +240,11 @@ ResourceBundle::ResourceBundle(char * infoFile)
 					toAdd = (void*)(ResourceBundle::readResourceArray(cstr));
 			break;
 			case INT:
-				toAdd = (void*)this->readArray<int>(value);
+				toAdd = (void*)this->readArray<int32_t>(value);
 				// Read an integer (array or single)
 			break;
 			case INTARR:
-				toAdd = (void*)this->readArrayArray<int>(value);
+				toAdd = (void*)this->readArrayArray<int32_t>(value);
 				// Read an integer (array or single)
 			break;
 			case DOUBLE:

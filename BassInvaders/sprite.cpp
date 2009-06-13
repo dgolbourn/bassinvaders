@@ -214,7 +214,7 @@ void Sprite::loadSpriteData(ResourceBundle * resource)
 
 	numberOfStates = GET_RESOURCE(int32_t, *resource, "numberofstates", 0);
 
-	memset(animationStateData, 0, (sizeof(AnimationStateData_t) * AS_STATES_SIZE));
+	//memset(animationStateData, 0, (sizeof(AnimationStateData_t) * AS_STATES_SIZE));
 	ResourceBundle * currentState;
 	for (uint32_t i = 0; i<numberOfStates; i++)
 	{
@@ -242,15 +242,14 @@ void Sprite::loadSpriteData(ResourceBundle * resource)
 
 		for (uint32_t j = 0; j<numberOfCollisionRects; ++j)
 		{
-			CollisionRect_t rect = {0,0,0,0};
+			CollisionRect_t rect;
 
 			rect.x = GET_RESOURCE(int32_t*, *currentState, "rect", j)[0];
 			rect.y = GET_RESOURCE(int32_t*, *currentState, "rect", j)[1];
 			rect.w = GET_RESOURCE(int32_t*, *currentState, "rect", j)[2];
 			rect.h = GET_RESOURCE(int32_t*, *currentState, "rect", j)[3];
-			//DebugPrint(("loading rect (%u,%u,%u,%u)\n", rect.x, rect.y,rect.w, rect.h ));
+			DebugPrint(("loading rect (%u,%u,%u,%u)\n", rect.x, rect.y,rect.w, rect.h ));
 			pData->collisionRects.push_back(rect);
-
 		}
 
 		// this doesn't work with GET_RESOURCE, I guess because filename doesn't return an array maybe?
@@ -260,12 +259,12 @@ void Sprite::loadSpriteData(ResourceBundle * resource)
 
 		if (pData->collisionRects.begin() == pData->collisionRects.end())
 		{
-			DebugPrint(("Loaded sprite without a collision box!\n"));
+			cout << (("Loaded sprite without a collision box!\n")) << endl;
 		}
 	}
 }
 
-void Sprite::setLocation(uint32_t xpos, uint32_t ypos)
+void Sprite::setLocation(int32_t xpos, int32_t ypos)
 {
 	int32_t xdelta = xpos - this->xpos;
 	int32_t ydelta = ypos - this->ypos;
@@ -307,7 +306,23 @@ void Sprite::setLocation(uint32_t xpos, uint32_t ypos)
 /* returns the collision boxes of the current animation state*/
 std::vector<CollisionRect_t> Sprite::getCollisionRects()
 {
-	return animationStateData[currentState].collisionRects;
+	std::vector<CollisionRect_t> CR;
+
+	if (currentState==0) return CR;
+	try
+	{
+		CR = animationStateData[currentState].collisionRects;
+		if (CR.begin() == CR.end())
+		{
+			cout << "Loaded sprite without a collision box!\n" << endl;
+		}
+	}
+	catch (std::exception& e)
+	{
+		cout << "Standard exception: " << e.what() << endl;
+	}
+
+	return CR;
 }
 
 AnimationState_t Sprite::getPendingAnimationState()
@@ -335,7 +350,7 @@ bool Sprite::isCollidingWith(std::vector<CollisionRect_t> other)
 
 	for (myRects = pData->collisionRects.begin(); myRects != pData->collisionRects.end(); ++myRects)
 	{
-		uint32_t top1,bottom1,left1,right1;
+		int32_t top1,bottom1,left1,right1;
 
 		top1    = myRects->y;
 		bottom1 = top1+myRects->h;
@@ -344,7 +359,7 @@ bool Sprite::isCollidingWith(std::vector<CollisionRect_t> other)
 
 		for (otherRects = other.begin(); otherRects != other.end(); ++otherRects)
 		{
-			uint32_t top2,bottom2,left2,right2;
+			int32_t top2,bottom2,left2,right2;
 			top2    = otherRects->y;
 			bottom2 = top2+otherRects->h;
 			left2   = otherRects->x;

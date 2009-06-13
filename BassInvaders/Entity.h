@@ -28,7 +28,7 @@ typedef enum
 	RT_POWERUP
 } EntityType_t;
 
-#define SCREEN_BORDER_SIZE 100
+#define SCREEN_BORDER_SIZE 600
 
 class Entity {
 public:

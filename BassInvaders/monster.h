@@ -18,14 +18,16 @@
 #include <iostream>
 #include "spline.h"
 
-#define MONSTER_X_SPEED -10
+#define MONSTER_X_SPEED -2
 #define MONSTER_Y_SPEED 0
 
 #define MAIN_SPRITE 0
 
 class monster: public Entity {
+	bool localPath;
 public:
 	monster(int32_t);
+	monster(int32_t x0, int32_t y0, double monsterTime, Path path);
 	~monster();
 	void render(SDL_Surface *pScreen);
 	void doCollision(Entity* pOther);
@@ -38,7 +40,7 @@ public:
 	double s; 		// "monster time" parametrizes the path
 	double x0;		// a place to store an offset for x
 	double y0;  	// a place to store an offset for y
-	Path *path; 	// the path the monster is going to take
+	Path path; 		// the path the monster is going to take
 
 private:
 	void updatePosition();

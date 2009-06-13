@@ -29,6 +29,8 @@ struct Path
 {
 	Functor *x; // function that returns x(s)
 	Functor *y; // function that returns y(s)
+
+	Path() { x = NULL; y = NULL;}
 };
 
 /*
@@ -106,6 +108,14 @@ class sine: public Functor{
 public:
 	sine(double amplitude, double period, double phase = 0) { this->phase = phase; this->amplitude = amplitude; this->period = 2*M_PI/period;}
 	double operator() (double s) {return amplitude*std::sin(phase + (period*s));}
+};
+
+class defaultFunctors
+{
+public:
+	static constant monsterConstantY;
+	static linear monsterLinearX;
+	static sine monsterSineY;
 };
 
 #endif /* spline_H_ */

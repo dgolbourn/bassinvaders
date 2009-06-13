@@ -110,6 +110,9 @@ public:
 	double operator() (double s) {return amplitude*std::sin(phase + (period*s));}
 };
 
+/*
+ * static versions of some common functors used by enemies.
+ */
 class defaultFunctors
 {
 public:

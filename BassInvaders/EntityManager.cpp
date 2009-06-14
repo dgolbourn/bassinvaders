@@ -44,8 +44,6 @@ void EntityManager::render()
 	 * - powerups
 	 */
 
-	//DebugPrint(("rendering %u bullets\n", bulletCount));
-
 	std::deque<Entity*>::iterator pos;
 
 	for (pos = enemies.begin(); pos != enemies.end(); ++pos)
@@ -60,10 +58,10 @@ void EntityManager::render()
 		(*pos)->render(this->pScreen);
 	}
 
-	for (pos = powerups.begin(); pos != powerups.end(); ++pos)
+	/*for (pos = powerups.begin(); pos != powerups.end(); ++pos)
 	{
 		(*pos)->render(this->pScreen);
-	}
+	}*/
 }
 
 void EntityManager::move()
@@ -82,10 +80,10 @@ void EntityManager::move()
 		(*pos)->move();
 	}
 
-	for (pos = powerups.begin(); pos != powerups.end(); ++pos)
+/*	for (pos = powerups.begin(); pos != powerups.end(); ++pos)
 	{
 		(*pos)->move();
-	}
+	}*/
 }
 
 void EntityManager::update()
@@ -104,10 +102,10 @@ void EntityManager::update()
 		(*pos)->update();
 	}
 
-	for (pos = powerups.begin(); pos != powerups.end(); ++pos)
+	/*for (pos = powerups.begin(); pos != powerups.end(); ++pos)
 	{
 		(*pos)->update();
-	}
+	}*/
 }
 
 void EntityManager::doCollisions()
@@ -121,7 +119,7 @@ void EntityManager::doCollisions()
 
 	std::deque<Entity*>::iterator bulletsIter;
 	std::deque<Entity*>::iterator enemiesIter;
-	std::deque<Entity*>::iterator powerupsIter;
+	//std::deque<Entity*>::iterator powerupsIter;
 
 	/* bullets vs enemies */
 	for (bulletsIter = bullets.begin(); bulletsIter != bullets.end(); ++bulletsIter)
@@ -140,10 +138,10 @@ void EntityManager::doCollisions()
 	}
 
 	/* hero vs powerups */
-	for (powerupsIter = powerups.begin(); powerupsIter != powerups.end(); ++powerupsIter)
+	/*for (powerupsIter = powerups.begin(); powerupsIter != powerups.end(); ++powerupsIter)
 	{
 		pHero->doCollision(*powerupsIter);
-	}
+	}*/
 
 }
 

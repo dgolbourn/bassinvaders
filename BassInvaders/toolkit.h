@@ -23,7 +23,7 @@ typedef enum
 } Playstate_t;
 
 SDL_Surface* LoadImage(const char* filename);
-void DrawToSurface( uint32_t x, uint32_t y, SDL_Surface* pSource, SDL_Surface* pDest, SDL_Rect* clip = NULL);
+void DrawToSurface( int32_t x, int32_t y, SDL_Surface* pSource, SDL_Surface* pDest, SDL_Rect* clip = NULL);
 
 
 #endif /* TOOLKIT_H_ */

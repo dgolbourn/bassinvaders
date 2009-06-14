@@ -24,7 +24,7 @@ SDL_Surface* LoadImage(const char* filename)
 	DebugPrint(("Loaded image from %s\n", filename));
 }
 
-void DrawToSurface( uint32_t x, uint32_t y, SDL_Surface* pSource, SDL_Surface* pDest, SDL_Rect* clip)
+void DrawToSurface( int32_t x, int32_t y, SDL_Surface* pSource, SDL_Surface* pDest, SDL_Rect* clip)
 {
 	SDL_Rect offset;
 	offset.x = x;

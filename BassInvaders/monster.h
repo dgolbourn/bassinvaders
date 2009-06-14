@@ -18,7 +18,7 @@
 #include <iostream>
 #include "spline.h"
 
-#define MONSTER_X_SPEED -2
+#define MONSTER_X_SPEED -4
 #define MONSTER_Y_SPEED 0
 
 #define MAIN_SPRITE 0

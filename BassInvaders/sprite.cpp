@@ -10,6 +10,38 @@
 
 //#define DEBUG_COLLISIONS
 
+AnimationStateData_t::AnimationStateData_t()
+{
+	state = AS_INIT;
+	nextState = AS_INIT;
+	currentAnimationStep = 0;
+	numberOfAnimationSteps = 0;
+	sheetStartsAt.h = 0;
+	sheetStartsAt.w = 0;
+	sheetStartsAt.x = 0;
+	sheetStartsAt.y = 0;
+	spriteWidth = 0;
+	spriteHeight = 0;
+	ticksPerStep = 0;
+	lastAnimTickCount = 0;
+	spriteSheet = NULL;
+}
+
+void AnimationStateData_t::debugPrint()
+{
+	cout << "state: " << state << endl;
+	cout << "next state: " << nextState << endl;
+	cout << "current animation step: " << currentAnimationStep << endl;
+	cout << "number of animation steps: " << numberOfAnimationSteps << endl;
+	cout << "sheet h: " << sheetStartsAt.h << " w: " << sheetStartsAt.w << " x: " << sheetStartsAt.x << " y: " << sheetStartsAt.y << endl;
+	cout << "sprite width: " << spriteWidth << endl;
+	cout << "sprite height: " << spriteHeight << endl;
+	cout << "ticks/step: " << ticksPerStep << endl;
+	cout << "last tick count: " << lastAnimTickCount << endl;
+	cout << "sprite sheet address: " << spriteSheet << endl;
+	cout << "collision vector length: " << collisionRects.size() << endl;
+}
+
 Sprite::Sprite(ResourceBundle * resources/*, BassInvaders * game*/) {
 	/* take a text file as a parameter containing all the data for all the states
 	 * then pass file into a function which populates an AnimationState_t
@@ -204,7 +236,7 @@ void Sprite::loadSpriteData(ResourceBundle * resource)
 	 * then loop through file parsing each line until
 	 * we read all the data we expected
 	 * you should probably add some error handling code at some point*/
-	AnimationStateData_t* pData;
+	AnimationStateData_t* pData = NULL;
 	uint32_t numberOfStates;
 	uint32_t R=0;
 	uint32_t G=0;
@@ -261,6 +293,8 @@ void Sprite::loadSpriteData(ResourceBundle * resource)
 		{
 			cout << (("Loaded sprite without a collision box!\n")) << endl;
 		}
+
+		//pData->debugPrint();
 	}
 }
 
@@ -309,17 +343,11 @@ std::vector<CollisionRect_t> Sprite::getCollisionRects()
 	std::vector<CollisionRect_t> CR;
 
 	if (currentState==0) return CR;
-	try
+
+	CR = animationStateData[currentState].collisionRects;
+	if (CR.begin() == CR.end())
 	{
-		CR = animationStateData[currentState].collisionRects;
-		if (CR.begin() == CR.end())
-		{
-			cout << "Loaded sprite without a collision box!\n" << endl;
-		}
-	}
-	catch (std::exception& e)
-	{
-		cout << "Standard exception: " << e.what() << endl;
+		cout << "***Sprite without a collision box!***\n" << endl;
 	}
 
 	return CR;

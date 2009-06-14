@@ -174,7 +174,7 @@ void BassInvaders::loadLevel()
 
 	// set up the beat detector.
 	int historyBuffer = (int) (1.0 / ((double)(chunkSampleLength)/(double)(soundSource->spec.freq)));
-	beat = new BeatDetector(historyBuffer, SENSITIVITY, chunkSampleLength );
+	beat = new BeatDetector(historyBuffer, SENSITIVITY, chunkSampleLength);
 	beatIter = beat->iterator(COOLDOWN);
 
 	// hook the game in to the music via the MusicPlayer function.
@@ -237,12 +237,18 @@ void BassInvaders::doPlayingState()
 	pHero->setActions(im.getCurrentActions());
 
 	/* this is just to test the monsters! This will eventually be managed by scenes! */
-	static int stuff = 1;
 	if (beatIter->isBeat())
 	{
+		/*
+		 * monsters are given paths to move along, this might turn out to be a little
+		 * cumbersome for easy paths like just going straight forward, but for complicated
+		 * beautiful splines I think it will turn out to be a good way :-)
+		 */
 		Path path;
 		path.x = &(defaultFunctors::monsterLinearX);	// Linear motion in x.
-		if (stuff<8)
+
+
+		if (rand()%50 != 1)
 		{
 			path.y = &(defaultFunctors::monsterConstantY); // constant motion in y.;
 			randomHorde m(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50), path);
@@ -250,10 +256,8 @@ void BassInvaders::doPlayingState()
 		else
 		{
 			path.y = &(defaultFunctors::monsterSineY); // constant motion in y.;
-			monsterLine m(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50), path, 5);
-			stuff = 0;
+			monsterLine m(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50), path,5);
 		}
-		stuff++;
 	}
 
 	/* do collision detection */

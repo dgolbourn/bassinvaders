@@ -54,22 +54,8 @@ struct AnimationStateData_t
 	SDL_Surface* spriteSheet;
 	std::vector<CollisionRect_t> collisionRects;
 
-	AnimationStateData_t()
-	{
-		state = AS_INIT;
-		nextState = AS_INIT;
-		currentAnimationStep = 0;
-		numberOfAnimationSteps = 0;
-		sheetStartsAt.h = 0;
-		sheetStartsAt.w = 0;
-		sheetStartsAt.x = 0;
-		sheetStartsAt.y = 0;
-		spriteWidth = 0;
-		spriteHeight = 0;
-		ticksPerStep = 0;
-		lastAnimTickCount = 0;
-		spriteSheet = NULL;
-	}
+	AnimationStateData_t();
+	void debugPrint();
 };
 
 class Sprite {

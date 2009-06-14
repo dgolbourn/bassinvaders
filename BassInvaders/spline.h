@@ -23,7 +23,7 @@ public:
 /*
  * A path is the (x,y) location given as a function of a parameter (i.e. time)
  * A path structure contains an x(t) and a y(t) functor which provide the
- * (x,y) position as a function "time".
+ * (x,y) position as a function of "time".
  */
 struct Path
 {

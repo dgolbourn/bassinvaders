@@ -113,7 +113,7 @@ void * ResourceBundle::operator[](const char * s)
 	std::map<std::string,void*>::iterator iter = data.find(s);
 	if( iter != data.end() ) return iter->second;
 
-	cout << "ResourceBundle:operator[] ***couldn't find data*** : " << s << endl;
+	cout << "ResourceBundle:operator[] ***couldn't find data*** :" << s << endl;
 	return NULL;
 }
 

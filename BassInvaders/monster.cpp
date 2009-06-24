@@ -90,10 +90,14 @@ void monster::update()
 void monster::updatePosition()
 {
 	affine_rotate R(0.1);
+	affine_translate A(-SCREEN_WIDTH/2, -SCREEN_HEIGHT/2);
 	affine_translate T(x0, y0);
-	path.transformStack.push(&R);
-	path.transformStack.push(&T);
-	path.get(&xpos, &ypos, s);
+	affine_translate B(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+	path.transformStack.push(&A); // translate centre of screen to 0
+	path.transformStack.push(&R); // rotate around origin by 0.1 radians
+	path.transformStack.push(&B); // translate centre back to where it started
+	path.transformStack.push(&T); // translate enemies to their start points
+	path.get(&xpos, &ypos, s); // copy (x,y) values at `monster time' s to xpos and ypos
 }
 
 void monster::updateStates()

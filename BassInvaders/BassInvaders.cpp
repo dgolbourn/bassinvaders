@@ -8,6 +8,7 @@
 #include "BassInvaders.h"
 #include "WindowManager.h"
 #include "toolkit.h"
+#include "path.h"
 #include "spline.h"
 #include <new>
 

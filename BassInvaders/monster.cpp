@@ -6,6 +6,7 @@
  */
 
 #include "monster.h"
+#include "affineTransform.h"
 
 monster::monster(int32_t x0, int32_t y0, double monsterTime, Path path)
 {
@@ -88,7 +89,11 @@ void monster::update()
 
 void monster::updatePosition()
 {
-	evalpo(xpos, x0, ypos, y0, s, path)
+	affine_rotate R(0.1);
+	affine_translate T(x0, y0);
+	path.transformStack.push(&R);
+	path.transformStack.push(&T);
+	path.get(&xpos, &ypos, s);
 }
 
 void monster::updateStates()

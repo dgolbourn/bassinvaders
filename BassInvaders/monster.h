@@ -16,6 +16,7 @@
 #include <fstream>
 #include "WindowManager.h"
 #include <iostream>
+#include "path.h"
 #include "spline.h"
 
 #define MONSTER_X_SPEED -4

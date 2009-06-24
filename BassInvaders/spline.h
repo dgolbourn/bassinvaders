@@ -17,35 +17,9 @@ class Functor
 {
 public:
 	virtual ~Functor() {};
-	virtual double operator() (double t) = 0;
+	virtual double operator() (double t) = 0;   // the basic operation of a functor is to return a
+												// value, just like a function.
 };
-
-/*
- * A path is the (x,y) location given as a function of a parameter (i.e. time)
- * A path structure contains an x(t) and a y(t) functor which provide the
- * (x,y) position as a function of "time".
- */
-struct Path
-{
-	Functor *x; // function that returns x(s)
-	Functor *y; // function that returns y(s)
-
-	Path() { x = NULL; y = NULL;}
-};
-
-/*
- * Shorthand macros to help copy values from a path at point t
- * into x and y;
- *
- * evalpo(	double x [x coordinate],
- * 			double x0 [offset],
- * 			double y [y coordinate],
- * 			double y0 [offset],
- * 			double t [parameter],
- * 			path P)
- */
-#define evalpo(X, X0, Y, Y0, t, P) {(X) = (int32_t)((*((P).x))((t)) + (X0)); (Y) = (int32_t)((*((P).y))((t)) + (Y0));}
-#define evalp(X, Y, t, P) {(X) = (int32_t)((*((P).x))((t))); (Y) = (int32_t)((*((P).y))((t)));}
 
 /********************************************************************************
  * A few pre-built functors
@@ -62,14 +36,15 @@ class spline: public Functor {
 	gsl_interp_accel *accel;
 public:
 	/*
-	 * look up table is descrete version of y(x) sampled at the array of
-	 * points xa[i] with values ya[i], each array is size "size".
+	 * look up table is descrete version of f(s) sampled at the array of
+	 * points sa[i] with values fa[i], each array is size "size".
 	 */
-	spline( const double xa[], const double ya[], size_t size );
+	spline( const double sa[], const double fa[], size_t size );
 	virtual ~spline();
-	double operator()(double x);
+	double operator()(double s);
 
-	static double eq(double freq, void* e);
+	static double eq(double freq, void* e); // this is so splines can be used as graphic equalisers for the ffts.
+											// not really anything to do with motion of enemies!
 };
 
 /*
@@ -78,8 +53,12 @@ public:
  *
  */
 class constant: public Functor{
+protected:
+	/* arguments */
 	double val;
+
 public:
+	/* functor methods */
 	constant(double val = 0.) {this->val = val;}
 	double operator() (double s) {return val;}
 };
@@ -90,8 +69,12 @@ public:
  * 						variable "speed".
  */
 class linear: public Functor{
+protected:
+	/* arguments */
 	double speed;
+
 public:
+	/* functor methods */
 	linear(double speed) {this->speed = speed;}
 	double operator() (double s) {return s*speed;}
 };
@@ -102,17 +85,22 @@ public:
  * 						-"amplitude" with period "period".
  */
 class sine: public Functor{
+protected:
+	/* arguments */
 	double amplitude;
-	double period;
+	double frequency;
 	double phase;
+
 public:
-	sine(double amplitude, double period, double phase = 0) { this->phase = phase; this->amplitude = amplitude; this->period = 2*M_PI/period;}
-	double operator() (double s) {return amplitude*std::sin(phase + (period*s));}
+	/* functor methods */
+	sine(double amplitude, double period, double phase = 0) { this->phase = phase; this->amplitude = amplitude; this->frequency = 2*M_PI/period;}
+	double operator() (double s) {return amplitude*std::sin(phase + (frequency*s));}
 };
 
-/*
+
+/********************************************************************************
  * static versions of some common functors used by enemies.
- */
+ ********************************************************************************/
 class defaultFunctors
 {
 public:

@@ -16,6 +16,7 @@
 #include "Entity.h"
 #include "BeatDetector.h"
 #include "spline.h"
+#include "path.h"
 #include <list>
 
 class Formation {

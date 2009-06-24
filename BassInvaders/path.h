@@ -8,6 +8,8 @@
  * A path structure contains an x(s) and a y(s) functor which provide the
  * (x,y) position as a function of "time".
  *
+ * A path also contains a FIFO stack of transformations.  Push transformations onto the
+ * stack and they will be evaluated when you do a get command.
  */
 
 #ifndef PATH_H_

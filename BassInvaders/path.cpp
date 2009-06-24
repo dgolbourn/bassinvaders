@@ -17,6 +17,8 @@ Path::~Path() {
 
 void Path::get(int32_t *xpos, int32_t *ypos, double s)
 {
+	if (x == NULL || y == NULL || xpos == NULL || ypos == NULL ) return;
+
 	double tempX = (*x)(s);
 	double tempY = (*y)(s);
 

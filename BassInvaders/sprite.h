@@ -80,7 +80,7 @@ private:
 	AnimationState_t currentState;
 	AnimationState_t pendingState;
 	uint32_t statesSupported; // bitmask of which AnimationStates are implemented by this sprite
-	AnimationStateData_t animationStateData[AS_STATES_SIZE+1]; // space-ineffecient but fast-indexed array of animation states
+	AnimationStateData_t animationStateData[AS_STATES_SIZE]; // space-ineffecient but fast-indexed array of animation states
 	int32_t xpos;
 	int32_t ypos;
 };

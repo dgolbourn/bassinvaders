@@ -208,6 +208,8 @@ void Sprite::update()
 	{
 		currentState = pendingState;
 
+		if (currentState == AS_DEAD) return;
+
 		pCurrentState = &animationStateData[currentState];
 		pCurrentState->currentAnimationStep = 0;
 		pCurrentState->lastAnimTickCount = SDL_GetTicks();

@@ -18,6 +18,9 @@ public:
 	virtual void operator() (double* xpos, double* ypos) = 0;
 };
 
+/*
+ * TRANSLATE: translate points x -> x + dx and y -> y + dy
+ */
 class affine_translate : public affineTransform{
 public:
 	double dx;
@@ -26,6 +29,9 @@ public:
 	void operator() (double *xpos, double *ypos) { (*xpos) += dx; (*ypos) += dy;}
 };
 
+/*
+ * ROTATE: rotate x and y around the origin by theta radians
+ */
 class affine_rotate : public affineTransform{
 public:
 	double theta;
@@ -37,6 +43,9 @@ public:
 	}
 };
 
+/*
+ * SCALE: rescale x and y around the origin by a factor kx and ky
+ */
 class affine_scale : public affineTransform{
 public:
 	double kx;
@@ -48,6 +57,9 @@ public:
 	}
 };
 
+/*
+ * SHEAR: move the y coordinate by and amount k * y (rotate first to shear around a different line, then rotate back)
+ */
 class affine_shear : public affineTransform{
 public:
 	double k;

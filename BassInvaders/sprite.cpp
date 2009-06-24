@@ -67,12 +67,12 @@ Sprite::~Sprite() {
 
 void Sprite::destroy()
 {
-	for(uint32_t i = 0; i<AS_STATES_SIZE; ++i)
+	uint32_t state = AS_IDLE;
+
+	while(state < AS_STATES_SIZE)
 	{
-		if (animationStateData[i].state != 0)
-		{
-			SDL_FreeSurface(animationStateData[i].spriteSheet);
-		}
+		SDL_FreeSurface(animationStateData[state].spriteSheet);
+		state<<=1;
 	}
 }
 
@@ -342,13 +342,7 @@ std::vector<CollisionRect_t> Sprite::getCollisionRects()
 {
 	std::vector<CollisionRect_t> CR;
 
-	if (currentState==0) return CR;
-
 	CR = animationStateData[currentState].collisionRects;
-	if (CR.begin() == CR.end())
-	{
-		cout << "***Sprite without a collision box!***\n" << endl;
-	}
 
 	return CR;
 }

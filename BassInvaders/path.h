@@ -8,21 +8,25 @@
  * A path structure contains an x(s) and a y(s) functor which provide the
  * (x,y) position as a function of "time".
  *
- * A path also contains a FIFO stack of transformations.  Push transformations onto the
+ * A path also contains a stack of transformations.  multiply transformations onto the
  * stack and they will be evaluated when you do a get command.
  */
 
 #ifndef PATH_H_
 #define PATH_H_
 #include "spline.h"
-#include <queue>
 #include "affineTransform.h"
+#include <boost/numeric/ublas/matrix.hpp>
+
+using namespace boost::numeric::ublas;
 
 class Path {
 public:
 	Functor *x; // function that returns x(s)
 	Functor *y; // function that returns y(s)
-	std::queue<affineTransform*> transformStack; // stack of affine transforms to apply to coordinates.
+
+	matrix<double> defaultStack;
+	matrix<double> transformStack;
 
 	Path();
 	virtual ~Path();

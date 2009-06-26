@@ -8,7 +8,6 @@
 #ifndef BASSINVADERS_H_
 #define BASSINVADERS_H_
 
-#include <deque>
 #include "Entity.h"
 #include "Hero.h"
 #include "Background.h"

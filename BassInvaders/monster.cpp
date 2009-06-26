@@ -8,11 +8,9 @@
 #include "monster.h"
 #include "affineTransform.h"
 
-monster::monster(int32_t x0, int32_t y0, double monsterTime, Path path)
+monster::monster(double monsterTime, Path path)
 {
 	loadMonsterData();
-	this->x0 = x0;
-	this->y0 = y0;
 	type = RT_ENEMY;
 	currentState = RS_ACTIVE;
 	pendingState = RS_ACTIVE;
@@ -22,42 +20,9 @@ monster::monster(int32_t x0, int32_t y0, double monsterTime, Path path)
 	this->path = path;
 	s = monsterTime;
 	updatePosition();
-	localPath = false;
-}
-
-monster::monster(int32_t height)
-{
-	loadMonsterData();
-	xpos = SCREEN_WIDTH;
-	ypos = height;
-	type = RT_ENEMY;
-	currentState = RS_ACTIVE;
-	pendingState = RS_ACTIVE;
-
-	/* JG TODO: put these in a file */
-	health = 10;
-	attackDamage = 10;
-	velocityTicks = 10;
-
-	/*
-	 * This is to set up the path the monster takes across the screen.
-	 */
-	x0 = xpos;	// Starting x position.
-	y0 = ypos;	// Starting y position.
-
-	localPath = true; // monster manages its own path memory.
-	path.x = new linear(MONSTER_X_SPEED);	// Linear motion in x.
-	path.y = new constant(); // constant y
-
-	s = 0; // Start at "time" s=0.
 }
 
 monster::~monster() {
-	if (localPath)
-	{
-		delete path.x;
-		delete path.y;
-	}
 }
 
 void monster::loadMonsterData()
@@ -89,14 +54,6 @@ void monster::update()
 
 void monster::updatePosition()
 {
-	affine_rotate R(0.1);
-	affine_translate A(-SCREEN_WIDTH/2, -SCREEN_HEIGHT/2);
-	affine_translate T(x0, y0);
-	affine_translate B(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
-	path.transformStack.push(&A); // translate centre of screen to 0
-	path.transformStack.push(&R); // rotate around origin by 0.1 radians
-	path.transformStack.push(&B); // translate centre back to where it started
-	path.transformStack.push(&T); // translate enemies to their start points
 	path.get(&xpos, &ypos, s); // copy (x,y) values at `monster time' s to xpos and ypos
 }
 

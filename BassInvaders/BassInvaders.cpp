@@ -10,6 +10,7 @@
 #include "toolkit.h"
 #include "path.h"
 #include "spline.h"
+#include <boost/numeric/ublas/matrix.hpp>
 #include <new>
 
 /*
@@ -246,18 +247,32 @@ void BassInvaders::doPlayingState()
 		 * beautiful splines I think it will turn out to be a good way :-)
 		 */
 		Path path;
+
+		/*
+		 * set up an example transformation, rotation around the middle of the screen
+		 */
+		path.defaultStack = prec_prod(path.defaultStack, affine_translate(SCREEN_WIDTH/2, SCREEN_HEIGHT/2) ); // translate centre of screen to 0
+		path.defaultStack = prec_prod(path.defaultStack, affine_rotate(0.1)); // rotate around origin by angle radians
+		path.defaultStack = prec_prod(path.defaultStack, affine_translate(-SCREEN_WIDTH/2, -SCREEN_HEIGHT/2) ); // translate centre back to where it started
+
+		/*
+		 * translate enemy into its start position
+		 */
+		path.defaultStack = prec_prod(path.defaultStack, affine_translate(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50)) ); // translate enemies to their start points
+
+		/*
+		 * set up the path taken by the enemy
+		 */
 		path.x = &(defaultFunctors::monsterLinearX);	// Linear motion in x.
-
-
 		if (rand()%50 != 1)
 		{
 			path.y = &(defaultFunctors::monsterConstantY); // constant motion in y.;
-			randomHorde m(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50), path);
+			randomHorde m(path);
 		}
 		else
 		{
-			path.y = &(defaultFunctors::monsterSineY); // constant motion in y.;
-			monsterLine m(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50), path,5);
+			path.y = &(defaultFunctors::monsterSineY); // sine motion in y.;
+			monsterLine m(path,5);
 		}
 	}
 

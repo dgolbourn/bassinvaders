@@ -31,7 +31,7 @@ public:
 class randomHorde : public Formation {
 public:
 	~randomHorde();
-	randomHorde(int32_t xpos, int32_t ypos, Path path);
+	randomHorde( Path path);
 };
 
 /*
@@ -40,7 +40,7 @@ public:
 class monsterLine: public Formation {
 public:
 	~monsterLine();
-	monsterLine(int32_t xpos, int32_t ypos, Path path, uint8_t num);
+	monsterLine(Path path, uint8_t num);
 };
 
 #endif /* FORMATION_H_ */

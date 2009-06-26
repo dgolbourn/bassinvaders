@@ -252,7 +252,7 @@ void BassInvaders::doPlayingState()
 		 * set up an example transformation, rotation around the middle of the screen
 		 */
 		apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH/2, SCREEN_HEIGHT/2) );
-		apply_transform(path.defaultStack, affine_rotate(0.4) );
+		apply_transform(path.defaultStack, affine_rotate(rand()) );
 		apply_transform(path.defaultStack, affine_translate(-SCREEN_WIDTH/2, -SCREEN_HEIGHT/2) );
 
 		/*

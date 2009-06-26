@@ -25,6 +25,7 @@ public:
 	Functor *x; // function that returns x(s)
 	Functor *y; // function that returns y(s)
 	double s0; // start time for this path
+	double ds; // rate of change of s.
 
 	matrix<double> defaultStack;
 	matrix<double> transformStack;

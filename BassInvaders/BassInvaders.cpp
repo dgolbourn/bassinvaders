@@ -11,7 +11,6 @@
 #include "path.h"
 #include "spline.h"
 #include <boost/numeric/ublas/matrix.hpp>
-#include <new>
 
 /*
  * This is called by SDL Music for chunkSampleSize x 4 bytes each time SDL needs it

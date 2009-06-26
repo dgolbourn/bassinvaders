@@ -11,7 +11,7 @@
 Path::Path() {
 	x = NULL;
 	y = NULL;
-
+	double s0 = 0; // start time for this path
 	defaultStack = identity_matrix<double>(3);
 	transformStack = identity_matrix<double>(3);
 }
@@ -24,8 +24,8 @@ void Path::get(int32_t *xpos, int32_t *ypos, double s)
 	if (x == NULL || y == NULL || xpos == NULL || ypos == NULL ) return;
 
     vector<double> pos(3);
-    pos(0) = (*x)(s);
-	pos(1) = (*y)(s);
+    pos(0) = (*x)(s+s0);
+	pos(1) = (*y)(s+s0);
 	pos(2) = 1;
 
 	pos = prec_prod(defaultStack, pos);

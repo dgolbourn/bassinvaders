@@ -9,13 +9,10 @@
 #define MONSTER_H_
 
 #include "Entity.h"
-#include <vector>
 #include "InputManager.h"
 #include "ResourceBundle.h"
 #include "toolkit.h"
-#include <fstream>
 #include "WindowManager.h"
-#include <iostream>
 #include "path.h"
 #include "spline.h"
 
@@ -26,7 +23,7 @@
 
 class monster: public Entity {
 public:
-	monster(double monsterTime, Path path);
+	monster(Path path);
 	~monster();
 	void render(SDL_Surface *pScreen);
 	void doCollision(Entity* pOther);

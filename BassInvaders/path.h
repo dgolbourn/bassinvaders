@@ -24,6 +24,7 @@ class Path {
 public:
 	Functor *x; // function that returns x(s)
 	Functor *y; // function that returns y(s)
+	double s0; // start time for this path
 
 	matrix<double> defaultStack;
 	matrix<double> transformStack;

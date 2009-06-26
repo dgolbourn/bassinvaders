@@ -8,7 +8,7 @@
 #include "monster.h"
 #include "affineTransform.h"
 
-monster::monster(double monsterTime, Path path)
+monster::monster(Path path)
 {
 	loadMonsterData();
 	type = RT_ENEMY;
@@ -18,7 +18,7 @@ monster::monster(double monsterTime, Path path)
 	attackDamage = 10;
 	velocityTicks = 10;
 	this->path = path;
-	s = monsterTime;
+	s = 0;
 	updatePosition();
 }
 

@@ -10,7 +10,7 @@
 
 randomHorde::randomHorde(Path path)
 {
-	BassInvaders::theGame->pRM->addEnemy(new monster(0, path));
+	BassInvaders::theGame->pRM->addEnemy(new monster(path));
 }
 
 randomHorde::~randomHorde()
@@ -21,7 +21,8 @@ monsterLine::monsterLine(Path path, uint8_t num)
 {
 	for (int i = 0; i < num; i++)
 	{
-		BassInvaders::theGame->pRM->addEnemy(new monster(-i*20, path));
+		path.s0 = -i*20;
+		BassInvaders::theGame->pRM->addEnemy(new monster(path));
 	}
 }
 

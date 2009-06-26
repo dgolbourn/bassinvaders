@@ -9,6 +9,12 @@
 #define AFFINETRANSFORM_H_
 #include <boost/numeric/ublas/matrix.hpp>
 using namespace boost::numeric::ublas;
+
+/*
+ * apply matrix transform T to matrix M
+ */
+void apply_transform(matrix<double> &M, const matrix<double> &T);
+
 /*
  * TRANSLATE: translate points x -> x + dx and y -> y + dy
  */

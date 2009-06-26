@@ -11,7 +11,7 @@
 Path::Path() {
 	x = NULL;
 	y = NULL;
-	double s0 = 0; // start time for this path
+	s0 = 0; // start time for this path
 	defaultStack = identity_matrix<double>(3);
 	transformStack = identity_matrix<double>(3);
 }

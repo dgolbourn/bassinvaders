@@ -251,14 +251,14 @@ void BassInvaders::doPlayingState()
 		/*
 		 * set up an example transformation, rotation around the middle of the screen
 		 */
-		path.defaultStack = prec_prod(path.defaultStack, affine_translate(SCREEN_WIDTH/2, SCREEN_HEIGHT/2) ); // translate centre of screen to 0
-		path.defaultStack = prec_prod(path.defaultStack, affine_rotate(0.4)); // rotate around origin by angle radians
-		path.defaultStack = prec_prod(path.defaultStack, affine_translate(-SCREEN_WIDTH/2, -SCREEN_HEIGHT/2) ); // translate centre back to where it started
+		apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH/2, SCREEN_HEIGHT/2) );
+		apply_transform(path.defaultStack, affine_rotate(0.4) );
+		apply_transform(path.defaultStack, affine_translate(-SCREEN_WIDTH/2, -SCREEN_HEIGHT/2) );
 
 		/*
 		 * translate enemy into its start position
 		 */
-		path.defaultStack = prec_prod(path.defaultStack, affine_translate(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50)) ); // translate enemies to their start points
+		apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50)) );
 
 		/*
 		 * set up the path taken by the enemy

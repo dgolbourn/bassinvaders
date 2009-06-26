@@ -1,5 +1,10 @@
 #include "affineTransform.h"
 
+void apply_transform(matrix<double> &M, const matrix<double> &T)
+{
+	M = prec_prod(M, T );
+}
+
 /*
  * TRANSLATE: translate points x -> x + dx and y -> y + dy
  */

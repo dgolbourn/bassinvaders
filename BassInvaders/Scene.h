@@ -16,9 +16,7 @@
 
 class Scene {
 public:
-	Scene();
-	virtual ~Scene() = 0;
-	std::list<Formation*> formations;
+	virtual ~Scene() {};
 };
 
 #endif /* SCENE_H_ */

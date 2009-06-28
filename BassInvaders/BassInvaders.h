@@ -8,7 +8,6 @@
 #ifndef BASSINVADERS_H_
 #define BASSINVADERS_H_
 
-#include <deque>
 #include "Entity.h"
 #include "Hero.h"
 #include "Background.h"
@@ -28,7 +27,6 @@
 #include "Scene.h"
 
 #define SENSITIVITY 1.3
-#define INSERT_YOUR_SONG_PATH_HERE "test.mp3"
 #define COOLDOWN 200
 
 /*JG TODO:
@@ -53,7 +51,7 @@ public:
 
 	void goGameGo(); // main game loop
 
-	// These are called by SDL and need to be publically accessible
+	// These are called by SDL and need to be publicly accessible
 	// Write getters/setters if you are so inclined :-)
 	// This is the level class
 	SoundSource * soundSource;
@@ -76,6 +74,9 @@ public:
 
 private:
 	void injectState(GameStates_t newState);
+	void update();
+
+private:
 	void updateStates();
 	void doPlayingState();
 	void doPausedState();

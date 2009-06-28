@@ -9,32 +9,37 @@
 #define MONSTER_H_
 
 #include "Entity.h"
-#include <vector>
 #include "InputManager.h"
 #include "ResourceBundle.h"
+#include "toolkit.h"
+#include "WindowManager.h"
+#include "path.h"
+#include "spline.h"
 
-#define MONSTER_X_SPEED -10
+#define MONSTER_X_SPEED -4
 #define MONSTER_Y_SPEED 0
 
 #define MAIN_SPRITE 0
 
 class monster: public Entity {
 public:
-	monster(int32_t);
-	virtual ~monster();
+	monster(Path path);
+	~monster();
+	void render(SDL_Surface *pScreen);
+	void doCollision(Entity* pOther);
+	std::vector<Sprite*> getActiveSpriteList();
+	void update();
 
-	virtual bool isOffScreen(int32_t screenWidth, int32_t screenHeight);
-	virtual void render(SDL_Surface *pScreen);
-	virtual bool canBeRemoved();
-	virtual void doCollision(Entity* pOther);
-	virtual std::vector<Sprite> getActiveSpriteList();
-	virtual void reactToCollision(Entity* pOther);
-	static int32_t speed;
-protected:
-	virtual void updateStates();
-
+	/*
+	 * variables and methods which manage the movement of the monster (used by overloaded updatePosition)
+	 */
+	double s; 		// "monster time" parametrizes the path
+	Path path; 		// the path the monster is going to take
 private:
+	void updatePosition();
+	void updateStates();
 	void loadMonsterData();
+	void reactToCollision(Entity* pOther);
 };
 
 #endif /* HERO_H_ */

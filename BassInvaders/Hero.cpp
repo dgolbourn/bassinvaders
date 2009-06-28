@@ -9,6 +9,7 @@
 #include "toolkit.h"
 #include <fstream>
 #include <iostream>
+#include <new>
 
 Hero::Hero(ResourceBundle* resource, EntityManager* pRM)
 {
@@ -36,10 +37,10 @@ Hero::~Hero()
 {
 	std::vector<Sprite>::iterator pos;
 
-		for (pos = sprites.begin(); pos !=sprites.end(); ++pos)
-		{
-			pos->destroy();
-		}
+	for (pos = sprites.begin(); pos !=sprites.end(); ++pos)
+	{
+		pos->destroy();
+	}
 }
 
 void Hero::loadHeroData(ResourceBundle* resource)
@@ -49,38 +50,19 @@ void Hero::loadHeroData(ResourceBundle* resource)
 	Sprite heroBody(((ResourceBundle**)(*resource)["bodysprite"])[0]);
 
 	sprites.push_back(heroBody);
-
 }
 
-bool Hero::isOffScreen(int32_t screenWidth, int32_t screenHeight)
+std::vector<Sprite*> Hero::getActiveSpriteList()
 {
-	if ( (ypos < -50) || (ypos > (int32_t)screenHeight) )
-		return true;
-
-	return false;
+	std::vector<Sprite*> ret;
+	ret.push_back(&(sprites[BODYSPRITE]));
+	return ret;
 }
 
 void Hero::render(SDL_Surface* pScreen)
 {
-	doActions();
-	updateStates();
-
-	/* set the sprite for the main body to the same position
-	 * as the Hero class
-	 * we'll then, (when they exist) render all the other sprites  (e.g. thrusters)
-	 * in their appropriate relative positions
-	 */
 	sprites[BODYSPRITE].setLocation(this->xpos, this->ypos);
-
-	/* render all the sprites in the vector*/
-	std::vector<Sprite>::iterator pos;
-
-	uint8_t i = 0;
-	for (pos = sprites.begin(); pos!=sprites.end(); ++pos)
-	{
-		pos->renderSprite(pScreen);
-		++i;
-	}
+	sprites[BODYSPRITE].renderSprite(pScreen);
 }
 
 void Hero::setActions(ACTIONMASK actions)
@@ -111,7 +93,7 @@ void Hero::setActions(ACTIONMASK actions)
 		xvelocity = 0;
 	}
 
-	if (actions & ACTION_SHOOT)
+	if ((actions & ACTION_SHOOT) && (canShoot == false))
 	{
 		uint32_t now = SDL_GetTicks();
 		uint32_t delta = now - lastFireTicks;
@@ -125,24 +107,18 @@ void Hero::setActions(ACTIONMASK actions)
 
 void Hero::doActions()
 {
-	uint32_t now = SDL_GetTicks();
-	uint32_t delta = now - lastTickCount;
-
-	if (delta > velocityTicks)
-	{
-		xpos += xvelocity;
-		ypos += yvelocity;
-
-		lastTickCount = now;
-	}
-
 	if (canShoot)
 	{
 		//DebugPrint(("Firing bullet\n"));
 		/* Create a new bullet, stick it in the Entity manager
 		 * the x and y pos are where we want the bullet to spawn (i.e. at the nose of the hero craft)*/
-		pRM->addBullet(new Bullet(xpos+100, ypos+50)); //JG TODO: magic numbers must go
-		canShoot = false;
+		Bullet *B = new(std::nothrow) Bullet(xpos+100, ypos+50); //JG TODO: magic numbers must go
+
+		if (B)
+		{
+			pRM->addBullet(B);
+			canShoot = false;
+		}
 	}
 }
 
@@ -151,8 +127,13 @@ bool Hero::canBeRemoved()
 	return false;
 }
 
-void Hero::updateStates()
+void Hero::update()
 {
+	doActions();
+	updateStates();
+}
+
+void Hero::updateStates(){
 	currentState = pendingState;
 
 	switch(currentState)
@@ -198,13 +179,6 @@ void Hero::doCollision(Entity* pOther)
 			return;
 		}
 	}
-}
-
-std::vector<Sprite> Hero::getActiveSpriteList()
-{
-	std::vector<Sprite> ret;
-	ret.push_back(sprites[BODYSPRITE]);
-	return ret;
 }
 
 void Hero::reactToCollision(Entity* pOther)

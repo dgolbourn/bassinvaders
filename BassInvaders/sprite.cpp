@@ -8,7 +8,39 @@
 #include "sprite.h"
 #include "toolkit.h"
 
-#define DEBUG_COLLISIONS
+//#define DEBUG_COLLISIONS
+
+AnimationStateData_t::AnimationStateData_t()
+{
+	state = AS_INIT;
+	nextState = AS_INIT;
+	currentAnimationStep = 0;
+	numberOfAnimationSteps = 0;
+	sheetStartsAt.h = 0;
+	sheetStartsAt.w = 0;
+	sheetStartsAt.x = 0;
+	sheetStartsAt.y = 0;
+	spriteWidth = 0;
+	spriteHeight = 0;
+	ticksPerStep = 0;
+	lastAnimTickCount = 0;
+	spriteSheet = NULL;
+}
+
+void AnimationStateData_t::debugPrint()
+{
+	cout << "state: " << state << endl;
+	cout << "next state: " << nextState << endl;
+	cout << "current animation step: " << currentAnimationStep << endl;
+	cout << "number of animation steps: " << numberOfAnimationSteps << endl;
+	cout << "sheet h: " << sheetStartsAt.h << " w: " << sheetStartsAt.w << " x: " << sheetStartsAt.x << " y: " << sheetStartsAt.y << endl;
+	cout << "sprite width: " << spriteWidth << endl;
+	cout << "sprite height: " << spriteHeight << endl;
+	cout << "ticks/step: " << ticksPerStep << endl;
+	cout << "last tick count: " << lastAnimTickCount << endl;
+	cout << "sprite sheet address: " << spriteSheet << endl;
+	cout << "collision vector length: " << collisionRects.size() << endl;
+}
 
 Sprite::Sprite(ResourceBundle * resources/*, BassInvaders * game*/) {
 	/* take a text file as a parameter containing all the data for all the states
@@ -35,12 +67,12 @@ Sprite::~Sprite() {
 
 void Sprite::destroy()
 {
-	for(uint32_t i = 0; i<AS_STATES_SIZE; ++i)
+	uint32_t state = AS_IDLE;
+
+	while(state < AS_STATES_SIZE)
 	{
-		if (animationStateData[i].state != 0)
-		{
-			SDL_FreeSurface(animationStateData[i].spriteSheet);
-		}
+		SDL_FreeSurface(animationStateData[state].spriteSheet);
+		state<<=1;
 	}
 }
 
@@ -82,7 +114,7 @@ void Sprite::renderSprite(SDL_Surface *pScreen)
 {
 	AnimationStateData_t* pTempState;
 
-	updateStates();
+	update();
 
 	switch(currentState)
 	{
@@ -159,7 +191,7 @@ uint8_t Sprite::getNextAnimationStep(const AnimationStateData_t* pStateData)
 	}
 }
 
-void Sprite::updateStates()
+void Sprite::update()
 {
 	AnimationStateData_t* pCurrentState = &animationStateData[currentState];
 
@@ -175,6 +207,8 @@ void Sprite::updateStates()
 	if (pendingState != currentState)
 	{
 		currentState = pendingState;
+
+		if (currentState == AS_DEAD) return;
 
 		pCurrentState = &animationStateData[currentState];
 		pCurrentState->currentAnimationStep = 0;
@@ -204,7 +238,7 @@ void Sprite::loadSpriteData(ResourceBundle * resource)
 	 * then loop through file parsing each line until
 	 * we read all the data we expected
 	 * you should probably add some error handling code at some point*/
-	AnimationStateData_t* pData;
+	AnimationStateData_t* pData = NULL;
 	uint32_t numberOfStates;
 	uint32_t R=0;
 	uint32_t G=0;
@@ -214,7 +248,7 @@ void Sprite::loadSpriteData(ResourceBundle * resource)
 
 	numberOfStates = GET_RESOURCE(int32_t, *resource, "numberofstates", 0);
 
-	memset(animationStateData, 0, (sizeof(AnimationStateData_t) * AS_STATES_SIZE));
+	//memset(animationStateData, 0, (sizeof(AnimationStateData_t) * AS_STATES_SIZE));
 	ResourceBundle * currentState;
 	for (uint32_t i = 0; i<numberOfStates; i++)
 	{
@@ -242,15 +276,14 @@ void Sprite::loadSpriteData(ResourceBundle * resource)
 
 		for (uint32_t j = 0; j<numberOfCollisionRects; ++j)
 		{
-			CollisionRect_t rect = {0,0,0,0};
+			CollisionRect_t rect;
 
 			rect.x = GET_RESOURCE(int32_t*, *currentState, "rect", j)[0];
 			rect.y = GET_RESOURCE(int32_t*, *currentState, "rect", j)[1];
 			rect.w = GET_RESOURCE(int32_t*, *currentState, "rect", j)[2];
 			rect.h = GET_RESOURCE(int32_t*, *currentState, "rect", j)[3];
-			//DebugPrint(("loading rect (%u,%u,%u,%u)\n", rect.x, rect.y,rect.w, rect.h ));
+			DebugPrint(("loading rect (%u,%u,%u,%u)\n", rect.x, rect.y,rect.w, rect.h ));
 			pData->collisionRects.push_back(rect);
-
 		}
 
 		// this doesn't work with GET_RESOURCE, I guess because filename doesn't return an array maybe?
@@ -260,12 +293,14 @@ void Sprite::loadSpriteData(ResourceBundle * resource)
 
 		if (pData->collisionRects.begin() == pData->collisionRects.end())
 		{
-			DebugPrint(("Loaded sprite without a collision box!\n"));
+			cout << (("Loaded sprite without a collision box!\n")) << endl;
 		}
+
+		//pData->debugPrint();
 	}
 }
 
-void Sprite::setLocation(uint32_t xpos, uint32_t ypos)
+void Sprite::setLocation(int32_t xpos, int32_t ypos)
 {
 	int32_t xdelta = xpos - this->xpos;
 	int32_t ydelta = ypos - this->ypos;
@@ -277,7 +312,7 @@ void Sprite::setLocation(uint32_t xpos, uint32_t ypos)
 
 	/* iterate through each sprite state, and then through each collision rect list,
 	 * updating the collision rect postions if we've changed position.
-	 * don't waste time doing any of this is the change is zero */
+	 * don't waste time doing any of this if the change is zero */
 	if ((ydelta != 0 ) || (xdelta != 0))
 	{
 		while(state < AS_STATES_SIZE)
@@ -307,7 +342,11 @@ void Sprite::setLocation(uint32_t xpos, uint32_t ypos)
 /* returns the collision boxes of the current animation state*/
 std::vector<CollisionRect_t> Sprite::getCollisionRects()
 {
-	return animationStateData[currentState].collisionRects;
+	std::vector<CollisionRect_t> CR;
+
+	CR = animationStateData[currentState].collisionRects;
+
+	return CR;
 }
 
 AnimationState_t Sprite::getPendingAnimationState()
@@ -335,7 +374,7 @@ bool Sprite::isCollidingWith(std::vector<CollisionRect_t> other)
 
 	for (myRects = pData->collisionRects.begin(); myRects != pData->collisionRects.end(); ++myRects)
 	{
-		uint32_t top1,bottom1,left1,right1;
+		int32_t top1,bottom1,left1,right1;
 
 		top1    = myRects->y;
 		bottom1 = top1+myRects->h;
@@ -344,7 +383,7 @@ bool Sprite::isCollidingWith(std::vector<CollisionRect_t> other)
 
 		for (otherRects = other.begin(); otherRects != other.end(); ++otherRects)
 		{
-			uint32_t top2,bottom2,left2,right2;
+			int32_t top2,bottom2,left2,right2;
 			top2    = otherRects->y;
 			bottom2 = top2+otherRects->h;
 			left2   = otherRects->x;

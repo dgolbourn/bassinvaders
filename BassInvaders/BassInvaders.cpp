@@ -8,11 +8,9 @@
 #include "BassInvaders.h"
 #include "WindowManager.h"
 #include "toolkit.h"
-#include "graphicalEqualiser.h"
-
-double x[] = {-10, 220, 440,1760, 30000};
-double y[] = {1.0, 1.0, 1.0, 1.0, 1.0};
-graphicalEqualiser pGE(x,y, 5);
+#include "path.h"
+#include "spline.h"
+#include <boost/numeric/ublas/matrix.hpp>
 
 /*
  * This is called by SDL Music for chunkSampleSize x 4 bytes each time SDL needs it
@@ -25,10 +23,9 @@ void BassInvaders::MusicPlayer(void *udata, Uint8 *stream, int len)
 		SoundSample * sample = iter->next();
 		memcpy(stream, sample->sample, sample->len);
 
-		((BassInvaders*)udata)->fft->ingest(stream);
-		((BassInvaders*)udata)->fft->EQ(stream, graphicalEqualiser::eq, (void*)&pGE);
+		//((BassInvaders*)udata)->fft->ingest(stream);
 
-		BeatDetector::process(((BassInvaders*)udata)->beat, stream, len);
+		BeatDetector::process(((BassInvaders*)udata)->beat, sample->sample , len);
 	}
 }
 
@@ -42,13 +39,11 @@ BassInvaders::BassInvaders()
 	nextState = Loading;
 	running = true;
 	BassInvaders::theGame = this;
-	pRM = new EntityManager(wm.getWindowSurface());
 }
 
 BassInvaders::~BassInvaders() {
 	delete pHero;
-	//delete pBG; //The background is being deleted wrongly and acting like a dick.
-					// TODO Background needs reworking to use the resourceBundle anyway.
+	//delete pBG; // TODO Background needs reworking to use the resourceBundle anyway.
 	delete dt;
 	delete fft;
 	delete soundSource;
@@ -59,7 +54,7 @@ void BassInvaders::goGameGo()
 {
 	while (running)
 	{
-		updateStates();
+		update();
 		switch (gameState)
 		{
 			case Loading:
@@ -96,7 +91,7 @@ void BassInvaders::injectState(GameStates_t newState)
 	nextState = newState;
 }
 
-void BassInvaders::updateStates()
+void BassInvaders::update()
 {
 	if (gameState != nextState)
 	{
@@ -136,6 +131,8 @@ void BassInvaders::doLoadingState()
 
 void BassInvaders::loadLevel()
 {
+	pRM = new EntityManager(wm.getWindowSurface());
+
 	/* Load the level */
 	ResourceBundle *level = ResourceBundle::getResource("resources/levels/level-test.info");
 
@@ -178,7 +175,7 @@ void BassInvaders::loadLevel()
 
 	// set up the beat detector.
 	int historyBuffer = (int) (1.0 / ((double)(chunkSampleLength)/(double)(soundSource->spec.freq)));
-	beat = new BeatDetector(historyBuffer, SENSITIVITY, chunkSampleLength );
+	beat = new BeatDetector(historyBuffer, SENSITIVITY, chunkSampleLength);
 	beatIter = beat->iterator(COOLDOWN);
 
 	// hook the game in to the music via the MusicPlayer function.
@@ -219,7 +216,6 @@ void BassInvaders::doPlayingState()
 			{
 				pBG->accelerate(10, 1);
 				BandPassFilterDT::alpha = 0.3;
-				monster::speed = -15;
 				if (!isRegistered)
 				{
 					Mix_RegisterEffect(MIX_CHANNEL_POST, BandPassFilterDT::lowPassFilterEffect, NULL, dt);
@@ -231,7 +227,6 @@ void BassInvaders::doPlayingState()
 			{
 				pBG->accelerate(1, 1);
 				BandPassFilterDT::alpha = 1.;
-				monster::speed = -10;
 			}
 		}
 	}
@@ -242,22 +237,54 @@ void BassInvaders::doPlayingState()
 	/* move the hero about and let him shoot things*/
 	pHero->setActions(im.getCurrentActions());
 
-	//DebugPrint(("is beat?\n"));
+	/* this is just to test the monsters! This will eventually be managed by scenes! */
 	if (beatIter->isBeat())
 	{
-		pRM->addEnemy(new monster(rand()%SCREEN_HEIGHT-50));
-		pHero->score-=monster::speed;
+		/*
+		 * monsters are given paths to move along, this might turn out to be a little
+		 * cumbersome for easy paths like just going straight forward, but for complicated
+		 * beautiful splines I think it will turn out to be a good way :-)
+		 */
+		Path path;
+
+		/*
+		 * set up an example transformation, rotation around the middle of the screen
+		 */
+		apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH/2, SCREEN_HEIGHT/2) );
+		apply_transform(path.defaultStack, affine_rotate(rand()) );
+		apply_transform(path.defaultStack, affine_translate(-SCREEN_WIDTH/2, -SCREEN_HEIGHT/2) );
+
+		/*
+		 * translate enemy into its start position
+		 */
+		apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50)) );
+
+		/*
+		 * set up the path taken by the enemy
+		 */
+		path.x = &(defaultFunctors::monsterLinearX);	// Linear motion in x.
+		if (rand()%50 != 1)
+		{
+			path.y = &(defaultFunctors::monsterConstantY); // constant motion in y.;
+			randomHorde m(path);
+		}
+		else
+		{
+			path.y = &(defaultFunctors::monsterSineY); // sine motion in y.;
+			monsterLine m(path,5);
+		}
 	}
 
 	/* do collision detection */
-//	DebugPrint(("do collisions\n"));
 	pRM->doCollisions();
 
-//	DebugPrint(("render\n"));
+	pRM->update();
+
+	pRM->move();
+
 	/* draw all the active Entities */
 	pRM->render();
 
-//	DebugPrint(("remove inactives\n"));
 	/* remove the dead/off screen ones */
 	pRM->removeInactiveEntities();
 

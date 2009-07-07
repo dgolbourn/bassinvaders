@@ -61,7 +61,7 @@ private:
 	// readArray template class replaces readIntArray and readFloatArray
 	template<class type> static type* readArray(string cstr);
 	template<class type> static type** readArrayArray(string cstr);
-	ResourceBundle ** ResourceBundle::readResourceArray(string cstr);
+	ResourceBundle ** readResourceArray(string cstr);
 	static void registerResource(string, void *);
 
 	static std::map<string,void*> resourceRegister;

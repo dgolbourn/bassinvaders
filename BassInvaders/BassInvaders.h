@@ -58,7 +58,7 @@ public:
 	SoundSource * soundSource;
 	SoundSourceIterator * soundIter;
 	BandPassFilterDT *dt;
-	BeatDetector *beat, *beat1, *beat2, *beat3, *beat0, *beat4;
+	BeatDetector *beat0;
 	BeatManager *pBM;
 	bool running;// is the main game loop still running?
 

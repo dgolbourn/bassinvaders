@@ -10,9 +10,10 @@
 #include "toolkit.h"
 #include "BassInvaders.h"
 
-
 Bullet::Bullet(int32_t xpos, int32_t ypos)
 {
+	number = BassInvaders::theGame->pRM->bullets.size();
+
 	loadBulletData();
 
 	xvelocity = BULLET_X_SPEED;

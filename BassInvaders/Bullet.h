@@ -32,8 +32,10 @@ public:
 
 private:
 	void loadBulletData();
+	uint32_t number;
 	void updateStates();
 	void reactToCollision(Entity* pOther);
+
 };
 
 #endif /* BULLET_H_ */

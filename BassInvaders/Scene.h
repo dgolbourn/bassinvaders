@@ -12,9 +12,20 @@
 #ifndef SCENE_H_
 #define SCENE_H_
 #include "Formation.h"
-#include <list>
+#include <deque>
+
+/*
+ * is the scene inactive, currently ongoing or has it finished?
+ */
+enum sceneState_t
+{
+	IDLE,	// waiting
+	ACTIVE,	// playing
+	FINISHED// done
+};
 
 class Scene {
+	std::deque <Formation*> formations;
 public:
 	virtual ~Scene() {};
 };

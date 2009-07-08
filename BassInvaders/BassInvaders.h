@@ -25,6 +25,7 @@
 #include "Bullet.h"
 #include "Formation.h"
 #include "Scene.h"
+#include "BeatManager.h"
 
 #define SENSITIVITY 1.3
 #define COOLDOWN 200
@@ -56,10 +57,9 @@ public:
 	// This is the level class
 	SoundSource * soundSource;
 	SoundSourceIterator * soundIter;
-	BandPassFilterFFT *fft;
 	BandPassFilterDT *dt;
-	BeatDetector *beat;
-	BeatIterator *beatIter;
+	BeatDetector *beat, *beat1, *beat2, *beat3, *beat0, *beat4;
+	BeatManager *pBM;
 	bool running;// is the main game loop still running?
 
 	Hero* pHero;

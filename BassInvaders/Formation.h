@@ -17,11 +17,25 @@
 #include "BeatDetector.h"
 #include "spline.h"
 #include "path.h"
-#include <list>
+#include <deque>
+
+/*
+ * is the formation active or has it finished?
+ */
+enum formationState_t
+{
+	FORMATION_ACTIVE,
+	FORMATION_FINISHED
+};
 
 class Formation {
+protected:
+	std::deque <Entity*> entities;
+	formationState_t formationState;
 public:
 	virtual ~Formation() {};
+	virtual void update() = 0;
+	formationState_t getState() {return formationState;}
 };
 
 /*
@@ -32,15 +46,18 @@ class randomHorde : public Formation {
 public:
 	~randomHorde();
 	randomHorde( Path path);
+	void update() {}
 };
 
 /*
  * A monsterLine is a row of enemies that follow each other
  */
 class monsterLine: public Formation {
+	uint32_t tally;
 public:
 	~monsterLine();
 	monsterLine(Path path, uint8_t num);
+	void update();
 };
 
 #endif /* FORMATION_H_ */

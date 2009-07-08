@@ -6,7 +6,9 @@
  */
 
 #include "BandPassFilterFFT.h"
-
+#include <iostream>
+#include "gsl/gsl_blas.h"
+#include "gsl/gsl_vector.h"
 /*
  * Initialize the FFT Band-pass filter
  */
@@ -30,23 +32,20 @@ BandPassFilterFFT::BandPassFilterFFT(uint32_t sample_rate, uint32_t chunk_size){
 
 	faccel = gsl_interp_accel_alloc () ;
 	fcache = new double[2*samples];
+	band_data = new double[2*samples];
 }
 
 /**
- * Utility function to write data to file.
- * save the graphs y1 = re[z(x)] and y2 = im[z(x)]
+ * Free the allocated data
  */
-void BandPassFilterFFT::writef(double* data, char* file)
-{
-	FILE *fp = fopen(file,"w");
+BandPassFilterFFT::~BandPassFilterFFT() {
+	delete[] f;
+	delete[] fcache;
+	delete[] band_data;
 
-	/* write the data to file. Column 1 = x, Column 2 = re(z), Column 3 = im(z).*/
-	for (uint32_t i =0; i<samples; i++){
-		fprintf(fp,"%f %f %f\n", f[i], REAL(data,i), IMAG(data,i));
-	    fflush(fp);
-	}
-
-    fclose(fp);
+	gsl_interp_accel_free(faccel);
+	gsl_fft_complex_wavetable_free (wavetable);
+	gsl_fft_complex_workspace_free (workspace);
 }
 
 /**
@@ -74,18 +73,19 @@ fft_t BandPassFilterFFT::fft_alloc(uint8_t* stream)
 }
 
 /*
- * Free the allocated data types
+ * transform frequency domain into stream
  */
-BandPassFilterFFT::~BandPassFilterFFT() {
-	delete[] f;
-	delete[] fcache;
-	gsl_interp_accel_free(faccel);
-	gsl_fft_complex_wavetable_free (wavetable);
-	gsl_fft_complex_workspace_free (workspace);
+void BandPassFilterFFT::fft_inverse(double* band_data, uint8_t *stream) {
+	gsl_fft_complex_inverse(band_data, 1, samples, wavetable, workspace); // Then reverse Fourier transform back to the time domain...
+
+	for (uint32_t i =0; i<samples; i++){ // ...and copy the data back in to the stream.
+		RIGHT((int16_t*)stream,i)=(int16_t)REAL(band_data,i);
+		LEFT((int16_t*)stream,i)=(int16_t)IMAG(band_data,i);
+	}
 }
 
 /*
- * fourier transform a stream and place the frequency data in the cache
+ * fourier transform a stream and place the frequency data into the cache
  */
 void BandPassFilterFFT::ingest(uint8_t *stream)
 {
@@ -93,13 +93,12 @@ void BandPassFilterFFT::ingest(uint8_t *stream)
 }
 
 /*
- * copy a chunk containing only frequencies between flo and fhi into stream.
+ * copy a chunk containing only frequencies between flo and fhi into band data and then
+ * inverse fourier transform it back into the time-domain stream.
  */
 void BandPassFilterFFT::band_pass(uint8_t *stream, double flo, double fhi)
 {
-	double band_data[2*samples];
 	band_window(band_data, ffind(fhi)+1, ffind(flo));
-	//writef(band_data, "test.dat");
 	fft_inverse(band_data, stream);
 }
 
@@ -113,7 +112,7 @@ void BandPassFilterFFT::band_window(double *band_data, uint32_t bandhi, uint32_t
 	 */
 	for(uint32_t i=0; i<=freqs; i++) // Go over each frequency...
 	{
-		if ((i <= bandhi) && (i>=bandlo)) // ...and copy over the frequencies in the the band window...
+		if ((i <= bandhi) && (i>=bandlo)) // ...and copy over the frequencies in the band window...
 		{
 			REAL(band_data,POSITIVE(i,samples)) = REAL(fcache,POSITIVE(i,samples));
 			IMAG(band_data,POSITIVE(i,samples)) = IMAG(fcache,POSITIVE(i,samples));
@@ -131,12 +130,60 @@ void BandPassFilterFFT::band_window(double *band_data, uint32_t bandhi, uint32_t
 }
 
 /*
- * graphical equaliser using the function eq to boost/cut the stream.
+ * returns the highest amplitude frequency in the band_limited stream.
  */
-void BandPassFilterFFT::EQ(uint8_t *stream, double(*eq)(double, void*), void *args)
+double BandPassFilterFFT::util_max_freq_band_limited()
 {
-	double band_data[2*samples];
+	/*
+	 * find index of biggest amplitude value...
+	 */
+	gsl_vector_const_view V = gsl_vector_const_view_array(band_data+1, 2*samples-1);
+	CBLAS_INDEX_t ind = gsl_blas_idamax(&V.vector);
 
+	/*
+	 * ...then work out what frequency that means and return it.
+	 */
+	return f[ind/2+1];
+}
+
+/*
+ * returns the highest amplitude frequency in the stream.
+ */
+double BandPassFilterFFT::util_max_freq()
+{
+	/*
+	 * find index of biggest amplitude value...
+	 */
+	gsl_vector_const_view V = gsl_vector_const_view_array(fcache+1, 2*samples-1);
+	CBLAS_INDEX_t ind = gsl_blas_idamax(&V.vector);
+
+	/*
+	 * ...then work out what frequency that means and return it.
+	 */
+	return f[ind/2+1];}
+
+/**
+ * Utility function to write data to file.
+ * save the graphs y1 = re[z(x)] and y2 = im[z(x)]
+ */
+void BandPassFilterFFT::util_write_freq(char* file)
+{
+	FILE *fp = fopen(file,"w");
+
+	/* write the data to file. Column 1 = x, Column 2 = re(z), Column 3 = im(z).*/
+	for (uint32_t i =0; i<samples; i++){
+		fprintf(fp,"%f %f %f\n", f[i], REAL(fcache,i), IMAG(fcache,i));
+	    fflush(fp);
+	}
+
+    fclose(fp);
+}
+
+/*
+ * graphical equaliser using the callback function eq(freq, user_data) to shape the frequencies in stream.
+ */
+void BandPassFilterFFT::util_eq(uint8_t *stream, double(*eq)(double, void*), void *args)
+{
 	/*
 	 * EQ the data
 	 */
@@ -150,16 +197,4 @@ void BandPassFilterFFT::EQ(uint8_t *stream, double(*eq)(double, void*), void *ar
 	}
 
 	fft_inverse(band_data, stream);
-}
-
-/*
- * transform frequency domain into stream
- */
-void BandPassFilterFFT::fft_inverse(double* band_data, uint8_t *stream) {
-	gsl_fft_complex_inverse(band_data, 1, samples, wavetable, workspace); // Then reverse Fourier transform back to the time domain...
-
-	for (uint32_t i =0; i<samples; i++){ // ...and copy the data back in to the stream.
-		RIGHT((int16_t*)stream,i)=(int16_t)REAL(band_data,i);
-		LEFT((int16_t*)stream,i)=(int16_t)IMAG(band_data,i);
-	}
 }

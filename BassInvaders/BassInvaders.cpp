@@ -11,7 +11,8 @@
 #include "path.h"
 #include "spline.h"
 #include <boost/numeric/ublas/matrix.hpp>
-
+#include "BeatManager.h"
+#include <iostream>
 /*
  * This is called by SDL Music for chunkSampleSize x 4 bytes each time SDL needs it
  */
@@ -23,9 +24,7 @@ void BassInvaders::MusicPlayer(void *udata, Uint8 *stream, int len)
 		SoundSample * sample = iter->next();
 		memcpy(stream, sample->sample, sample->len);
 
-		//((BassInvaders*)udata)->fft->ingest(stream);
-
-		BeatDetector::process(((BassInvaders*)udata)->beat, sample->sample , len);
+		BeatManager::process(((BassInvaders*)udata)->pBM, sample->sample);
 	}
 }
 
@@ -45,9 +44,9 @@ BassInvaders::~BassInvaders() {
 	delete pHero;
 	//delete pBG; // TODO Background needs reworking to use the resourceBundle anyway.
 	delete dt;
-	delete fft;
 	delete soundSource;
-	delete beat;
+	//delete beat;
+	delete pBM;
 }
 
 void BassInvaders::goGameGo()
@@ -170,13 +169,17 @@ void BassInvaders::loadLevel()
 	soundIter = soundSource->iter(chunkSampleLength*4);
 
 	// fft and dt filters if you want them.
-	fft = new BandPassFilterFFT (soundSource->spec.freq, chunkSampleLength*4);
 	dt = new BandPassFilterDT (chunkSampleLength*4);
 
 	// set up the beat detector.
-	int historyBuffer = (int) (1.0 / ((double)(chunkSampleLength)/(double)(soundSource->spec.freq)));
-	beat = new BeatDetector(historyBuffer, SENSITIVITY, chunkSampleLength);
-	beatIter = beat->iterator(COOLDOWN);
+	pBM = new BeatManager(chunkSampleLength, soundSource->spec.freq);
+
+	beat0 = pBM->detector(1.7, 1,80);
+	beat = pBM->detector(1.7, 80,160);
+	beat1 = pBM->detector(1.7, 160,320);
+	beat2 = pBM->detector(1.7, 320,640);
+	beat3 = pBM->detector(1.7, 640,1280);
+	beat4 = pBM->detector(1.7, 1280,20000);
 
 	// hook the game in to the music via the MusicPlayer function.
 	Mix_HookMusic(BassInvaders::MusicPlayer, this);
@@ -186,6 +189,14 @@ void BassInvaders::loadLevel()
 	cout << "Loading HUD with font: " << (char*)((*level)["scorefont"]) << endl;
 	pHUD = new hud((char*)((*level)["scorefont"]), 20, c, wm.getWindowSurface());
 }
+
+struct X{
+	beat_t beat;
+	int32_t pos;
+	bool operator<(const X x) const{
+		return  this->beat < x.beat;
+	}
+};
 
 /**************************
  * Playing logic of game loop
@@ -237,9 +248,31 @@ void BassInvaders::doPlayingState()
 	/* move the hero about and let him shoot things*/
 	pHero->setActions(im.getCurrentActions());
 
+	static uint32_t now, now2;
+	static uint32_t delta, delta2;
+	static uint32_t lastTickCount = 0, lastTickCount2=0;
+
+	now = now2 = SDL_GetTicks();
+	delta = now - lastTickCount;
+	delta2 = now2 - lastTickCount2;
+
+	std::vector<X> findMax1(3);
+	//std::vector<X> findMax2(3);
+	findMax1[0].beat = beat0->isBeat(); findMax1[0].pos = 1;
+	//findMax2[2].beat = beat4->isBeat(); findMax2[2].pos = 6;
+	//findMax1[1].beat = beat->isBeat(); findMax1[1].pos = 2;
+	//findMax1[2].beat = beat1->isBeat();findMax1[2].pos = 3;
+	//findMax2[0].beat = beat2->isBeat();findMax2[0].pos = 4;
+	//findMax2[1].beat = beat3->isBeat();findMax2[1].pos = 5;
+
+	X Y = (*max_element(findMax1.begin(),findMax1.end()));
+	//X Z = (*max_element(findMax2.begin(),findMax2.end()));
+
 	/* this is just to test the monsters! This will eventually be managed by scenes! */
-	if (beatIter->isBeat())
+	if ((Y.beat) && (delta > COOLDOWN))
 	{
+		lastTickCount = now;
+
 		/*
 		 * monsters are given paths to move along, this might turn out to be a little
 		 * cumbersome for easy paths like just going straight forward, but for complicated
@@ -250,14 +283,14 @@ void BassInvaders::doPlayingState()
 		/*
 		 * set up an example transformation, rotation around the middle of the screen
 		 */
-		apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH/2, SCREEN_HEIGHT/2) );
-		apply_transform(path.defaultStack, affine_rotate(rand()) );
-		apply_transform(path.defaultStack, affine_translate(-SCREEN_WIDTH/2, -SCREEN_HEIGHT/2) );
+		//apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH/2, SCREEN_HEIGHT/2) );
+		//apply_transform(path.defaultStack, affine_rotate(rand()) );
+		//apply_transform(path.defaultStack, affine_translate(-SCREEN_WIDTH/2, -SCREEN_HEIGHT/2) );
 
 		/*
 		 * translate enemy into its start position
 		 */
-		apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH, (rand()%SCREEN_HEIGHT - 50)) );
+		apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH, Y.pos*(SCREEN_HEIGHT/7) ));
 
 		/*
 		 * set up the path taken by the enemy
@@ -271,6 +304,7 @@ void BassInvaders::doPlayingState()
 		else
 		{
 			path.y = &(defaultFunctors::monsterSineY); // sine motion in y.;
+			path.ds = 0.9;
 			monsterLine m(path,5);
 		}
 	}

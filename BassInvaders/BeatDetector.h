@@ -53,16 +53,21 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <SDL/SDL.h>
+#include <list>
 #include <vector>
+#include "BeatManager.h"
 
 class BeatIterator;
 class BeatBroadcaster;
+
+typedef double beat_t;
 
 /*
  * Detector
  */
 class BeatDetector {
-	bool beat;
+private:
+	beat_t beat;
 	uint32_t history_len; // length of history
 	history<double> *H;// history
 	double sensitivity; // sensitivity of beat detector
@@ -72,7 +77,7 @@ public:
 	BeatDetector(uint32_t hislen, double sen, uint32_t samples);
 	virtual ~BeatDetector();
 	void detect(uint8_t* stream);
-	bool isBeat();
+	beat_t isBeat();
 	BeatIterator* iterator(uint32_t cooldown);
 	BeatBroadcaster* broadcaster(uint32_t cooldown);
 
@@ -84,14 +89,14 @@ public:
  */
 class BeatIterator{
 	friend BeatIterator* BeatDetector::iterator(uint32_t cooldown);
-private:
+protected:
 	BeatIterator(uint32_t coolDown, BeatDetector*);
 	uint32_t coolDown; // minimum number of milliseconds to wait between reporting a positive beat
 	BeatDetector *b;
 	uint32_t lastTickCount;
 public:
 	virtual ~BeatIterator(){}
-	bool isBeat();
+	beat_t isBeat();
 };
 
 /*

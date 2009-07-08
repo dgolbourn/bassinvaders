@@ -37,17 +37,19 @@ BeatIterator::BeatIterator(uint32_t coolDown, BeatDetector* b) {
 	this->b=b;
 }
 
-bool BeatIterator::isBeat(){
+beat_t BeatIterator::isBeat(){
 	uint32_t now = SDL_GetTicks();
 	uint32_t delta = now - lastTickCount;
 
-	if ((delta > coolDown) && b->isBeat())
+	beat_t B = b->isBeat();
+
+	if ((delta > coolDown) && B)
 	{
 		lastTickCount = now;
-		return true;
+		return B;
 	}
 
-	return false;
+	return 0;
 }
 
 BeatIterator* BeatDetector::iterator(uint32_t cooldown)
@@ -79,12 +81,12 @@ void BeatDetector::detect(uint8_t* stream){
 	}
 
 	/* if local average is greater than S x global average then it's a beat! */
-	beat = (average_energy * history_len) > (sensitivity * H->total);
+	beat = ((average_energy * history_len) > (sensitivity * H->total)) * average_energy;
 
 	/* update history buffer */
 	H->record(average_energy);
 }
 
-bool BeatDetector::isBeat(){
+beat_t BeatDetector::isBeat(){
 	return beat;
 }

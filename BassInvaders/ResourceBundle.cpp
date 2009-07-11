@@ -90,28 +90,29 @@ template<class type> type** ResourceBundle::readArrayArray(string cstr)
 }
 
 ResourceBundle* ResourceBundle::getResource(char* file){
-	filesystem::path temp = filesystem::complete(string(file));
-	const char* complete_path = (temp.native_file_string()).c_str();
-
 	map<string,void*>::iterator iter;
 
-	iter = ResourceBundle::resourceRegister.find(complete_path);
+	iter = ResourceBundle::resourceRegister.find(file);
 
 	if(iter==ResourceBundle::resourceRegister.end())
 	{
 		ResourceBundle ** r = new ResourceBundle*[1];
-		r[0] = new ResourceBundle((char*)complete_path);
+		r[0] = new ResourceBundle((char*)file);
 
-		ResourceBundle::resourceRegister[complete_path] = (void*)r;
+		ResourceBundle::resourceRegister[file] = (void*)r;
 	}
 
-	return ((ResourceBundle**)ResourceBundle::resourceRegister[complete_path])[0];
+	return ((ResourceBundle**)ResourceBundle::resourceRegister[file])[0];
 }
 
 void * ResourceBundle::operator[](const char * s)
 {
 	std::map<std::string,void*>::iterator iter = data.find(s);
-	if( iter != data.end() ) return iter->second;
+	if( iter != data.end() )
+	{
+		cout << "ResourceBundle:operator[] found data:" << s << endl;
+		return iter->second;
+	}
 
 	cout << "ResourceBundle:operator[] ***couldn't find data*** :" << s << endl;
 	return NULL;

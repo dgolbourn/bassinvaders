@@ -74,6 +74,7 @@ public:
 	 */
 	void ingest(uint8_t *stream); // eat a stream and fourier-transform it.
 	void band_pass(uint8_t *stream, double flo, double fhi); // copy band-limited version of data back to stream.
+	void band_pass_with_copy(uint8_t *stream, double *freq, double flo, double fhi); //same as above with copy out freq data.
 
 	/*
 	 * utility methods
@@ -81,7 +82,7 @@ public:
 	void util_write_freq(char* file); // write frequency data to file.
 	void util_eq(uint8_t *stream, double(*eq)(double, void*), void *args); // use the callback to shape frequencies in stream.
 	double util_max_freq_band_limited(); // return freq of largest amplitude frequency component
-	double util_max_freq(); // return freq of largest amplitude frequency component
+	double util_max_freq(double* freq=NULL); // return freq of largest amplitude frequency component
 };
 
 #endif /* BANDPASSFILTERFFT_H_ */

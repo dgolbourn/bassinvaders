@@ -14,6 +14,19 @@
 #include "BandPassFilterFFT.h"
 
 class BeatDetector;
+class BeatAnalyser;
+
+/*
+ * This data type is used to hold any metrics that we want to return from the beat analyser.
+ * The beat analyser and the beat manager will probably have to work together to extract
+ * computationally expensive data in an efficient way.
+ */
+struct beat_info_t{
+	double max_freq; // highest amplitude frequency
+	/*
+	 * can put more things in here when we think of them.
+	 */
+};
 
 /*
  * This structure contains all the meta-data about the detector
@@ -30,12 +43,13 @@ struct detector_t
 	bool isBandLimited;
 	double f_lo; // low freq.
 	double f_hi; // high freq.
+	//uint8_t *stream; // stream cache
 
 	/*
 	 * data characterisation
 	 */
 	bool isFindMaxFreq;
-	double max_freq; // highest amplitude frequency
+	beat_info_t data; // highest amplitude frequency
 };
 
 /*
@@ -49,6 +63,7 @@ class BeatManager {
 	 */
 	BandPassFilterFFT *fft; // fourier tranform
 	uint8_t *stream; // stream cache
+	double *freq; // stream cache
 
 	/*
 	 * audio config parameters
@@ -74,6 +89,11 @@ public:
 	 */
 	BeatDetector* detector(double senstivity, double f_lo, double f_hi);
 	BeatDetector* detector(double senstivity);
+
+	/*
+	 * create a BeatAnalyser
+	 */
+	BeatAnalyser* analyser(uint32_t coolDown, BeatDetector* d);
 
 	/*
 	 * unregister detector (because it is going to be deleted)

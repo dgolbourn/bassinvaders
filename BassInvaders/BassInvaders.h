@@ -26,6 +26,7 @@
 #include "Formation.h"
 #include "Scene.h"
 #include "BeatManager.h"
+#include "BeatAnalyser.h"
 
 #define SENSITIVITY 1.3
 #define COOLDOWN 200
@@ -58,6 +59,7 @@ public:
 	SoundSource * soundSource;
 	SoundSourceIterator * soundIter;
 	BandPassFilterDT *dt;
+	BeatAnalyser *an0;
 	BeatDetector *beat0;
 	BeatManager *pBM;
 	bool running;// is the main game loop still running?

@@ -7,6 +7,7 @@
 
 #include "BeatManager.h"
 #include "BeatDetector.h"
+#include "BeatAnalyser.h"
 #include <iostream>
 
 BeatManager::BeatManager(uint32_t samplesPerChunk, uint32_t sampleFreq)
@@ -17,11 +18,14 @@ BeatManager::BeatManager(uint32_t samplesPerChunk, uint32_t sampleFreq)
 	fft = new BandPassFilterFFT (sampleFreq, sampleLen);
 	this->historyLen = (int) (1.0 / ((double)(samplesPerChunk)/(double)(sampleFreq)));
 	stream = new uint8_t[sampleLen];
+	freq = new double[samplesPerChunk*2];
+
 }
 
 BeatManager::~BeatManager()
 {
 	delete []stream;
+	delete []freq;
 	delete fft;
 }
 
@@ -77,6 +81,28 @@ void BeatManager::unregister(BeatDetector *D)
 	}
 }
 
+BeatAnalyser* BeatManager::analyser(uint32_t coolDown, BeatDetector* d)
+{
+	std::list<detector_t>::iterator iter;
+	/*
+	 * search through the list...
+	 */
+	for (iter = detectors.begin(); iter != detectors.end(); iter++)
+	{
+		/*
+		 * and once you find the detector, create a new analyser.
+		 */
+		if ((*iter).detector == d)
+		{
+			return new BeatAnalyser(coolDown, &(*iter));
+		}
+	}
+
+	// not a registered BeatDetector
+	return NULL;
+}
+
+
 void BeatManager::partition(uint8_t *stream)
 {
 	/*
@@ -92,7 +118,7 @@ void BeatManager::partition(uint8_t *stream)
 		 */
 		if ((*iter).isBandLimited)
 		{
-			fft->band_pass(this->stream, (*iter).f_lo, (*iter).f_hi);
+			fft->band_pass_with_copy(this->stream, freq, (*iter).f_lo, (*iter).f_hi);
 			(*iter).detector->detect(this->stream);
 
 			/*
@@ -100,7 +126,7 @@ void BeatManager::partition(uint8_t *stream)
 			 */
 			if ((*iter).isFindMaxFreq)
 			{
-				(*iter).max_freq = fft->util_max_freq_band_limited();
+				(*iter).data.max_freq = fft->util_max_freq(freq);
 			}
 		}
 		else
@@ -113,7 +139,7 @@ void BeatManager::partition(uint8_t *stream)
 
 			if ((*iter).isFindMaxFreq)
 			{
-				(*iter).max_freq = fft->util_max_freq();
+				(*iter).data.max_freq = fft->util_max_freq();
 			}
 		}
 	}

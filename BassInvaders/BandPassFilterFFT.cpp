@@ -98,7 +98,19 @@ void BandPassFilterFFT::ingest(uint8_t *stream)
  */
 void BandPassFilterFFT::band_pass(uint8_t *stream, double flo, double fhi)
 {
-	band_window(band_data, ffind(fhi)+1, ffind(flo));
+	band_window(band_data, ffind(fhi), ffind(flo));
+	fft_inverse(band_data, stream);
+}
+
+void BandPassFilterFFT::band_pass_with_copy(uint8_t *stream, double *freq, double flo, double fhi)
+{
+	band_window(band_data, ffind(fhi), ffind(flo));
+
+	for (uint32_t i =0; i<samples; i++){ // copy data to freq.
+		RIGHT(freq,i)=REAL(band_data,i);
+		LEFT(freq,i)=IMAG(band_data,i);
+	}
+
 	fft_inverse(band_data, stream);
 }
 
@@ -112,7 +124,7 @@ void BandPassFilterFFT::band_window(double *band_data, uint32_t bandhi, uint32_t
 	 */
 	for(uint32_t i=0; i<=freqs; i++) // Go over each frequency...
 	{
-		if ((i <= bandhi) && (i>=bandlo)) // ...and copy over the frequencies in the band window...
+		if ((i < bandhi) && (i>=bandlo)) // ...and copy over the frequencies in the band window...
 		{
 			REAL(band_data,POSITIVE(i,samples)) = REAL(fcache,POSITIVE(i,samples));
 			IMAG(band_data,POSITIVE(i,samples)) = IMAG(fcache,POSITIVE(i,samples));
@@ -143,14 +155,16 @@ double BandPassFilterFFT::util_max_freq_band_limited()
 	/*
 	 * ...then work out what frequency that means and return it.
 	 */
-	return f[ind/2+1];
+	return f[(ind+1)/2];
 }
 
 /*
  * returns the highest amplitude frequency in the stream.
  */
-double BandPassFilterFFT::util_max_freq()
+double BandPassFilterFFT::util_max_freq(double* freq)
 {
+	if (freq == NULL) freq = fcache;
+
 	/*
 	 * find index of biggest amplitude value...
 	 */
@@ -160,7 +174,8 @@ double BandPassFilterFFT::util_max_freq()
 	/*
 	 * ...then work out what frequency that means and return it.
 	 */
-	return f[ind/2+1];}
+	return f[(ind+1)/2];
+}
 
 /**
  * Utility function to write data to file.
@@ -172,7 +187,7 @@ void BandPassFilterFFT::util_write_freq(char* file)
 
 	/* write the data to file. Column 1 = x, Column 2 = re(z), Column 3 = im(z).*/
 	for (uint32_t i =0; i<samples; i++){
-		fprintf(fp,"%f %f %f\n", f[i], REAL(fcache,i), IMAG(fcache,i));
+		fprintf(fp,"%f %f %f\n", f[i], REAL(band_data,i), IMAG(band_data,i));
 	    fflush(fp);
 	}
 

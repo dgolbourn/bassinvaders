@@ -13,6 +13,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include "BeatManager.h"
 #include <iostream>
+#include <math.h>
+
 /*
  * This is called by SDL Music for chunkSampleSize x 4 bytes each time SDL needs it
  */
@@ -168,13 +170,13 @@ void BassInvaders::loadLevel()
 	Mix_OpenAudio( soundSource->spec.freq, MIX_DEFAULT_FORMAT, soundSource->spec.channels, chunkSampleLength);
 	soundIter = soundSource->iter(chunkSampleLength*4);
 
-	// fft and dt filters if you want them.
+	// dt filter if you want it.
 	dt = new BandPassFilterDT (chunkSampleLength*4);
 
 	// set up the beat detector.
-	pBM = new BeatManager(chunkSampleLength, soundSource->spec.freq);
-
-	beat0 = pBM->detector(1.7, 1,80);
+	pBM = new BeatManager(chunkSampleLength, soundSource->spec.freq); // manage all the beat detection
+	beat0 = pBM->detector(1.7); // a beat detector
+	an0 = pBM->analyser(COOLDOWN, beat0); // extract additional info from the detector
 
 	// hook the game in to the music via the MusicPlayer function.
 	Mix_HookMusic(BassInvaders::MusicPlayer, this);
@@ -184,17 +186,6 @@ void BassInvaders::loadLevel()
 	cout << "Loading HUD with font: " << (char*)((*level)["scorefont"]) << endl;
 	pHUD = new hud((char*)((*level)["scorefont"]), 20, c, wm.getWindowSurface());
 }
-
-/*
- * just for testing, will be in scenes.
- */
-struct X{
-	beat_t beat;
-	int32_t pos;
-	bool operator<(const X x) const{
-		return  this->beat < x.beat;
-	}
-};
 
 /**************************
  * Playing logic of game loop
@@ -247,20 +238,9 @@ void BassInvaders::doPlayingState()
 	pHero->setActions(im.getCurrentActions());
 
 	/* this is all just to test the monsters! This will eventually be managed by scenes! */
-	static uint32_t now;
-	static uint32_t delta;
-	static uint32_t lastTickCount = 0;
-
-	now  = SDL_GetTicks();
-	delta = now - lastTickCount;
-
-	std::vector<X> findMax1(3);
-	findMax1[0].beat = beat0->isBeat(); findMax1[0].pos = 1;
-	X Y = (*max_element(findMax1.begin(),findMax1.end()));
-
-	if ((Y.beat) && (delta > COOLDOWN))
+	if (an0->isBeat())
 	{
-		lastTickCount = now;
+		int pos = fabs((an0->beat_info()).max_freq);
 
 		/*
 		 * monsters are given paths to move along, this might turn out to be a little
@@ -279,7 +259,7 @@ void BassInvaders::doPlayingState()
 		/*
 		 * translate enemy into its start position
 		 */
-		apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH, Y.pos*(SCREEN_HEIGHT/7) ));
+		apply_transform(path.defaultStack, affine_translate(SCREEN_WIDTH, SCREEN_HEIGHT/3 ));
 
 		/*
 		 * set up the path taken by the enemy

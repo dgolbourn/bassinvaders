@@ -4,3 +4,6 @@
 [submodule "lib/SDL2"]
 	path = lib/SDL2
 	url = https://github.com/davidsiaw/SDL2.git
+[submodule "lib/SDL2_ttf"]
+	path = lib/SDL2_ttf
+	url = https://github.com/davidsiaw/SDL2_ttf.git

@@ -1,3 +1,6 @@
 [submodule "lib/jansson"]
 	path = lib/jansson
 	url = https://github.com/akheron/jansson.git
+[submodule "lib/SDL2"]
+	path = lib/SDL2
+	url = https://github.com/davidsiaw/SDL2.git

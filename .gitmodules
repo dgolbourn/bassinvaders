@@ -7,3 +7,9 @@
 [submodule "lib/SDL2_ttf"]
 	path = lib/SDL2_ttf
 	url = https://github.com/davidsiaw/SDL2_ttf.git
+[submodule "lib/SDL2_mixer"]
+	path = lib/SDL2_mixer
+	url = https://github.com/davidsiaw/SDL2_mixer.git
+[submodule "SDL2_image"]
+	path = SDL2_image
+	url = https://github.com/davidsiaw/SDL2_image.git

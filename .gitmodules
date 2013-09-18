@@ -11,5 +11,5 @@
 	path = lib/SDL2_mixer
 	url = https://github.com/davidsiaw/SDL2_mixer.git
 [submodule "SDL2_image"]
-	path = SDL2_image
+	path = lib/SDL2_image
 	url = https://github.com/davidsiaw/SDL2_image.git

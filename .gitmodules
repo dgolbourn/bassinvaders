@@ -10,6 +10,6 @@
 [submodule "lib/SDL2_mixer"]
 	path = lib/SDL2_mixer
 	url = https://github.com/davidsiaw/SDL2_mixer.git
-[submodule "lib\\SDL2_image"]
-	path = lib\\SDL2_image
+[submodule "lib/SDL2_image"]
+	path = lib/SDL2_image
 	url = https://github.com/davidsiaw/SDL2_image.git

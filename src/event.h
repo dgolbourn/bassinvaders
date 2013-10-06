@@ -1,22 +1,17 @@
 #ifndef EVENT_H_
 #define EVENT_H_
 
-typedef void (*Callback) (class Event);
+#include "signal.h"
 
-class Event
-{
-public:
-  Event(void);
-  ~Event(void);
-  Event(const Event& original);
-  Event(Event&& original);
-  Event& operator=(Event original);
+extern Signal quit;
 
-  void Emit(void);
-  void Subscribe(Callback callback);
-  void Unsubscribe(Callback callback);
-private:
-  class EventImpl* impl_;
-};
+extern Signal up;
+extern Signal down;
+extern Signal left;
+extern Signal right;
+
+extern Signal trigger;
+
+void events(void);
 
 #endif

@@ -4,31 +4,31 @@
 class ListenerImpl
 {
 public:
-  Event event_;
+  Signal signal_;
   Callback callback_;
   int reference_count_;
 
-  ListenerImpl(Callback callback, Event event);
+  ListenerImpl(Callback callback, Signal signal);
   ~ListenerImpl(void);
 };
 
-ListenerImpl::ListenerImpl(Callback callback, Event event)
+ListenerImpl::ListenerImpl(Callback callback, Signal signal)
 {
-  event_ = event;
-  event_.Subscribe(callback);
+  signal_ = signal;
+  signal_.Subscribe(callback);
   callback_ = callback;
   reference_count_ = 1;
 }
  
 ListenerImpl::~ListenerImpl(void)
 {
-  event_.Unsubscribe(callback_);
+  signal_.Unsubscribe(callback_);
   callback_ = nullptr;
 }
 
-Listener::Listener(Callback callback, Event event)
+Listener::Listener(Callback callback, Signal signal)
 {
-  impl_ = new ListenerImpl(callback, event);
+  impl_ = new ListenerImpl(callback, signal);
 }
 
 Listener::Listener(void)

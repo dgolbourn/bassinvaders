@@ -5,12 +5,41 @@
 #include "texture.h"
 #include "cstd_exception.h"
 #include "bounding_box.h"
-#include "event.h"
+#include "signal.h"
 #include "listener.h"
+#include "event.h"
 
-void test_callback(Event event)
+void test_callback(Signal signal)
 {
   printf("what!\n");
+}
+
+bool quitflag = false;
+
+void quit_callback(Signal signal)
+{
+  quitflag = true;
+  printf("who!\n");
+}
+
+void up_callback(Signal signal)
+{
+  printf("up!\n");
+}
+
+void down_callback(Signal signal)
+{
+  printf("down!\n");
+}
+
+void left_callback(Signal signal)
+{
+  printf("left!\n");
+}
+
+void right_callback(Signal signal)
+{
+  printf("right!\n");
 }
 
 int main(int argc, char *argv[]) 
@@ -31,7 +60,6 @@ int main(int argc, char *argv[])
     ret = -1;
   }
 
-  //std::cin.get();
   Texture S0 = w->Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
   Texture S1 = w->Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
   Texture S2 = w->Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
@@ -49,15 +77,26 @@ int main(int argc, char *argv[])
   S2.Render(BoundingBox(), BoundingBox(20,20,20,20));
   S4.Render();
   w->Show();
-  //std::cin.get();
 
-  Event E;
+  Signal E;
   Listener L(test_callback, E);
 
   E.Emit();
   E.Emit();
   E.Emit();
-  std::cin.get();
+  
+  Listener L0(quit_callback, quit);
+  Listener L1(quit_callback, trigger);
+  Listener L2(up_callback, up);
+  Listener L3(down_callback, down);
+  Listener L4(left_callback, left);
+  Listener L5(right_callback, right);
+
+  while(!quitflag)
+  {
+    events();
+  }
+
   delete w;
  
   try

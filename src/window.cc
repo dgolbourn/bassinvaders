@@ -12,18 +12,14 @@
 #include "texture_impl.h"
 #include "font_impl.h"
 
-WindowImpl::WindowImpl(void)
+namespace display
 {
-  try
-  {
-    sdl::init(SDL_INIT_VIDEO);
-    img::init(IMG_INIT_PNG);
-    ttf::init();
-  }
-  catch(...)
-  {
-    throw;
-  }
+
+WindowImpl::WindowImpl(std::string name)
+{
+  sdl::init(SDL_INIT_VIDEO);
+  img::init(IMG_INIT_PNG);
+  ttf::init();
 
 	if(!SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1"))
 	{
@@ -35,7 +31,7 @@ WindowImpl::WindowImpl(void)
 		fprintf(stderr, "Warning: SDL_SetHint() failed.");
 	}
 
-	window_ = SDL_CreateWindow("Bass Invaders", SDL_WINDOWPOS_UNDEFINED, 
+  window_ = SDL_CreateWindow(name.c_str(), SDL_WINDOWPOS_UNDEFINED, 
     SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
 
 	if(!window_)
@@ -54,6 +50,8 @@ WindowImpl::WindowImpl(void)
 			SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
 		}
 	}
+
+  reference_count_ = 1;
 }
 
 WindowImpl::~WindowImpl(void)
@@ -145,14 +143,51 @@ void WindowImpl::Show(void)
   SDL_RenderPresent(renderer_);
 }
 
+Window::Window(std::string name)
+{
+  impl_ = new WindowImpl(name);
+}
+
 Window::Window(void)
 {
-  impl_ = new WindowImpl();
+  impl_ = nullptr;
+}
+
+Window::Window(const Window& original)
+{
+  impl_ = original.impl_;
+  if(impl_)
+  {
+    impl_->reference_count_++;
+  }
+}
+
+Window::Window(Window&& original)
+{
+  impl_ = original.impl_;
+  original.impl_ = nullptr;
 }
 
 Window::~Window(void)
 {
-  delete impl_;
+  if(impl_)
+  {
+    if(impl_->reference_count_ > 0)
+    {
+      impl_->reference_count_--;
+    }
+    if(impl_->reference_count_ == 0)
+    {
+      delete impl_;
+      impl_ = nullptr;
+    }
+  }
+}
+
+Window& Window::operator=(Window original)
+{
+  std::swap(impl_, original.impl_);
+  return *this;
 }
 
 Texture Window::Load(std::string filename)
@@ -174,3 +209,5 @@ Texture Window::Text(std::string text, Font font)
 {
   return impl_->Text(text, font);
 }
+
+};

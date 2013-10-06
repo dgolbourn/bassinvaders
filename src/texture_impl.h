@@ -6,6 +6,9 @@
 #include "bounding_box.h"
 #include "window_impl.h"
 
+namespace display
+{
+
 class TextureImpl
 {
 public:
@@ -15,10 +18,12 @@ public:
   void Free(void);
   void Render(void);
   void Render(BoundingBox& source, BoundingBox& destination);
-
+  void Render(int x, int y);
+  
   int reference_count_;
   SDL_Texture* texture_;
   WindowImpl* window_;
 };
 
+};
 #endif

@@ -1,6 +1,9 @@
 #include "event.h"
 #include "SDL_events.h"
 
+namespace event
+{
+
 Signal quit;
 
 Signal up;
@@ -45,19 +48,21 @@ static void keydown_event(SDL_KeyboardEvent& keyboard_event)
 
 void events(void)
 {
-  SDL_Event events;
-  while(SDL_PollEvent(&events))
+  SDL_Event event;
+  while(SDL_PollEvent(&event))
   {
-	  switch(events.type)
+	  switch(event.type)
 	  {
     case SDL_QUIT:
       quit_event();
       break;
     case SDL_KEYDOWN:
-      keydown_event(events.key);
+      keydown_event(event.key);
       break;
     default:
       break;
 	  }
   }
 }
+
+};

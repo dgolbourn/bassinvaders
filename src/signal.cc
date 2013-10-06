@@ -1,6 +1,9 @@
 #include "signal.h"
 #include <set>
 
+namespace event
+{
+
 class SignalImpl
 {
 public:
@@ -114,3 +117,5 @@ Signal& Signal::operator=(Signal original)
   std::swap(impl_, original.impl_);
   return *this;
 }
+
+};

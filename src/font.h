@@ -3,6 +3,9 @@
 
 #include <string>
 
+namespace display
+{
+
 class Font
 {
   friend class WindowImpl;
@@ -18,4 +21,5 @@ private:
   class FontImpl* impl_;
 };
 
+};
 #endif

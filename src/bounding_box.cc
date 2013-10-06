@@ -3,9 +3,12 @@
 #include <utility>
 #include "SDL_rect.h"
 
+namespace display
+{
+
 bool BoundingBox::operator ==(const BoundingBox& compare) const
 {
-  return SDL_RectEquals(&impl_->rect_, &compare.impl_->rect_);
+  return SDL_RectEquals(&impl_->rect_, &compare.impl_->rect_) != 0;
 }
 
 BoundingBox BoundingBox::operator |(const BoundingBox& other)
@@ -28,12 +31,12 @@ BoundingBox BoundingBox::operator &(const BoundingBox& other)
 
 bool BoundingBox::operator &&(const BoundingBox& other)
 {
-  return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_);
+  return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_) != 0;
 }
 
 bool BoundingBox::empty(void)
 {
-  return SDL_RectEmpty(&impl_->rect_);
+  return SDL_RectEmpty(&impl_->rect_) != 0;
 }
 
 BoundingBox::BoundingBox(void)
@@ -87,3 +90,5 @@ BoundingBox& BoundingBox::operator=(BoundingBox original)
   std::swap(impl_, original.impl_);
   return *this;
 }
+
+};

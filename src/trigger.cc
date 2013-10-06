@@ -1,18 +1,21 @@
-#include "listener.h"
+#include "trigger.h"
 #include <utility>
 
-class ListenerImpl
+namespace event
+{
+
+class TriggerImpl
 {
 public:
   Signal signal_;
   Callback callback_;
   int reference_count_;
 
-  ListenerImpl(Callback callback, Signal signal);
-  ~ListenerImpl(void);
+  TriggerImpl(Callback callback, Signal signal);
+  ~TriggerImpl(void);
 };
 
-ListenerImpl::ListenerImpl(Callback callback, Signal signal)
+TriggerImpl::TriggerImpl(Callback callback, Signal signal)
 {
   signal_ = signal;
   signal_.Subscribe(callback);
@@ -20,23 +23,23 @@ ListenerImpl::ListenerImpl(Callback callback, Signal signal)
   reference_count_ = 1;
 }
  
-ListenerImpl::~ListenerImpl(void)
+TriggerImpl::~TriggerImpl(void)
 {
   signal_.Unsubscribe(callback_);
   callback_ = nullptr;
 }
 
-Listener::Listener(Callback callback, Signal signal)
+Trigger::Trigger(Callback callback, Signal signal)
 {
-  impl_ = new ListenerImpl(callback, signal);
+  impl_ = new TriggerImpl(callback, signal);
 }
 
-Listener::Listener(void)
+Trigger::Trigger(void)
 {
   impl_ = nullptr;
 }
 
-Listener::Listener(const Listener& original)
+Trigger::Trigger(const Trigger& original)
 {
   impl_ = original.impl_;
   if(impl_)
@@ -45,13 +48,13 @@ Listener::Listener(const Listener& original)
   }
 }
 
-Listener::Listener(Listener&& original)
+Trigger::Trigger(Trigger&& original)
 {
   impl_ = original.impl_;
   original.impl_ = nullptr;
 }
 
-Listener::~Listener(void)
+Trigger::~Trigger(void)
 {
   if(impl_)
   {
@@ -67,8 +70,10 @@ Listener::~Listener(void)
   }
 }
 
-Listener& Listener::operator=(Listener original)
+Trigger& Trigger::operator=(Trigger original)
 {
   std::swap(impl_, original.impl_);
   return *this;
 }
+
+};

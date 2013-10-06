@@ -9,16 +9,20 @@
 #include "texture_impl.h"
 #include "font.h"
 
+namespace display
+{
+
 class WindowImpl
 {
 public:
-  WindowImpl(void);
+  WindowImpl(std::string name);
   ~WindowImpl(void);
   Texture Load(std::string filename);
   Texture Text(std::string text, Font font);
   void Clear(void);
   void Show(void);
 
+  int reference_count_;
   SDL_Window* window_;
   SDL_Renderer* renderer_;
 
@@ -26,4 +30,5 @@ public:
   std::map<TextureImpl*, std::string> textures_;
 };
 
+};
 #endif

@@ -3,6 +3,9 @@
 
 #include "bounding_box.h"
 
+namespace display
+{
+
 /**The Texture object is an encapsulation of an SDL_Texture. The SDL_Texture 
 is only stored once, and the number of Texture objects referencing it are
 remembered.  Construction, copy, move, assignment and destruction operators are
@@ -20,8 +23,11 @@ public:
 
   void Render(void);
   void Render(BoundingBox& source, BoundingBox& destination);
+  void Render(int x, int y);
+ 
 private:
   class TextureImpl* impl_;
 };
 
+};
 #endif

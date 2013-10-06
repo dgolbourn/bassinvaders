@@ -3,11 +3,16 @@
 
 #include "SDL_rect.h"
 
+namespace display
+{
+
 class BoundingBoxImpl
 {
 public:
   SDL_Rect rect_;
   int reference_count_;
+};
+
 };
 
 #endif

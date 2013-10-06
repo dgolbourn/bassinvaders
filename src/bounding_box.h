@@ -1,6 +1,9 @@
 #ifndef BOUNDING_BOX_H_
 #define BOUNDING_BOX_H_
 
+namespace display
+{
+
 class BoundingBox
 {
   friend class TextureImpl;
@@ -30,4 +33,5 @@ private:
   class BoundingBoxImpl* impl_;
 };
 
+};
 #endif

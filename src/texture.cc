@@ -4,6 +4,10 @@
 #include "window_impl.h"
 #include "bounding_box.h"
 #include "bounding_box_impl.h"
+#include "sdl_exception.h"
+
+namespace display
+{
 
 TextureImpl::TextureImpl(SDL_Texture* texture, WindowImpl* window)
 {
@@ -39,6 +43,23 @@ void TextureImpl::Free(void)
       SDL_DestroyTexture(texture_);
       delete this;
     }
+  }
+}
+
+void TextureImpl::Render(int x, int y)
+{
+  if(window_)
+  {
+    SDL_Rect rect;
+    rect.x = x;
+    rect.y = y;
+
+    if(SDL_QueryTexture(texture_, nullptr, nullptr, &rect.w, &rect.h))
+    {
+      throw sdl::Exception();
+    }
+
+    SDL_RenderCopy(window_->renderer_, texture_, nullptr, &rect);
   }
 }
 
@@ -106,6 +127,14 @@ Texture& Texture::operator=(Texture original)
   return *this;
 }
 
+void Texture::Render(int x, int y)
+{
+  if(impl_)
+  {
+    impl_->Render(x, y);
+  }
+}
+
 void Texture::Render(void)
 {
   if(impl_)
@@ -121,3 +150,5 @@ void Texture::Render(BoundingBox& source, BoundingBox& destination)
     impl_->Render(source, destination);
   }
 }
+
+};

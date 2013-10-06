@@ -3,6 +3,9 @@
 #include "ttf_exception.h"
 #include "ttf_manager.h"
 
+namespace display
+{
+
 FontImpl::FontImpl(std::string filename, int point, int r, int g, int b)
 {
   ttf::init();
@@ -73,3 +76,5 @@ Font& Font::operator=(Font original)
   std::swap(impl_, original.impl_);
   return *this;
 }
+
+};

@@ -5,6 +5,9 @@
 #include "SDL_TTF.h"
 #include "SDL_Pixels.h"
 
+namespace display
+{
+
 class FontImpl
 {
 public:
@@ -17,4 +20,5 @@ public:
   int reference_count_;
 };
 
+};
 #endif

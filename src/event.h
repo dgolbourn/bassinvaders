@@ -3,6 +3,9 @@
 
 #include "signal.h"
 
+namespace event
+{
+
 extern Signal quit;
 
 extern Signal up;
@@ -13,5 +16,7 @@ extern Signal right;
 extern Signal trigger;
 
 void events(void);
+
+};
 
 #endif

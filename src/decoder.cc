@@ -10,6 +10,7 @@ extern "C"
 
 #include <string>
 #include <memory>
+#include <queue>
 
 #include "ffmpeg_manager.h"
 #include "ffmpeg_exception.h"
@@ -60,34 +61,34 @@ public:
   }
 };
 
-class FormatContextImpl
+class FormatImpl
 {
 public:
-  AVFormatContext* format_context_;
+  AVFormatContext* format_;
   AVStream* audio_stream_;
 
-  FormatContextImpl(std::string filename)
+  FormatImpl(std::string filename)
   {
-    format_context_ = avformat_alloc_context();
-    if(!format_context_)
+    format_ = avformat_alloc_context();
+    if(!format_)
     {
       throw ffmpeg::Exception();
     }
-    if(avformat_open_input(&format_context_, filename.c_str(), nullptr, nullptr))
+    if(avformat_open_input(&format_, filename.c_str(), nullptr, nullptr))
     {
       throw ffmpeg::Exception();
     }
-    if(avformat_find_stream_info(format_context_, nullptr) < 0)
+    if(avformat_find_stream_info(format_, nullptr) < 0)
     {
       throw ffmpeg::Exception();
     }
 
     audio_stream_ = nullptr;
-    for(unsigned int i = 0; i < format_context_->nb_streams; ++i)
+    for(unsigned int i = 0; i < format_->nb_streams; ++i)
     {
-      if (format_context_->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
+      if (format_->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
       {
-        audio_stream_ = format_context_->streams[i];
+        audio_stream_ = format_->streams[i];
         break;
       }
     }
@@ -97,103 +98,103 @@ public:
     }
   }
 
-  ~FormatContextImpl(void)
+  ~FormatImpl(void)
   {
-    if(format_context_)
+    if(format_)
     {
-      avformat_close_input(&format_context_);
-      avformat_free_context(format_context_);
+      avformat_close_input(&format_);
+      avformat_free_context(format_);
     }
   }
 };
 
-class FormatContext
+class Format
 {
 public:
-  std::shared_ptr<FormatContextImpl> impl_;
+  std::shared_ptr<FormatImpl> impl_;
 
-  FormatContext(void)
+  Format(void)
   {    
   }
 
-  FormatContext(std::string filename)
+  Format(std::string filename)
   {
-    impl_ = std::shared_ptr<FormatContextImpl>(new FormatContextImpl(filename));
+    impl_ = std::shared_ptr<FormatImpl>(new FormatImpl(filename));
   }
 
-  FormatContext(const FormatContext& other)
+  Format(const Format& other)
   {
     impl_ = other.impl_;
   }
 
-  FormatContext(FormatContext&& other)
+  Format(Format&& other)
   {
     impl_ = other.impl_;
     other.impl_.reset();
   }
 
-  FormatContext& operator=(FormatContext other)
+  Format& operator=(Format other)
   {
     std::swap(impl_, other.impl_);
     return *this;
   }
 
-  ~FormatContext(void)
+  ~Format(void)
   {
   }
 };
 
-class CodecContext
+class Codec
 {
 public:
-  std::shared_ptr<AVCodecContext> codec_context_;
+  std::shared_ptr<AVCodecContext> codec_;
 
   class Deleter
   {
   public:
-    void operator()(AVCodecContext* codec_context)
+    void operator()(AVCodecContext* codec)
     {
-      avcodec_close(codec_context);
+      avcodec_close(codec);
     }
   };
 
-  CodecContext(void)
+  Codec(void)
   {    
   }
 
-  CodecContext(FormatContext& format_context)
+  Codec(Format& format)
   {
-    AVCodecContext* codec_context = format_context.impl_->audio_stream_->codec;
-    codec_context->codec = avcodec_find_decoder(codec_context->codec_id);
-    if(!codec_context->codec)
+    AVCodecContext* codec = format.impl_->audio_stream_->codec;
+    codec->codec = avcodec_find_decoder(codec->codec_id);
+    if(!codec->codec)
     {
       throw ffmpeg::Exception();
     }
-    if(avcodec_open2(codec_context, codec_context->codec, nullptr))
+    if(avcodec_open2(codec, codec->codec, nullptr))
     {
       throw ffmpeg::Exception();
     }
-    codec_context_ = std::shared_ptr<AVCodecContext>(codec_context, Deleter());
+    codec_ = std::shared_ptr<AVCodecContext>(codec, Deleter());
   }
 
-  CodecContext(const CodecContext& other)
+  Codec(const Codec& other)
   {
-    codec_context_ = other.codec_context_;
+    codec_ = other.codec_;
   }
 
-  CodecContext(CodecContext&& other)
+  Codec(Codec&& other)
   {
-    codec_context_ = other.codec_context_;
-    other.codec_context_.reset();
+    codec_ = other.codec_;
+    other.codec_.reset();
   }
 
-  CodecContext& operator=(CodecContext other)
+  Codec& operator=(Codec other)
   {
-    std::swap(codec_context_, other.codec_context_);
+    std::swap(codec_, other.codec_);
     return *this;
   }
 
-  ~CodecContext(void)
+  ~Codec(void)
   {
   }
 };
@@ -271,14 +272,6 @@ public:
   }
 };
 
-void handle_output(uint8_t** output, int out_samples)
-{
-  for(int i = 0; i < out_samples; i+=2)
-  {
-    std::cout << *((int16_t*)&output[0][i]) << " ";
-  }
-}
-
 class ResamplerImpl
 {
 public:
@@ -289,7 +282,7 @@ public:
   AVSampleFormat output_format_;
   uint64_t output_channel_layout_;
 
-  ResamplerImpl(CodecContext& codec_context)
+  ResamplerImpl(Codec& codec)
   {
     swr_ = swr_alloc();
     if(!swr_)
@@ -301,11 +294,11 @@ public:
     output_format_ = AV_SAMPLE_FMT_S16;
     output_channel_layout_ = AV_CH_LAYOUT_STEREO;
 
-    av_opt_set_int(swr_, "in_channel_layout", codec_context.codec_context_->channel_layout, 0);
+    av_opt_set_int(swr_, "in_channel_layout", codec.codec_->channel_layout, 0);
     av_opt_set_int(swr_, "out_channel_layout", output_channel_layout_, 0);
-    av_opt_set_int(swr_, "in_sample_rate", codec_context.codec_context_->sample_rate, 0);
+    av_opt_set_int(swr_, "in_sample_rate", codec.codec_->sample_rate, 0);
     av_opt_set_int(swr_, "out_sample_rate", output_sample_rate_, 0);
-    av_opt_set_sample_fmt(swr_, "in_sample_fmt", codec_context.codec_context_->sample_fmt, 0);
+    av_opt_set_sample_fmt(swr_, "in_sample_fmt", codec.codec_->sample_fmt, 0);
     av_opt_set_sample_fmt(swr_, "out_sample_fmt", output_format_, 0);
     
     if(swr_init(swr_))
@@ -313,7 +306,7 @@ public:
       throw ffmpeg::Exception();
     }
 
-    input_sample_rate_ = codec_context.codec_context_->sample_rate;
+    input_sample_rate_ = codec.codec_->sample_rate;
     output_channels_ =  av_get_channel_layout_nb_channels(output_channel_layout_);
   }
 
@@ -354,9 +347,9 @@ public:
   {
   }
 
-  Resampler(CodecContext& codec_context)
+  Resampler(Codec& codec)
   {
-    impl_ = std::shared_ptr<ResamplerImpl>(new ResamplerImpl(codec_context));
+    impl_ = std::shared_ptr<ResamplerImpl>(new ResamplerImpl(codec));
   }
   
   Resampler(const Resampler& other)
@@ -437,28 +430,43 @@ public:
 class DecoderImpl
 {
 public:
-  FormatContext format_context_;
-  CodecContext codec_context_;
+  Format format_;
+  Codec codec_;
   Resampler resampler_;
   Frame frame_;
+
   bool packets_finished_;
+
+  std::queue<Samples> queue_;
+  uint8_t* data_;
+  int total_buffer_size_;
+  int remaining_current_buffer_size_;
+  int target_buffer_size_;
 
   DecoderImpl(std::string filename)
   {
     ffmpeg::init();
-    format_context_ = FormatContext(filename);
-    codec_context_ = CodecContext(format_context_);
-    resampler_ = Resampler(codec_context_);
+    format_ = Format(filename);
+    codec_ = Codec(format_);
+    resampler_ = Resampler(codec_);
+
     packets_finished_ = false;
+
+    total_buffer_size_ = 0;
+    target_buffer_size_ = 1 << 20;
+
+    replenish_buffer();
+    remaining_current_buffer_size_ = queue_.front().impl_->size_;
+    data_ = queue_.front().impl_->data_[0];
   }
 
   ~DecoderImpl(void)
   {
-    if(codec_context_.codec_context_->codec->capabilities & CODEC_CAP_DELAY)
+    if(codec_.codec_->codec->capabilities & CODEC_CAP_DELAY)
     {
       Packet packet;
       int frameFinished = 0;
-      while (avcodec_decode_audio4(codec_context_.codec_context_.get(), frame_.frame_.get(), &frameFinished, packet.packet_.get()) >= 0 && frameFinished)
+      while(avcodec_decode_audio4(codec_.codec_.get(), frame_.frame_.get(), &frameFinished, packet.packet_.get()) >= 0 && frameFinished)
       {
         av_frame_unref(frame_.frame_.get());
       }
@@ -467,20 +475,21 @@ public:
 
   void decode(void)
   {
-    while(!packets_finished_) 
+    if(!packets_finished_) 
     {
       Packet packet;
-      if(av_read_frame(format_context_.impl_->format_context_, packet.packet_.get()) == 0)
+      if(av_read_frame(format_.impl_->format_, packet.packet_.get()) == 0)
       {
-        if(packet.packet_->stream_index == format_context_.impl_->audio_stream_->index)
+        if(packet.packet_->stream_index == format_.impl_->audio_stream_->index)
         {
           int frame_finished = 0;
-          avcodec_decode_audio4(codec_context_.codec_context_.get(), frame_.frame_.get(), &frame_finished, packet.packet_.get());
+          avcodec_decode_audio4(codec_.codec_.get(), frame_.frame_.get(), &frame_finished, packet.packet_.get());
 
           if(frame_finished)
           {
             Samples samples = resampler_.resample((uint8_t const**)frame_.frame_->data, frame_.frame_->nb_samples);
-            handle_output(samples.impl_->data_, samples.impl_->size_);
+            total_buffer_size_ += samples.impl_->size_;
+            queue_.push(samples);
             av_frame_unref(frame_.frame_.get());
           }
         }
@@ -488,6 +497,60 @@ public:
       else
       {
         packets_finished_ = true;
+      }
+    }
+  }
+
+  void replenish_buffer(void)
+  {
+    while((total_buffer_size_ < target_buffer_size_) && !packets_finished_)
+    {
+      decode();
+    }
+  }
+
+  bool empty(void)
+  {
+    return queue_.empty();
+  }
+
+  void read(uint8_t* buffer, int size)
+  {
+    replenish_buffer();
+
+    while(size)
+    {
+      if(!queue_.empty())
+      {
+        if(size < remaining_current_buffer_size_)
+        {
+          memcpy(buffer, data_, size);
+          data_ += size;
+          remaining_current_buffer_size_ -= size;
+          total_buffer_size_ -= size;
+        }
+        else
+        {
+          memcpy(buffer, data_, remaining_current_buffer_size_);
+          buffer += remaining_current_buffer_size_;
+          total_buffer_size_ -= remaining_current_buffer_size_;
+          size -= remaining_current_buffer_size_;
+          queue_.pop();
+          if(!queue_.empty())
+          {
+            data_ = queue_.front().impl_->data_[0];
+            remaining_current_buffer_size_ = queue_.front().impl_->size_;
+          }
+          else
+          {
+            replenish_buffer();
+          }
+        }
+      }
+      else
+      {
+        memset(buffer, 0, size);
+        size = 0;
       }
     }
   }
@@ -527,14 +590,38 @@ public:
   {
   }
 
-  void decode(void)
+  void read(uint8_t* buffer, int size)
   {
-    impl_->decode();
+    impl_->read(buffer, size);
+  }
+
+  bool empty(void)
+  {
+    return impl_->empty();
   }
 };
 
+void handle_output(uint8_t* output, int out_samples)
+{
+  for(int i = 0; i < out_samples; i+=2)
+  {
+    std::cout << *((int16_t*)&output[i]) << " ";
+  }
+}
+
 int main()
 {
-  Decoder decoder("16Hz-20kHz-Exp-1f-10sec.mp3");
-  decoder.decode();
+  int i = 0;
+  while(i < 1)
+  {
+    Decoder decoder("16Hz-20kHz-Exp-1f-10sec.mp3");
+    uint8_t buffer[4096]; 
+    while(!decoder.empty())
+    {
+      decoder.read(buffer, 4096);
+      //handle_output(buffer, 4096);
+    }
+    i++;
+    //std::cout << i << std::endl;
+  }
 }

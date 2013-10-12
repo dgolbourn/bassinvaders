@@ -13,3 +13,6 @@
 [submodule "lib/SDL2_image"]
 	path = lib/SDL2_image
 	url = https://github.com/davidsiaw/SDL2_image.git
+[submodule ".\\lib\\ffmpeg"]
+	path = .\\lib\\ffmpeg
+	url = https://github.com/FFmpeg/FFmpeg.git

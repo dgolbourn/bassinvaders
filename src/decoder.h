@@ -18,8 +18,8 @@ public:
   Decoder& operator=(Decoder other);
   ~Decoder(void);
 
-  void read(uint8_t* buffer, int size);
-  bool empty(void);
+  void Read(uint8_t* buffer, int size);
+  bool Empty(void);
 private:
   std::shared_ptr<class DecoderImpl> impl_;
 };

@@ -58,7 +58,7 @@ AVCodecContext* Codec::operator->(void)
   return codec_.operator->();
 }
 
-AVCodecContext* Codec::get(void)
+AVCodecContext* Codec::Get(void)
 {
   return codec_.get();
 }

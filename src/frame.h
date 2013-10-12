@@ -20,7 +20,7 @@ public:
   ~Frame(void);
 
   AVFrame* operator->(void);
-  AVFrame* get(void);
+  AVFrame* Get(void);
 private:
   std::shared_ptr<AVFrame> frame_;
 };

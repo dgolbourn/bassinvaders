@@ -51,7 +51,7 @@ AVPacket* Packet::operator->(void)
   return packet_.operator->();
 }
 
-AVPacket* Packet::get(void)
+AVPacket* Packet::Get(void)
 {
   return packet_.get();
 }

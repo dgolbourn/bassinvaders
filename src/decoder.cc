@@ -1,6 +1,8 @@
 #include "decoder.h"
 #include "decoder_impl.h"
 #include "ffmpeg_manager.h"
+#include "buffer.h"
+#include "packet.h"
 
 #include <queue>
 
@@ -9,19 +11,14 @@ namespace audio
 
 DecoderImpl::DecoderImpl(std::string filename)
 {
-  ffmpeg::init();
+  ffmpeg::Init();
   format_ = ffmpeg::Format(filename);
   codec_ = ffmpeg::Codec(format_);
   resampler_ = ffmpeg::Resampler(codec_);
+  buffer_ = ffmpeg::Buffer(1 << 20);
 
   packets_finished_ = false;
-
-  total_buffer_size_ = 0;
-  target_buffer_size_ = 1 << 20;
-
-  replenish_buffer();
-  remaining_current_buffer_size_ = queue_.front().size();
-  data_ = queue_.front().data()[0];
+  ReplenishBuffer();
 }
 
 DecoderImpl::~DecoderImpl(void)
@@ -30,31 +27,30 @@ DecoderImpl::~DecoderImpl(void)
   {
     ffmpeg::Packet packet;
     int frameFinished = 0;
-    while(avcodec_decode_audio4(codec_.get(), frame_.get(), &frameFinished, packet.get()) >= 0 && frameFinished)
+    while(avcodec_decode_audio4(codec_.Get(), frame_.Get(), &frameFinished, packet.Get()) >= 0 && frameFinished)
     {
-      av_frame_unref(frame_.get());
+      av_frame_unref(frame_.Get());
     }
   }
 }
 
-void DecoderImpl::decode(void)
+void DecoderImpl::Decode(void)
 {
   if(!packets_finished_) 
   {
     ffmpeg::Packet packet;
-    if(av_read_frame(format_.format(), packet.get()) == 0)
+    if(av_read_frame(format_.format(), packet.Get()) == 0)
     {
       if(packet->stream_index == format_.audio_stream()->index)
       {
         int frame_finished = 0;
-        avcodec_decode_audio4(codec_.get(), frame_.get(), &frame_finished, packet.get());
+        avcodec_decode_audio4(codec_.Get(), frame_.Get(), &frame_finished, packet.Get());
 
         if(frame_finished)
         {
-          ffmpeg::Samples samples = resampler_.resample((uint8_t const**)frame_->data, frame_->nb_samples);
-          total_buffer_size_ += samples.size();
-          queue_.push(samples);
-          av_frame_unref(frame_.get());
+          ffmpeg::Samples samples = resampler_.Resample((uint8_t const**)frame_->data, frame_->nb_samples);
+          buffer_.Add(samples);
+          av_frame_unref(frame_.Get());
         }
       }
     }
@@ -65,53 +61,29 @@ void DecoderImpl::decode(void)
   }
 }
 
-void DecoderImpl::replenish_buffer(void)
+void DecoderImpl::ReplenishBuffer(void)
 {
-  while((total_buffer_size_ < target_buffer_size_) && !packets_finished_)
+  while(!buffer_.Full() && !packets_finished_)
   {
-    decode();
+    Decode();
   }
 }
 
-bool DecoderImpl::empty(void)
+bool DecoderImpl::Empty(void)
 {
-  return queue_.empty();
+  return buffer_.Empty() && packets_finished_;
 }
 
-void DecoderImpl::read(uint8_t* buffer, int size)
+void DecoderImpl::Read(uint8_t* buffer, int size)
 {
-  replenish_buffer();
-
   while(size)
   {
-    if(!queue_.empty())
-    {
-      if(size < remaining_current_buffer_size_)
-      {
-        memcpy(buffer, data_, size);
-        data_ += size;
-        remaining_current_buffer_size_ -= size;
-        total_buffer_size_ -= size;
-      }
-      else
-      {
-        memcpy(buffer, data_, remaining_current_buffer_size_);
-        buffer += remaining_current_buffer_size_;
-        total_buffer_size_ -= remaining_current_buffer_size_;
-        size -= remaining_current_buffer_size_;
-        queue_.pop();
-        if(!queue_.empty())
-        {
-          data_ = queue_.front().data()[0];
-          remaining_current_buffer_size_ = queue_.front().size();
-        }
-        else
-        {
-          replenish_buffer();
-        }
-      }
-    }
-    else
+    ReplenishBuffer();
+    int read_size = buffer_.Read(buffer, size);
+    buffer += read_size;
+    size -= read_size;
+
+    if(Empty())
     {
       memset(buffer, 0, size);
       size = 0;
@@ -149,14 +121,14 @@ Decoder::~Decoder(void)
 {
 }
 
-void Decoder::read(uint8_t* buffer, int size)
+void Decoder::Read(uint8_t* buffer, int size)
 {
-  impl_->read(buffer, size);
+  impl_->Read(buffer, size);
 }
 
-bool Decoder::empty(void)
+bool Decoder::Empty(void)
 {
-  return impl_->empty();
+  return impl_->Empty();
 }
 
 }

@@ -9,7 +9,7 @@ namespace ffmpeg
 { 
 static bool registered;
 
-void init(void)
+void Init(void)
 {
   if(!registered)
   {

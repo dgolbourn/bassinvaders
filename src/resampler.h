@@ -19,7 +19,7 @@ public:
   Resampler& operator=(Resampler other);
   ~Resampler(void);
 
-  Samples resample(uint8_t const** input, int in_samples);
+  Samples Resample(uint8_t const** input, int in_samples);
 private:
   std::shared_ptr<class ResamplerImpl> impl_;
 };

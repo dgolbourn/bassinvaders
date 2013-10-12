@@ -54,7 +54,7 @@ AVFrame* Frame::operator->(void)
   return frame_.operator->();
 }
 
-AVFrame* Frame::get(void)
+AVFrame* Frame::Get(void)
 {
   return frame_.get();
 }

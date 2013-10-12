@@ -45,7 +45,7 @@ ResamplerImpl::~ResamplerImpl(void)
   }
 }
 
-Samples ResamplerImpl::resample(uint8_t const** input, int in_samples)
+Samples ResamplerImpl::Resample(uint8_t const** input, int in_samples)
 {
   uint8_t** output;
   int64_t delay = swr_get_delay(swr_, input_sample_rate_) + in_samples;
@@ -94,9 +94,9 @@ Resampler::~Resampler(void)
 {
 }
 
-Samples Resampler::resample(uint8_t const** input, int in_samples)
+Samples Resampler::Resample(uint8_t const** input, int in_samples)
 {
-  return impl_->resample(input, in_samples);
+  return impl_->Resample(input, in_samples);
 }
 
 }

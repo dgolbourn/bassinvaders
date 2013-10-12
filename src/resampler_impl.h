@@ -24,7 +24,7 @@ public:
 
   ResamplerImpl(Codec& codec);
   ~ResamplerImpl(void);
-  Samples resample(uint8_t const** input, int in_samples);
+  Samples Resample(uint8_t const** input, int in_samples);
 };
 
 }

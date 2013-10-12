@@ -20,7 +20,7 @@ public:
   ~Packet(void);
 
   AVPacket* operator->(void);
-  AVPacket* get(void);
+  AVPacket* Get(void);
 private:
   std::shared_ptr<AVPacket> packet_;
 };

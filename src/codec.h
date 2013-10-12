@@ -22,7 +22,7 @@ public:
   ~Codec(void);
 
   AVCodecContext* operator->(void);
-  AVCodecContext* get(void);
+  AVCodecContext* Get(void);
 private:
   std::shared_ptr<AVCodecContext> codec_;
 };

@@ -3,7 +3,7 @@
 
 namespace ffmpeg
 {
-void init(void);
+void Init(void);
 }
 
 #endif

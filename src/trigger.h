@@ -19,5 +19,5 @@ private:
  class TriggerImpl* impl_;
 };
 
-};
+}
 #endif

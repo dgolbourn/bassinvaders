@@ -13,6 +13,6 @@ public:
   int reference_count_;
 };
 
-};
+}
 
 #endif

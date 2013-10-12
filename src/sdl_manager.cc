@@ -6,7 +6,7 @@ namespace sdl
 bool initialised;
 int reference_count[8 * sizeof(Uint32)];
 
-void init(Uint32 flags)
+void Init(Uint32 flags)
 {
 	if(false == initialised)
 	{
@@ -38,7 +38,7 @@ void init(Uint32 flags)
 	}
 }
 
-void quit(Uint32 flags)
+void Quit(Uint32 flags)
 {
 	int index = 0;
 	Uint32 quit_flags = 0x00u;
@@ -70,4 +70,4 @@ void quit(Uint32 flags)
 	}
 }
 
-};
+}

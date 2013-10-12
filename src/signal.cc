@@ -118,4 +118,4 @@ Signal& Signal::operator=(Signal original)
   return *this;
 }
 
-};
+}

@@ -17,9 +17,9 @@ namespace display
 
 WindowImpl::WindowImpl(std::string name)
 {
-  sdl::init(SDL_INIT_VIDEO);
-  img::init(IMG_INIT_PNG);
-  ttf::init();
+  sdl::Init(SDL_INIT_VIDEO);
+  img::Init(IMG_INIT_PNG);
+  ttf::Init();
 
 	if(!SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1"))
 	{
@@ -64,9 +64,9 @@ WindowImpl::~WindowImpl(void)
 	SDL_DestroyRenderer(renderer_);
 	SDL_DestroyWindow(window_);
 	
-  ttf::quit();
-  img::quit(IMG_INIT_PNG);
-	sdl::quit(SDL_INIT_VIDEO);
+  ttf::Quit();
+  img::Quit(IMG_INIT_PNG);
+	sdl::Quit(SDL_INIT_VIDEO);
 }
 
 Texture WindowImpl::Load(std::string filename)
@@ -210,4 +210,4 @@ Texture Window::Text(std::string text, Font font)
   return impl_->Text(text, font);
 }
 
-};
+}

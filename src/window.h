@@ -41,5 +41,5 @@ private:
   class WindowImpl* impl_;
 };
 
-};
+}
 #endif

@@ -13,6 +13,6 @@ class Exception : public std::runtime_error
 public:
   Exception() : std::runtime_error(TTF_GetError()) { }
 };
-};
+}
 
 #endif

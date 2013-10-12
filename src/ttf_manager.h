@@ -9,11 +9,11 @@ namespace ttf
 count.
 @throw std::exception Text of exception contains information retrieved from 
 TTF_GetError().*/
-void init(void);
+void Init(void);
 
 /** Decrement the reference count for the TTF api and then quit if the 
 reference count is 0.*/
-void quit(void);
-};
+void Quit(void);
+}
 
 #endif

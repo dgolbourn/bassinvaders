@@ -5,7 +5,7 @@ namespace ttf
 {
 int reference_count;
 
-void init(void)
+void Init(void)
 {
   if(!TTF_WasInit() && TTF_Init()==-1) 
   {
@@ -15,7 +15,7 @@ void init(void)
 	reference_count++;
 }
 
-void quit(void)
+void Quit(void)
 {
   if(reference_count > 0)
   {
@@ -28,4 +28,4 @@ void quit(void)
   }
 }
 
-};
+}

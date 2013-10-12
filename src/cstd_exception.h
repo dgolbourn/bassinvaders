@@ -12,6 +12,6 @@ class Exception : public std::system_error
 public:
 	Exception() : std::system_error(errno, std::system_category()){}
 };
-};
+}
 
 #endif

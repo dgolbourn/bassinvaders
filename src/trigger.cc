@@ -76,4 +76,4 @@ Trigger& Trigger::operator=(Trigger original)
   return *this;
 }
 
-};
+}

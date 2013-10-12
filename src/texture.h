@@ -29,5 +29,5 @@ private:
   class TextureImpl* impl_;
 };
 
-};
+}
 #endif

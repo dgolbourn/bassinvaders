@@ -30,5 +30,5 @@ public:
   std::map<TextureImpl*, std::string> textures_;
 };
 
-};
+}
 #endif

@@ -34,7 +34,7 @@ bool BoundingBox::operator &&(const BoundingBox& other)
   return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_) != 0;
 }
 
-bool BoundingBox::empty(void)
+bool BoundingBox::Empty(void)
 {
   return SDL_RectEmpty(&impl_->rect_) != 0;
 }
@@ -91,4 +91,4 @@ BoundingBox& BoundingBox::operator=(BoundingBox original)
   return *this;
 }
 
-};
+}

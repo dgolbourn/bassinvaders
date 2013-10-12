@@ -25,5 +25,5 @@ public:
   WindowImpl* window_;
 };
 
-};
+}
 #endif

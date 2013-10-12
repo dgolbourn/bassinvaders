@@ -13,12 +13,12 @@ Signal right;
 
 Signal trigger;
 
-static void quit_event(void)
+static void QuitEvent(void)
 {
   quit.Emit();
 }
 
-static void keydown_event(SDL_KeyboardEvent& keyboard_event)
+static void KeydownEvent(SDL_KeyboardEvent& keyboard_event)
 {
   switch(keyboard_event.keysym.scancode)
   {
@@ -46,7 +46,7 @@ static void keydown_event(SDL_KeyboardEvent& keyboard_event)
   }
 }
 
-void events(void)
+void Events(void)
 {
   SDL_Event event;
   while(SDL_PollEvent(&event))
@@ -54,10 +54,10 @@ void events(void)
 	  switch(event.type)
 	  {
     case SDL_QUIT:
-      quit_event();
+      QuitEvent();
       break;
     case SDL_KEYDOWN:
-      keydown_event(event.key);
+      KeydownEvent(event.key);
       break;
     default:
       break;
@@ -65,4 +65,4 @@ void events(void)
   }
 }
 
-};
+}

@@ -21,5 +21,5 @@ private:
   class FontImpl* impl_;
 };
 
-};
+}
 #endif

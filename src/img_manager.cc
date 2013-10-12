@@ -6,7 +6,7 @@ namespace img
 int quit_flags;
 int reference_count[8 * sizeof(int)];
 
-void init(int flags)
+void Init(int flags)
 {
 	if((flags & IMG_Init(flags)) != flags)
 	{
@@ -26,7 +26,7 @@ void init(int flags)
 	}
 }
 
-void quit(int flags)
+void Quit(int flags)
 {
 	int index = 0;
 	while(flags)
@@ -53,4 +53,4 @@ void quit(int flags)
 	}
 }
 
-};
+}

@@ -28,10 +28,10 @@ public:
   bool operator &&(const BoundingBox& other);
 
   /**Return true if the bounding box has no extent.*/
-  bool empty(void);
+  bool Empty(void);
 private:
   class BoundingBoxImpl* impl_;
 };
 
-};
+}
 #endif

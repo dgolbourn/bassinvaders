@@ -22,6 +22,6 @@ private:
   class SignalImpl* impl_;
 };
 
-};
+}
 
 #endif

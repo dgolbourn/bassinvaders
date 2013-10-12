@@ -15,8 +15,8 @@ extern Signal right;
 
 extern Signal trigger;
 
-void events(void);
+void Events(void);
 
-};
+}
 
 #endif

@@ -151,4 +151,4 @@ void Texture::Render(BoundingBox& source, BoundingBox& destination)
   }
 }
 
-};
+}

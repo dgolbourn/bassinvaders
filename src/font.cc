@@ -8,7 +8,7 @@ namespace display
 
 FontImpl::FontImpl(std::string filename, int point, int r, int g, int b)
 {
-  ttf::init();
+  ttf::Init();
   font_ = TTF_OpenFont(filename.c_str(), point);
 	if(!font_)
 	{
@@ -27,7 +27,7 @@ FontImpl::~FontImpl(void)
 {
   delete colour_;
   TTF_CloseFont(font_);
-  ttf::quit();
+  ttf::Quit();
 }
 
 Font::Font(std::string filename, int point, int r, int g, int b)
@@ -77,4 +77,4 @@ Font& Font::operator=(Font original)
   return *this;
 }
 
-};
+}

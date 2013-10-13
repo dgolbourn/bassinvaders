@@ -2,6 +2,7 @@
 #define WINDOW_H_
 
 #include <string>
+#include <memory>
 #include "texture.h"
 #include "font.h"
 
@@ -34,11 +35,13 @@ SDL_GetError() or IMG_GetError() as required.*/
 
   Texture Text(std::string text, Font font);
 
+  void Free(std::string filename);
+
   void Clear(void);
 
   void Show(void);
 private:
-  class WindowImpl* impl_;
+  std::shared_ptr<class WindowImpl> impl_;
 };
 
 }

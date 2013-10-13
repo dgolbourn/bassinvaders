@@ -1,5 +1,6 @@
 #include "packet.h"
 #include "ffmpeg_exception.h"
+#include "cstd_exception.h"
 
 namespace ffmpeg
 {
@@ -19,7 +20,7 @@ Packet::Packet(void)
   AVPacket* packet = (AVPacket*)malloc(sizeof(AVPacket));
   if(!packet)
   {
-    throw ffmpeg::Exception();
+    throw cstd::Exception();
   }
   packet_ = std::shared_ptr<AVPacket>(packet, Deleter());
   av_init_packet(packet);

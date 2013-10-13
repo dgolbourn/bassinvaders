@@ -10,11 +10,10 @@ FontImpl::FontImpl(std::string filename, int point, int r, int g, int b)
 {
   ttf::Init();
   font_ = TTF_OpenFont(filename.c_str(), point);
-	if(!font_)
-	{
-		throw ttf::Exception();
-	}
-  reference_count_ = 1;
+  if(!font_)
+  {
+    throw ttf::Exception();
+  }
 
   colour_ = new SDL_Color;
   colour_->r = r;
@@ -32,43 +31,26 @@ FontImpl::~FontImpl(void)
 
 Font::Font(std::string filename, int point, int r, int g, int b)
 {
-  impl_ = new FontImpl(filename, point, r, g, b);
+  impl_ =   std::shared_ptr<class FontImpl>(new FontImpl(filename, point, r, g, b));
 }
 
 Font::Font(void)
 {
-  impl_ = nullptr;
 }
 
 Font::Font(const Font& original)
 {
   impl_ = original.impl_;
-  if(impl_)
-  {
-    impl_->reference_count_++;
-  }
 }
 
 Font::Font(Font&& original)
 {
   impl_ = original.impl_;
-  original.impl_ = nullptr;
+  original.impl_.reset();
 }
 
 Font::~Font(void)
 {
-  if(impl_)
-  {
-    if(impl_->reference_count_ > 0)
-    {
-      impl_->reference_count_--;
-    }
-    if(impl_->reference_count_ == 0)
-    {
-      delete impl_;
-      impl_ = nullptr;
-    }
-  }
 }
 
 Font& Font::operator=(Font original)

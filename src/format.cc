@@ -19,15 +19,15 @@ FormatImpl::FormatImpl(std::string filename)
   format_ = avformat_alloc_context();
   if(!format_)
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
   if(avformat_open_input(&format_, filename.c_str(), nullptr, nullptr))
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
   if(avformat_find_stream_info(format_, nullptr) < 0)
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
 
   audio_stream_ = nullptr;
@@ -41,7 +41,7 @@ FormatImpl::FormatImpl(std::string filename)
   }
   if(!audio_stream_)
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
 }
 

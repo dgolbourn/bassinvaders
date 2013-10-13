@@ -8,6 +8,7 @@
 #include "signal.h"
 #include "trigger.h"
 #include "event.h"
+#include "decoder.h"
 
 void TestCallback(event::Signal signal)
 {
@@ -42,6 +43,14 @@ void RightCallback(event::Signal signal)
   printf("right!\n");
 }
 
+void HandleOutput(uint8_t* output, int out_samples)
+{
+  for(int i = 0; i < out_samples; i+=2)
+  {
+    std::cout << *((int16_t*)&output[i]) << " ";
+  }
+}
+
 int main(int argc, char *argv[]) 
 {
   int ret = 0;
@@ -66,12 +75,12 @@ int main(int argc, char *argv[])
   display::Texture S3 = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
 
   {
-    display::Font f("C:\\Users\\golbo_000\\Documents\\Visual Studio 2012\\Projects\\ReBassInvaders\\Debug\\lazy.ttf", 32, 255, 255, 255);
+    display::Font f("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/lazy.ttf", 32, 255, 255, 255);
   }
 
   display::Font g("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/fonts/Batang.ttf", 32, 255, 255, 255);
 
-  display::Texture S4 = w.Text("the quick brown fox...", display::Font("C:\\Users\\golbo_000\\Documents\\Visual Studio 2012\\Projects\\ReBassInvaders\\Debug\\lazy.ttf", 32, 0, 0, 0));
+  display::Texture S4 = w.Text("the quick brown fox...", display::Font("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/lazy.ttf", 32, 0, 0, 0));
   w.Clear();
   S3.Render();
   S2.Render(display::BoundingBox(), display::BoundingBox(20,20,20,20));
@@ -97,7 +106,21 @@ int main(int argc, char *argv[])
   {
     event::Events();
   }
- 
+
+  int i = 0;
+  while(i < 10)
+  {
+    audio::Decoder decoder("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/16Hz-20kHz-Exp-1f-10sec.mp3");
+    uint8_t buffer[4096]; 
+    while(!decoder.Empty())
+    {
+      decoder.Read(buffer, 4096);
+    //  HandleOutput(buffer, 4096);
+    }
+    i++;
+    std::cout << i << std::endl;
+  }
+
   try
   {
     cstd::Exception();

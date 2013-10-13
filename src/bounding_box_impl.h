@@ -10,7 +10,6 @@ class BoundingBoxImpl
 {
 public:
   SDL_Rect rect_;
-  int reference_count_;
 };
 
 }

@@ -16,7 +16,7 @@ SamplesImpl::SamplesImpl(int channels, int size, AVSampleFormat format)
   if(av_samples_alloc_array_and_samples(&data_, nullptr, channels, size, format, 0) < 0)
   {
     data_ = nullptr;
-    throw ffmpeg::Exception();
+    throw Exception();
   }
   size_ = size;
 }

@@ -51,8 +51,8 @@ void Events(void)
   SDL_Event event;
   while(SDL_PollEvent(&event))
   {
-	  switch(event.type)
-	  {
+    switch(event.type)
+    {
     case SDL_QUIT:
       QuitEvent();
       break;
@@ -61,7 +61,7 @@ void Events(void)
       break;
     default:
       break;
-	  }
+    }
   }
 }
 

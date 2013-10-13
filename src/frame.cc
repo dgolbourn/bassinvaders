@@ -23,7 +23,7 @@ Frame::Frame(void)
   AVFrame* frame = avcodec_alloc_frame();
   if(!frame)
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
   frame_ = std::shared_ptr<AVFrame>(frame, Deleter());
 }

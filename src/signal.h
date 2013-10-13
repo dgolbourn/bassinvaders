@@ -1,6 +1,8 @@
 #ifndef SIGNAL_H_
 #define SIGNAL_H_
 
+#include <memory>
+
 namespace event
 {
 
@@ -19,7 +21,7 @@ public:
   void Subscribe(Callback callback);
   void Unsubscribe(Callback callback);
 private:
-  class SignalImpl* impl_;
+  std::shared_ptr<class SignalImpl> impl_;
 };
 
 }

@@ -9,10 +9,10 @@ void Init(void)
 {
   if(!TTF_WasInit() && TTF_Init()==-1) 
   {
-		throw Exception();
-	}
+    throw Exception();
+  }
 
-	reference_count++;
+  reference_count++;
 }
 
 void Quit(void)

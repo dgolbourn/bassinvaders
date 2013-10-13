@@ -1,6 +1,7 @@
 #ifndef TRIGGER_H_
 #define TRIGGER_H_
 
+#include <memory>
 #include "signal.h"
 
 namespace event
@@ -16,7 +17,7 @@ public:
   Trigger(Trigger&& original);
   Trigger& operator=(Trigger original);
 private:
- class TriggerImpl* impl_;
+  std::shared_ptr<class TriggerImpl> impl_;
 };
 
 }

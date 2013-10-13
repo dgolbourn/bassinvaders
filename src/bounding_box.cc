@@ -1,6 +1,5 @@
 #include "bounding_box.h"
 #include "bounding_box_impl.h"
-#include <utility>
 #include "SDL_rect.h"
 
 namespace display
@@ -41,48 +40,30 @@ bool BoundingBox::Empty(void)
 
 BoundingBox::BoundingBox(void)
 {
-  impl_ = nullptr;
 }
 
 BoundingBox::BoundingBox(int x, int y, int w, int h)
 {
-  impl_ = new BoundingBoxImpl;
+  impl_ = std::shared_ptr<BoundingBoxImpl>(new BoundingBoxImpl);
   impl_->rect_.x = x;
   impl_->rect_.y = y;
   impl_->rect_.w = w;
   impl_->rect_.h = h;
-  impl_->reference_count_ = 1;
 }
 
 BoundingBox::BoundingBox(const BoundingBox& original)
 {
   impl_ = original.impl_;
-  if(impl_)
-  {
-    impl_->reference_count_++;
-  }
 }
 
 BoundingBox::BoundingBox(BoundingBox&& original)
 {
   impl_ = original.impl_;
-  original.impl_ = nullptr;
+  original.impl_.reset();
 }
 
 BoundingBox::~BoundingBox(void)
 {
-  if(impl_)
-  {
-    if(impl_->reference_count_ > 0)
-    {
-      impl_->reference_count_--;
-    }
-    if(impl_->reference_count_ == 0)
-    {
-      delete impl_;
-      impl_ = nullptr;
-    }
-  }
 }
 
 BoundingBox& BoundingBox::operator=(BoundingBox original)

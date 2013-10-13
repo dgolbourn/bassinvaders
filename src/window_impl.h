@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <memory>
 #include "SDL_video.h"
 #include "SDL_render.h"
 #include "texture.h"
@@ -17,17 +18,16 @@ class WindowImpl
 public:
   WindowImpl(std::string name);
   ~WindowImpl(void);
+
   Texture Load(std::string filename);
   Texture Text(std::string text, Font font);
+  void Free(std::string filename);
   void Clear(void);
   void Show(void);
 
-  int reference_count_;
   SDL_Window* window_;
   SDL_Renderer* renderer_;
-
-  std::map<std::string, TextureImpl*> files_;
-  std::map<TextureImpl*, std::string> textures_;
+  std::map<std::string, Texture> files_;
 };
 
 }

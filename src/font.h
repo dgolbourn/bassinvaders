@@ -2,6 +2,7 @@
 #define FONT_H_
 
 #include <string>
+#include <memory>
 
 namespace display
 {
@@ -18,7 +19,7 @@ public:
   Font& operator=(Font original);
 
 private:
-  class FontImpl* impl_;
+  std::shared_ptr<class FontImpl> impl_;
 };
 
 }

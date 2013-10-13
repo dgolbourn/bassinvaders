@@ -1,6 +1,7 @@
 #ifndef TEXTURE_H_
 #define TEXTURE_H_
 
+#include <memory>
 #include "bounding_box.h"
 
 namespace display
@@ -26,7 +27,7 @@ public:
   void Render(int x, int y);
  
 private:
-  class TextureImpl* impl_;
+  std::shared_ptr<class TextureImpl> impl_;
 };
 
 }

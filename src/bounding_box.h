@@ -1,6 +1,8 @@
 #ifndef BOUNDING_BOX_H_
 #define BOUNDING_BOX_H_
 
+#include <memory>
+
 namespace display
 {
 
@@ -30,7 +32,7 @@ public:
   /**Return true if the bounding box has no extent.*/
   bool Empty(void);
 private:
-  class BoundingBoxImpl* impl_;
+  std::shared_ptr<class BoundingBoxImpl> impl_;
 };
 
 }

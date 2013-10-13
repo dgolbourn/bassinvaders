@@ -16,8 +16,6 @@ public:
 
   TTF_Font* font_;
   SDL_Color* colour_;
-
-  int reference_count_;
 };
 
 }

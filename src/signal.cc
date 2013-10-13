@@ -8,7 +8,6 @@ class SignalImpl
 {
 public:
   std::set<Callback> callbacks_;
-  int reference_count_;
 
   SignalImpl(void);
   ~SignalImpl(void);
@@ -19,7 +18,6 @@ public:
 
 SignalImpl::SignalImpl(void)
 {
-  reference_count_ = 1;
 }
 
 SignalImpl::~SignalImpl(void)
@@ -54,62 +52,37 @@ void SignalImpl::Unsubscribe(Callback callback)
 
 void Signal::Emit(void)
 {
-  if(impl_)
-  {
-    impl_->Emit(*this);
-  }
+  impl_->Emit(*this);
 }
 
 void Signal::Subscribe(Callback callback)
 {
-  if(impl_)
-  {
-    impl_->Subscribe(callback);
-  }
+  impl_->Subscribe(callback);
 }
 
 void Signal::Unsubscribe(Callback callback)
 {
-  if(impl_)
-  {
-    impl_->Unsubscribe(callback);
-  }
+  impl_->Unsubscribe(callback);
 }
 
 Signal::Signal(void)
 {
-  impl_ = new SignalImpl();
+  impl_ = std::shared_ptr<SignalImpl>(new SignalImpl());
 }
 
 Signal::Signal(const Signal& original)
 {
   impl_ = original.impl_;
-  if(impl_)
-  {
-    impl_->reference_count_++;
-  }
 }
 
 Signal::Signal(Signal&& original)
 {
   impl_ = original.impl_;
-  original.impl_ = nullptr;
+  original.impl_.reset();
 }
 
 Signal::~Signal(void)
 {
-  if(impl_)
-  {
-    if(impl_->reference_count_ > 0)
-    {
-      impl_->reference_count_--;
-    }
-    if(impl_->reference_count_ == 0)
-    {
-      delete impl_;
-      impl_ = nullptr;
-    }
-  }
 }
 
 Signal& Signal::operator=(Signal original)

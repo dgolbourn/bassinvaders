@@ -14,7 +14,7 @@ ResamplerImpl::ResamplerImpl(Codec& codec)
   swr_ = swr_alloc();
   if(!swr_)
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
 
   output_sample_rate_ = 22050;
@@ -30,7 +30,7 @@ ResamplerImpl::ResamplerImpl(Codec& codec)
     
   if(swr_init(swr_))
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
 
   input_sample_rate_ = codec->sample_rate;
@@ -53,12 +53,12 @@ Samples ResamplerImpl::Resample(uint8_t const** input, int in_samples)
   int linesize;
   if(av_samples_alloc_array_and_samples(&output, &linesize, output_channels_, out_samples, output_format_, 1) < 0)
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
   int conv_samples = swr_convert(swr_, output, out_samples, input, in_samples);
   if(conv_samples < 0)
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
   int size = av_samples_get_buffer_size(&linesize, output_channels_, conv_samples, output_format_, 1);
   return Samples(output, size);

@@ -4,7 +4,7 @@
 #include "SDL_rect.h"
 #include "SDL_render.h"
 #include "bounding_box.h"
-#include "window_impl.h"
+#include "window.h"
 
 namespace display
 {
@@ -12,17 +12,15 @@ namespace display
 class TextureImpl
 {
 public:
-  TextureImpl(SDL_Texture* texture, WindowImpl* window);
+  TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer);
   ~TextureImpl(void);
 
-  void Free(void);
   void Render(void);
   void Render(BoundingBox& source, BoundingBox& destination);
   void Render(int x, int y);
   
-  int reference_count_;
   SDL_Texture* texture_;
-  WindowImpl* window_;
+  SDL_Renderer* renderer_;
 };
 
 }

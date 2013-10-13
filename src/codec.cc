@@ -23,11 +23,11 @@ Codec::Codec(Format& format)
   codec->codec = avcodec_find_decoder(codec->codec_id);
   if(!codec->codec)
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
   if(avcodec_open2(codec, codec->codec, nullptr))
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
   codec_ = std::shared_ptr<AVCodecContext>(codec, Deleter());
 }

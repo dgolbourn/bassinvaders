@@ -3,7 +3,7 @@
 
 namespace ttf
 {
-int reference_count;
+static int reference_count;
 
 void Init(void)
 {

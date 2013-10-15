@@ -3,12 +3,12 @@
 
 namespace sdl
 {
-bool initialised;
-int reference_count[8 * sizeof(Uint32)];
+static bool initialised;
+static int reference_count[8 * sizeof(Uint32)];
 
 void Init(Uint32 flags)
 {
-  if(false == initialised)
+  if(!initialised)
   {
     SDL_SetMainReady();
     if(SDL_Init(flags) < 0)

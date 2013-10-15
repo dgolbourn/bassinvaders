@@ -1,6 +1,6 @@
 #include "window.h"
-#include "window_impl.h"
 #include <memory>
+#include <map>
 #include "sdl_manager.h"
 #include "img_manager.h"
 #include "ttf_manager.h"
@@ -12,6 +12,23 @@
 
 namespace display
 {
+
+class WindowImpl
+{
+public:
+  WindowImpl(std::string name);
+  ~WindowImpl(void);
+
+  Texture Load(std::string filename);
+  Texture Text(std::string text, Font font);
+  void Free(std::string filename);
+  void Clear(void);
+  void Show(void);
+
+  SDL_Window* window_;
+  SDL_Renderer* renderer_;
+  std::map<std::string, Texture> files_;
+};
 
 WindowImpl::WindowImpl(std::string name)
 {

@@ -13,22 +13,5 @@
 namespace display
 {
 
-class WindowImpl
-{
-public:
-  WindowImpl(std::string name);
-  ~WindowImpl(void);
-
-  Texture Load(std::string filename);
-  Texture Text(std::string text, Font font);
-  void Free(std::string filename);
-  void Clear(void);
-  void Show(void);
-
-  SDL_Window* window_;
-  SDL_Renderer* renderer_;
-  std::map<std::string, Texture> files_;
-};
-
 }
 #endif

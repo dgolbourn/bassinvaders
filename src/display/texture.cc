@@ -1,7 +1,6 @@
 #include "texture.h"
 #include "texture_impl.h"
 #include "SDL_render.h"
-#include "window_impl.h"
 #include "bounding_box.h"
 #include "bounding_box_impl.h"
 #include "sdl_exception.h"

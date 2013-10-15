@@ -3,8 +3,8 @@
 
 namespace img
 {
-int quit_flags;
-int reference_count[8 * sizeof(int)];
+static int quit_flags;
+static int reference_count[8 * sizeof(int)];
 
 void Init(int flags)
 {

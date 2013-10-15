@@ -1,9 +1,19 @@
 #include "samples.h"
-#include "samples_impl.h"
 #include "ffmpeg_exception.h"
 
 namespace ffmpeg
 {
+
+class SamplesImpl
+{
+public:
+  uint8_t** data_;
+  int size_;
+
+  SamplesImpl(uint8_t** data, int size);
+  SamplesImpl(int channels, int size, AVSampleFormat format);
+  ~SamplesImpl(void);
+};
 
 SamplesImpl::SamplesImpl(uint8_t** data, int size)
 {

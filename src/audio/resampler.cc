@@ -1,13 +1,25 @@
 extern "C"
 {
 #include <libavutil/opt.h>
+#include "libswresample/swresample.h"
 }
 #include "resampler.h"
-#include "resampler_impl.h"
 #include "ffmpeg_exception.h"
+#include "audio_format.h"
 
 namespace ffmpeg
 {
+
+class ResamplerImpl
+{
+public:
+  SwrContext* swr_;
+  int input_sample_rate_;
+
+  ResamplerImpl(Codec& codec);
+  ~ResamplerImpl(void);
+  Samples Resample(uint8_t const** input, int in_samples);
+};
 
 ResamplerImpl::ResamplerImpl(Codec& codec)
 {
@@ -17,16 +29,12 @@ ResamplerImpl::ResamplerImpl(Codec& codec)
     throw Exception();
   }
 
-  output_sample_rate_ = 22050;
-  output_format_ = AV_SAMPLE_FMT_S16;
-  output_channel_layout_ = AV_CH_LAYOUT_STEREO;
-
   av_opt_set_int(swr_, "in_channel_layout", codec->channel_layout, 0);
-  av_opt_set_int(swr_, "out_channel_layout", output_channel_layout_, 0);
+  av_opt_set_int(swr_, "out_channel_layout", FFMPEG_CHANNEL_LAYOUT, 0);
   av_opt_set_int(swr_, "in_sample_rate", codec->sample_rate, 0);
-  av_opt_set_int(swr_, "out_sample_rate", output_sample_rate_, 0);
+  av_opt_set_int(swr_, "out_sample_rate", SAMPLE_RATE, 0);
   av_opt_set_sample_fmt(swr_, "in_sample_fmt", codec->sample_fmt, 0);
-  av_opt_set_sample_fmt(swr_, "out_sample_fmt", output_format_, 0);
+  av_opt_set_sample_fmt(swr_, "out_sample_fmt", FFMPEG_FORMAT, 0);
     
   if(swr_init(swr_))
   {
@@ -34,24 +42,20 @@ ResamplerImpl::ResamplerImpl(Codec& codec)
   }
 
   input_sample_rate_ = codec->sample_rate;
-  output_channels_ =  av_get_channel_layout_nb_channels(output_channel_layout_);
 }
 
 ResamplerImpl::~ResamplerImpl(void)
 {
-  if(swr_)
-  {
-    swr_free(&swr_);
-  }
+  swr_free(&swr_);
 }
 
 Samples ResamplerImpl::Resample(uint8_t const** input, int in_samples)
 {
   uint8_t** output;
   int64_t delay = swr_get_delay(swr_, input_sample_rate_) + in_samples;
-  int out_samples = (int)av_rescale_rnd(delay, output_sample_rate_, input_sample_rate_, AV_ROUND_UP);    
+  int out_samples = (int)av_rescale_rnd(delay, SAMPLE_RATE, input_sample_rate_, AV_ROUND_UP);    
   int linesize;
-  if(av_samples_alloc_array_and_samples(&output, &linesize, output_channels_, out_samples, output_format_, 1) < 0)
+  if(av_samples_alloc_array_and_samples(&output, &linesize, CHANNELS, out_samples, FFMPEG_FORMAT, 1) < 0)
   {
     throw Exception();
   }
@@ -60,7 +64,7 @@ Samples ResamplerImpl::Resample(uint8_t const** input, int in_samples)
   {
     throw Exception();
   }
-  int size = av_samples_get_buffer_size(&linesize, output_channels_, conv_samples, output_format_, 1);
+  int size = av_samples_get_buffer_size(&linesize, CHANNELS, conv_samples, FFMPEG_FORMAT, 1);
   return Samples(output, size);
 }
 

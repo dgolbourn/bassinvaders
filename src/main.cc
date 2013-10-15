@@ -9,6 +9,8 @@
 #include "trigger.h"
 #include "event.h"
 #include "decoder.h"
+#include "audio_format.h"
+#include "mixer.h"
 
 void TestCallback(event::Signal signal)
 {
@@ -102,6 +104,11 @@ int main(int argc, char *argv[])
   event::Trigger L4(LeftCallback, event::left);
   event::Trigger L5(RightCallback, event::right);
 
+  audio::Mixer mixer;
+  //mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/16Hz-20kHz-Exp-1f-10sec.mp3");
+  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
+  mixer.Resume();
+
   while(!quitflag)
   {
     event::Events();
@@ -110,13 +117,6 @@ int main(int argc, char *argv[])
   int i = 0;
   while(i < 10)
   {
-    audio::Decoder decoder("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/16Hz-20kHz-Exp-1f-10sec.mp3");
-    uint8_t buffer[4096]; 
-    while(!decoder.Empty())
-    {
-      decoder.Read(buffer, 4096);
-    //  HandleOutput(buffer, 4096);
-    }
     i++;
     std::cout << i << std::endl;
   }

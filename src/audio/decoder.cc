@@ -1,13 +1,36 @@
 #include "decoder.h"
-#include "decoder_impl.h"
 #include "ffmpeg_manager.h"
 #include "buffer.h"
 #include "packet.h"
+#include "format.h"
+#include "codec.h"
+#include "resampler.h"
+#include "frame.h"
 
 #include <queue>
 
 namespace audio
 {
+
+class DecoderImpl
+{
+public:
+  ffmpeg::Format format_;
+  ffmpeg::Codec codec_;
+  ffmpeg::Resampler resampler_;
+  ffmpeg::Frame frame_;
+  ffmpeg::Buffer buffer_;
+
+  bool packets_finished_;
+
+  DecoderImpl(std::string filename);
+  ~DecoderImpl(void);
+
+  void Decode(void);
+  void ReplenishBuffer(void);
+  bool Empty(void);
+  void Read(uint8_t* buffer, int size);
+};
 
 DecoderImpl::DecoderImpl(std::string filename)
 {

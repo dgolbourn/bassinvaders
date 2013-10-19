@@ -6,7 +6,11 @@
 namespace event
 {
 
-typedef void (*Callback) (class Signal);
+class Callback
+{
+public:
+  virtual void operator() (class Signal) = 0;
+};
 
 class Signal
 {
@@ -18,8 +22,8 @@ public:
   Signal& operator=(Signal original);
 
   void Emit(void);
-  void Subscribe(Callback callback);
-  void Unsubscribe(Callback callback);
+  void Subscribe(Callback& callback);
+  void Unsubscribe(Callback& callback);
 private:
   std::shared_ptr<class SignalImpl> impl_;
 };

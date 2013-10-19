@@ -6,6 +6,6 @@
 #define FFMPEG_CHANNEL_LAYOUT AV_CH_LAYOUT_STEREO
 #define CHANNELS 2
 #define SAMPLE_RATE 22050
-#define SAMPLES (2 << 13)
+#define SAMPLES (1 << 12)
 
 #endif

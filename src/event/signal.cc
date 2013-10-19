@@ -7,13 +7,13 @@ namespace event
 class SignalImpl
 {
 public:
-  std::set<Callback> callbacks_;
+  std::set<Callback*> callbacks_;
 
   SignalImpl(void);
   ~SignalImpl(void);
   void Emit(Signal signal);
-  void Subscribe(Callback callback);
-  void Unsubscribe(Callback callback);
+  void Subscribe(Callback& callback);
+  void Unsubscribe(Callback& callback);
 };
 
 SignalImpl::SignalImpl(void)
@@ -28,22 +28,18 @@ void SignalImpl::Emit(Signal signal)
 {
   for(auto iter = callbacks_.begin(); iter != callbacks_.end(); ++iter)
   {
-    Callback callback = *iter;
-    if(callback)
-    {
-      callback(signal);
-    }
+    (**iter)(signal);
   }
 }
 
-void SignalImpl::Subscribe(Callback callback)
+void SignalImpl::Subscribe(Callback& callback)
 {
-  callbacks_.insert(callback);
+  callbacks_.insert(&callback);
 }
 
-void SignalImpl::Unsubscribe(Callback callback)
+void SignalImpl::Unsubscribe(Callback& callback)
 {
-  auto iter = callbacks_.find(callback);
+  auto iter = callbacks_.find(&callback);
   if(iter != callbacks_.end())
   {
     callbacks_.erase(iter);
@@ -55,12 +51,12 @@ void Signal::Emit(void)
   impl_->Emit(*this);
 }
 
-void Signal::Subscribe(Callback callback)
+void Signal::Subscribe(Callback& callback)
 {
   impl_->Subscribe(callback);
 }
 
-void Signal::Unsubscribe(Callback callback)
+void Signal::Unsubscribe(Callback& callback)
 {
   impl_->Unsubscribe(callback);
 }

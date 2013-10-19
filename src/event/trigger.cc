@@ -8,25 +8,25 @@ class TriggerImpl
 {
 public:
   Signal signal_;
-  Callback callback_;
+  Callback* callback_;
 
-  TriggerImpl(Callback callback, Signal signal);
+  TriggerImpl(Callback& callback, Signal signal);
   ~TriggerImpl(void);
 };
 
-TriggerImpl::TriggerImpl(Callback callback, Signal signal)
+TriggerImpl::TriggerImpl(Callback& callback, Signal signal)
 {
   signal_ = signal;
   signal_.Subscribe(callback);
-  callback_ = callback;
+  callback_ = &callback;
 }
  
 TriggerImpl::~TriggerImpl(void)
 {
-  signal_.Unsubscribe(callback_);
+  signal_.Unsubscribe(*callback_);
 }
 
-Trigger::Trigger(Callback callback, Signal signal)
+Trigger::Trigger(Callback& callback, Signal signal)
 {
   impl_ = std::shared_ptr<TriggerImpl>(new TriggerImpl(callback, signal));
 }

@@ -11,7 +11,7 @@ class Trigger
 {
 public:
   Trigger(void);
-  Trigger(Callback callback, Signal signal);
+  Trigger(Callback& callback, Signal signal);
   ~Trigger(void);
   Trigger(const Trigger& original);
   Trigger(Trigger&& original);

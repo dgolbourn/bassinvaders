@@ -25,8 +25,6 @@ public:
   void Music(std::string filename);
   void SoundVolume(int volume);
   void MusicVolume(int volume);
-
-  event::Signal Finished(void);
 private:
   std::shared_ptr<class MixerImpl> impl_;
 };

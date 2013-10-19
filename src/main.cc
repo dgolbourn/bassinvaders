@@ -11,39 +11,75 @@
 #include "decoder.h"
 #include "audio_format.h"
 #include "mixer.h"
+#include "sound.h"
 
-void TestCallback(event::Signal signal)
+class TestCallback : public event::Callback
 {
-  printf("what!\n");
-}
+public:
+  void operator()(event::Signal signal)
+  {
+    printf("what!\n");
+  }
+};
 
 bool quitflag = false;
 
-void QuitCallback(event::Signal signal)
+class QuitCallback : public event::Callback
 {
-  quitflag = true;
-  printf("who!\n");
-}
+public:
+  void operator()(event::Signal signal)
+  {
+    quitflag = true;
+    printf("who!\n");
+  }
+};
 
-void UpCallback(event::Signal signal)
+class UpCallback : public event::Callback
 {
-  printf("up!\n");
-}
+public:
+  void operator()(event::Signal signal)
+  {
+    printf("up!\n");
+  }
+};
 
-void DownCallback(event::Signal signal)
+class DownCallback : public event::Callback
 {
-  printf("down!\n");
-}
+public:
+  void operator()(event::Signal signal)
+  {
+    printf("down!\n");
+  } 
+};
 
-void LeftCallback(event::Signal signal)
+class LeftCallback : public event::Callback
 {
-  printf("left!\n");
-}
+public:
+  void operator()(event::Signal signal)
+  {
+    printf("left!\n");
+  }
+};
 
-void RightCallback(event::Signal signal)
+class RightCallback : public event::Callback
 {
-  printf("right!\n");
-}
+public:
+  void operator()(event::Signal signal)
+  {
+    printf("right!\n");
+  }
+};
+
+class Play : public event::Callback
+{
+public:
+  audio::Sound sound_;
+
+  void operator()(event::Signal signal)
+  {
+    sound_.Play();
+  }
+};
 
 void HandleOutput(uint8_t* output, int out_samples)
 {
@@ -91,34 +127,30 @@ int main(int argc, char *argv[])
   w.Show();
 
   event::Signal E;
-  event::Trigger L(TestCallback, E);
+  event::Trigger L(TestCallback(), E);
 
   E.Emit();
   E.Emit();
   E.Emit();
   
-  event::Trigger L0(QuitCallback, event::quit);
-  event::Trigger L1(QuitCallback, event::trigger);
-  event::Trigger L2(UpCallback, event::up);
-  event::Trigger L3(DownCallback, event::down);
-  event::Trigger L4(LeftCallback, event::left);
-  event::Trigger L5(RightCallback, event::right);
+  event::Trigger L0(QuitCallback(), event::quit);
+  event::Trigger L1(QuitCallback(), event::trigger);
+  event::Trigger L2(UpCallback(), event::up);
+  event::Trigger L3(DownCallback(), event::down);
+  event::Trigger L4(LeftCallback(), event::left);
+  event::Trigger L5(RightCallback(), event::right);
 
   audio::Mixer mixer;
-  //mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/16Hz-20kHz-Exp-1f-10sec.mp3");
+  Play play;
+  play.sound_ = mixer.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav");
   mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
   mixer.Resume();
+
+  event::Trigger L6(play, event::up);
 
   while(!quitflag)
   {
     event::Events();
-  }
-
-  int i = 0;
-  while(i < 10)
-  {
-    i++;
-    std::cout << i << std::endl;
   }
 
   try

@@ -1,6 +1,7 @@
 #include "buffer.h"
 
 #include <queue>
+#include <mutex>
 
 namespace ffmpeg
 {
@@ -13,6 +14,7 @@ public:
   int total_buffer_size_;
   int data_size_;
   int target_buffer_size_;
+  std::mutex mutex_;
 
   BufferImpl(int size);
   ~BufferImpl(void);
@@ -28,6 +30,10 @@ BufferImpl::BufferImpl(int size)
   data_ = nullptr;
   total_buffer_size_ = 0;
   data_size_ = 0;
+  if(size < 1)
+  {
+    size = 1;
+  }
   target_buffer_size_ = size;
 }
 
@@ -37,6 +43,7 @@ BufferImpl::~BufferImpl(void)
 
 void BufferImpl::Add(Samples samples)
 {
+  mutex_.lock();
   bool empty_flag = false;
   if(queue_.empty())
   {
@@ -51,20 +58,28 @@ void BufferImpl::Add(Samples samples)
     data_size_ = queue_.front().size();
     data_ = queue_.front().data()[0];
   }
+  mutex_.unlock();
 }
 
 bool BufferImpl::Full(void)
 {
-  return total_buffer_size_ >= target_buffer_size_;
+  mutex_.lock();
+  bool full = total_buffer_size_ >= target_buffer_size_;
+  mutex_.unlock();
+  return full;
 }
 
 bool BufferImpl::Empty(void)
 {
-  return queue_.empty();
+  mutex_.lock();
+  bool empty = queue_.empty();
+  mutex_.unlock();
+  return empty;
 }
 
 int BufferImpl::Read(uint8_t* buffer, int size)
 {
+  mutex_.lock();
   int start_size = size;
 
   while(size)
@@ -102,7 +117,9 @@ int BufferImpl::Read(uint8_t* buffer, int size)
     }
   }
 
-  return start_size - size;
+  start_size -= size;
+  mutex_.unlock();
+  return start_size;
 }
 
 void Buffer::Add(Samples samples)

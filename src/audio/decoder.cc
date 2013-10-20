@@ -8,6 +8,7 @@
 #include "frame.h"
 
 #include <queue>
+#include <thread>
 
 namespace audio
 {
@@ -23,28 +24,47 @@ public:
 
   bool packets_finished_;
 
-  DecoderImpl(std::string filename);
+  std::thread* thread_;
+
+  DecoderImpl(std::string filename, int buffer_size);
   ~DecoderImpl(void);
 
   void Decode(void);
   void ReplenishBuffer(void);
   bool Empty(void);
   void Read(uint8_t* buffer, int size);
+  void Flush(void);
 };
 
-DecoderImpl::DecoderImpl(std::string filename)
+static void ReplenishBufferThread(DecoderImpl* impl)
+{
+  while(!impl->packets_finished_)
+  {
+    impl->ReplenishBuffer();
+  }
+}
+
+DecoderImpl::DecoderImpl(std::string filename, int buffer_size)
 {
   ffmpeg::Init();
   format_ = ffmpeg::Format(filename);
   codec_ = ffmpeg::Codec(format_);
   resampler_ = ffmpeg::Resampler(codec_);
-  buffer_ = ffmpeg::Buffer(1 << 20);
+  buffer_ = ffmpeg::Buffer(buffer_size);
 
   packets_finished_ = false;
   ReplenishBuffer();
+  thread_ = new std::thread(ReplenishBufferThread, this);
 }
 
 DecoderImpl::~DecoderImpl(void)
+{
+  packets_finished_ = true;
+  thread_->join();
+  Flush();
+}
+
+void DecoderImpl::Flush(void)
 {
   if(codec_->codec->capabilities & CODEC_CAP_DELAY)
   {
@@ -89,7 +109,7 @@ void DecoderImpl::ReplenishBuffer(void)
   while(!buffer_.Full() && !packets_finished_)
   {
     Decode();
-  }
+  } 
 }
 
 bool DecoderImpl::Empty(void)
@@ -101,7 +121,6 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
 {
   while(size)
   {
-    ReplenishBuffer();
     int read_size = buffer_.Read(buffer, size);
     buffer += read_size;
     size -= read_size;
@@ -118,9 +137,9 @@ Decoder::Decoder(void)
 {
 }
 
-Decoder::Decoder(std::string filename)
+Decoder::Decoder(std::string filename, int buffer_size)
 {
-  impl_ = std::shared_ptr<DecoderImpl>(new DecoderImpl(filename));
+  impl_ = std::shared_ptr<DecoderImpl>(new DecoderImpl(filename, buffer_size));
 }
 
 Decoder::Decoder(const Decoder& other)

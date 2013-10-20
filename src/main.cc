@@ -12,6 +12,7 @@
 #include "audio_format.h"
 #include "mixer.h"
 #include "sound.h"
+#include "timer.h"
 
 class TestCallback : public event::Callback
 {
@@ -147,6 +148,10 @@ int main(int argc, char *argv[])
   mixer.Resume();
 
   event::Trigger L6(play, event::up);
+  event::Timer timer(1000, true);
+  timer.Pause();
+  event::Trigger L7(DownCallback(), timer.Signal());
+  timer.Resume();
 
   while(!quitflag)
   {

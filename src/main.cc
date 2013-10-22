@@ -13,6 +13,7 @@
 #include "mixer.h"
 #include "sound.h"
 #include "timer.h"
+#include "animation.h"
 
 class TestCallback : public event::Callback
 {
@@ -152,6 +153,10 @@ int main(int argc, char *argv[])
   timer.Pause();
   event::Trigger L7(DownCallback(), timer.Signal());
   timer.Resume();
+
+  game::Animation anim;
+
+  anim.Test();
 
   while(!quitflag)
   {

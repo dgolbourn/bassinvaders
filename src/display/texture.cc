@@ -59,24 +59,21 @@ Texture::Texture(void)
 {
 }
 
-Texture::Texture(const Texture& original)
+Texture::Texture(Texture const& other) : impl_(other.impl_)
 {
-  impl_ = original.impl_;
 }
 
-Texture::Texture(Texture&& original)
+Texture::Texture(Texture&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = original.impl_;
-  original.impl_.reset();
 }
 
 Texture::~Texture(void)
 {
 }
 
-Texture& Texture::operator=(Texture original)
+Texture& Texture::operator=(Texture other)
 {
-  std::swap(impl_, original.impl_);
+  std::swap(impl_, other.impl_);
   return *this;
 }
 

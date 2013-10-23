@@ -5,12 +5,12 @@
 namespace display
 {
 
-bool BoundingBox::operator ==(const BoundingBox& compare) const
+bool BoundingBox::operator ==(BoundingBox const& compare) const
 {
   return SDL_RectEquals(&impl_->rect_, &compare.impl_->rect_) != 0;
 }
 
-BoundingBox BoundingBox::operator |(const BoundingBox& other)
+BoundingBox BoundingBox::operator |(BoundingBox const& other)
 {
   BoundingBox intersection;
   (void)SDL_IntersectRect(&impl_->rect_, 
@@ -19,7 +19,7 @@ BoundingBox BoundingBox::operator |(const BoundingBox& other)
   return intersection;
 }
 
-BoundingBox BoundingBox::operator &(const BoundingBox& other)
+BoundingBox BoundingBox::operator &(BoundingBox const& other)
 {
   BoundingBox complement;
   SDL_UnionRect(&impl_->rect_, 
@@ -28,7 +28,7 @@ BoundingBox BoundingBox::operator &(const BoundingBox& other)
   return complement;
 }
 
-bool BoundingBox::operator &&(const BoundingBox& other)
+bool BoundingBox::operator &&(BoundingBox const& other)
 {
   return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_) != 0;
 }
@@ -51,24 +51,21 @@ BoundingBox::BoundingBox(int x, int y, int w, int h)
   impl_->rect_.h = h;
 }
 
-BoundingBox::BoundingBox(const BoundingBox& original)
+BoundingBox::BoundingBox(BoundingBox const& other) : impl_(other.impl_)
 {
-  impl_ = original.impl_;
 }
 
-BoundingBox::BoundingBox(BoundingBox&& original)
+BoundingBox::BoundingBox(BoundingBox&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = original.impl_;
-  original.impl_.reset();
 }
 
 BoundingBox::~BoundingBox(void)
 {
 }
 
-BoundingBox& BoundingBox::operator=(BoundingBox original)
+BoundingBox& BoundingBox::operator=(BoundingBox other)
 {
-  std::swap(impl_, original.impl_);
+  std::swap(impl_, other.impl_);
   return *this;
 }
 

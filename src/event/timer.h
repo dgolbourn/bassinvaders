@@ -12,9 +12,9 @@ public:
   Timer(void);
   Timer(int interval, bool repeats);
   ~Timer(void);
-  Timer::Timer(const Timer& original);
-  Timer(Timer&& original);
-  Timer& operator=(Timer original);
+  Timer::Timer(const Timer& other);
+  Timer(Timer&& other);
+  Timer& operator=(Timer other);
 
   void Pause(void);
   void Resume(void);

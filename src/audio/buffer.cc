@@ -146,20 +146,16 @@ Buffer::Buffer(void)
 {
 }
 
-Buffer::Buffer(int size)
+Buffer::Buffer(int size) : impl_((new BufferImpl(size)))
 {
-  impl_ = std::shared_ptr<BufferImpl>(new BufferImpl(size));
 }
 
-Buffer::Buffer(const Buffer& other)
+Buffer::Buffer(Buffer const& other) : impl_(other.impl_)
 {
-  impl_ = other.impl_;
 }
 
-Buffer::Buffer(Buffer&& other)
+Buffer::Buffer(Buffer&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = other.impl_;
-  other.impl_.reset();
 }
 
 Buffer& Buffer::operator=(Buffer other)

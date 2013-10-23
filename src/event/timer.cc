@@ -1,5 +1,6 @@
 #include "timer.h"
 #include "SDL_timer.h"
+#include "sdl_manager.h"
 
 namespace event
 {
@@ -12,8 +13,9 @@ public:
 
   SDL_TimerID timer_;
 
-  bool repeats_;
   Uint32 interval_;
+  bool repeats_;
+
   Signal signal_;
 
   TimerImpl(int interval, bool repeats);
@@ -31,6 +33,7 @@ static Uint32 TimerCallback(Uint32 interval, void* param)
 
 TimerImpl::TimerImpl(int interval, bool repeats)
 {
+  sdl::Init(SDL_INIT_TIMER);
   repeats_ = repeats;
   interval_ = (Uint32)interval;
   timer_ = SDL_AddTimer(interval_, TimerCallback, this);
@@ -39,6 +42,7 @@ TimerImpl::TimerImpl(int interval, bool repeats)
 TimerImpl::~TimerImpl(void)
 {
   SDL_RemoveTimer(timer_);
+  sdl::Quit(SDL_INIT_TIMER);
 }
 
 void TimerImpl::Pause(void)
@@ -97,29 +101,25 @@ Timer::Timer(void)
 {
 }
 
-Timer::Timer(int interval, bool repeats)
+Timer::Timer(int interval, bool repeats) : impl_(new TimerImpl(interval, repeats))
 {
-  impl_ = std::shared_ptr<TimerImpl>(new TimerImpl(interval, repeats));
 }
 
 Timer::~Timer(void)
 {
 }
 
-Timer::Timer(const Timer& original)
+Timer::Timer(Timer const& other) : impl_(other.impl_)
 {
-  impl_ = original.impl_;
 }
 
-Timer::Timer(Timer&& original)
+Timer::Timer(Timer&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = original.impl_;
-  original.impl_.reset();
 }
 
-Timer& Timer::operator=(Timer original)
+Timer& Timer::operator=(Timer other)
 {
-  std::swap(impl_, original.impl_);
+  std::swap(impl_, other.impl_);
   return *this;
 }
 

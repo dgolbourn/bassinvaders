@@ -17,10 +17,10 @@ class Texture
   friend class WindowImpl;
 public:
   Texture(void);
-  Texture(const Texture& original);
-  Texture(Texture&& original);
+  Texture(Texture const& other);
+  Texture(Texture&& other);
   ~Texture(void);
-  Texture& operator=(Texture original);
+  Texture& operator=(Texture other);
 
   void Render(void);
   void Render(BoundingBox& source, BoundingBox& destination);

@@ -11,7 +11,7 @@ class Sound
   friend class MixerImpl;
 public:
   Sound(void);
-  Sound(const Sound& other);
+  Sound(Sound const& other);
   Sound(Sound&& other);
   Sound& operator=(Sound other);
   ~Sound(void);

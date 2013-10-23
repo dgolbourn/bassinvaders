@@ -13,7 +13,7 @@ class Mixer
 {
 public:
   Mixer(void);
-  Mixer(const Mixer& other);
+  Mixer(Mixer const& other);
   Mixer(Mixer&& other);
   Mixer& operator=(Mixer other);
   ~Mixer(void);

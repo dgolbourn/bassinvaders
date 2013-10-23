@@ -17,7 +17,7 @@ public:
   Samples(uint8_t** data, int size);
   Samples(void);
   Samples(int channels, int size, AVSampleFormat format);
-  Samples(const Samples& other);
+  Samples(Samples const& other);
   Samples(Samples&& other);
   Samples& operator=(Samples other);
   ~Samples(void);

@@ -72,20 +72,16 @@ Resampler::Resampler(void)
 {
 }
 
-Resampler::Resampler(Codec& codec)
+Resampler::Resampler(Codec& codec) : impl_(new ResamplerImpl(codec))
 {
-  impl_ = std::shared_ptr<ResamplerImpl>(new ResamplerImpl(codec));
 }
   
-Resampler::Resampler(const Resampler& other)
+Resampler::Resampler(Resampler const& other) : impl_(other.impl_)
 {
-  impl_ = other.impl_;
 }
 
-Resampler::Resampler(Resampler&& other)
+Resampler::Resampler(Resampler&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = other.impl_;
-  other.impl_.reset();
 }
 
 Resampler& Resampler::operator=(Resampler other)

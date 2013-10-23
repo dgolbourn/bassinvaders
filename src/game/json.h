@@ -12,7 +12,7 @@ public:
   JSON(void);
   JSON(json_t* json);
   ~JSON(void);
-  JSON(const JSON& other);
+  JSON(JSON const& other);
   JSON(JSON&& other);
   JSON& operator=(JSON other);
 

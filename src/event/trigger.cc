@@ -1,5 +1,4 @@
 #include "trigger.h"
-#include <utility>
 
 namespace event
 {
@@ -26,33 +25,29 @@ TriggerImpl::~TriggerImpl(void)
   signal_.Unsubscribe(*callback_);
 }
 
-Trigger::Trigger(Callback& callback, Signal signal)
+Trigger::Trigger(Callback& callback, Signal signal) : impl_(new TriggerImpl(callback, signal))
 {
-  impl_ = std::shared_ptr<TriggerImpl>(new TriggerImpl(callback, signal));
 }
 
 Trigger::Trigger(void)
 {
 }
 
-Trigger::Trigger(const Trigger& original)
+Trigger::Trigger(Trigger const& other) : impl_(other.impl_)
 {
-  impl_ = original.impl_;
 }
 
-Trigger::Trigger(Trigger&& original)
+Trigger::Trigger(Trigger&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = original.impl_;
-  original.impl_.reset();
 }
 
 Trigger::~Trigger(void)
 {
 }
 
-Trigger& Trigger::operator=(Trigger original)
+Trigger& Trigger::operator=(Trigger other)
 {
-  std::swap(impl_, original.impl_);
+  std::swap(impl_, other.impl_);
   return *this;
 }
 

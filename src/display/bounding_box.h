@@ -12,10 +12,10 @@ class BoundingBox
 public:
   BoundingBox(void);
   BoundingBox(int x, int y, int w, int h);
-  BoundingBox(const BoundingBox& original);
-  BoundingBox(BoundingBox&& original);
+  BoundingBox(BoundingBox const& other);
+  BoundingBox(BoundingBox&& other);
   ~BoundingBox(void);
-  BoundingBox& operator=(BoundingBox original);
+  BoundingBox& operator=(BoundingBox other);
 
   /**Return true if both bounding boxes are identical.*/
   bool operator ==(const BoundingBox& compare) const;

@@ -14,7 +14,7 @@ class Packet
 {
 public:
   Packet(void);
-  Packet(const Packet& other);
+  Packet(Packet const& other);
   Packet(Packet&& other);
   Packet& operator=(Packet other);
   ~Packet(void);

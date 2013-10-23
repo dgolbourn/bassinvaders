@@ -58,20 +58,16 @@ Format::Format(void)
 {    
 }
 
-Format::Format(std::string filename)
+Format::Format(std::string filename) : impl_(new FormatImpl(filename))
 {
-  impl_ = std::shared_ptr<FormatImpl>(new FormatImpl(filename));
 }
 
-Format::Format(const Format& other)
+Format::Format(Format const& other) : impl_(other.impl_)
 {
-  impl_ = other.impl_;
 }
 
-Format::Format(Format&& other)
+Format::Format(Format&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = other.impl_;
-  other.impl_.reset();
 }
 
 Format& Format::operator=(Format other)

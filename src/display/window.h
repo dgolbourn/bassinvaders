@@ -20,9 +20,9 @@ from SDL_GetError().*/
   Window(std::string name);
   Window(void);
   ~Window(void);
-  Window(const Window& original);
-  Window(Window&& original);
-  Window& operator=(Window original);
+  Window(Window const& other);
+  Window(Window&& other);
+  Window& operator=(Window other);
 
 /**Load the image indicated by filename.  This can be called multiple times 
 on the same image file. The Texture object is effectively just a pointer to

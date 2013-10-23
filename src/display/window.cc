@@ -144,33 +144,29 @@ void WindowImpl::Free(std::string filename)
   }    
 }
 
-Window::Window(std::string name)
+Window::Window(std::string name) : impl_(new WindowImpl(name))
 {
-  impl_ = std::shared_ptr<class WindowImpl>(new WindowImpl(name));
 }
 
 Window::Window(void)
 {
 }
 
-Window::Window(const Window& original)
+Window::Window(Window const& other) : impl_(other.impl_)
 {
-  impl_ = original.impl_;
 }
 
-Window::Window(Window&& original)
+Window::Window(Window&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = original.impl_;
-  original.impl_.reset();
 }
 
 Window::~Window(void)
 {
 }
 
-Window& Window::operator=(Window original)
+Window& Window::operator=(Window other)
 {
-  std::swap(impl_, original.impl_);
+  std::swap(impl_, other.impl_);
   return *this;
 }
 

@@ -27,24 +27,21 @@ Sound::Sound(void)
 {
 }
 
-Sound::Sound(const Sound& original)
+Sound::Sound(Sound const& other) : impl_(other.impl_)
 {
-  impl_ = original.impl_;
 }
 
-Sound::Sound(Sound&& original)
+Sound::Sound(Sound&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = original.impl_;
-  original.impl_.reset();
 }
 
 Sound::~Sound(void)
 {
 }
 
-Sound& Sound::operator=(Sound original)
+Sound& Sound::operator=(Sound other)
 {
-  std::swap(impl_, original.impl_);
+  std::swap(impl_, other.impl_);
   return *this;
 }
 

@@ -16,7 +16,7 @@ class Codec
 public:
   Codec(void);
   Codec(Format& format);
-  Codec(const Codec& other);
+  Codec(Codec const& other);
   Codec(Codec&& other);
   Codec& operator=(Codec other);
   ~Codec(void);

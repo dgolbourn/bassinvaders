@@ -14,7 +14,7 @@ class Resampler
 public:
   Resampler(void);
   Resampler(Codec& codec);
-  Resampler(const Resampler& other);
+  Resampler(Resampler const& other);
   Resampler(Resampler&& other);
   Resampler& operator=(Resampler other);
   ~Resampler(void);

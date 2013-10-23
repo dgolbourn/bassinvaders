@@ -14,7 +14,7 @@ class Frame
 {
 public:
   Frame(void);
-  Frame(const Frame& other);
+  Frame(Frame const& other);
   Frame(Frame&& other);
   Frame& operator=(Frame other);
   ~Frame(void);

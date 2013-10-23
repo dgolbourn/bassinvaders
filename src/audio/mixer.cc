@@ -103,29 +103,25 @@ void MixerImpl::Music(std::string filename)
   Mix_PauseMusic();
 }
 
-Mixer::Mixer(void)
+Mixer::Mixer(void) : impl_((new MixerImpl))
 {
-  impl_ = std::shared_ptr<MixerImpl>(new MixerImpl);
 }
 
-Mixer::Mixer(const Mixer& original)
+Mixer::Mixer(Mixer const& other) : impl_(other.impl_)
 {
-  impl_ = original.impl_;
 }
 
-Mixer::Mixer(Mixer&& original)
+Mixer::Mixer(Mixer&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = original.impl_;
-  original.impl_.reset();
 }
 
 Mixer::~Mixer(void)
 {
 }
 
-Mixer& Mixer::operator=(Mixer original)
+Mixer& Mixer::operator=(Mixer other)
 {
-  std::swap(impl_, original.impl_);
+  std::swap(impl_, other.impl_);
   return *this;
 }
 

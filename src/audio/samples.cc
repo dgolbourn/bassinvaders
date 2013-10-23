@@ -40,29 +40,24 @@ SamplesImpl::~SamplesImpl(void)
   }
 }
 
-Samples::Samples(uint8_t** data, int size)
+Samples::Samples(uint8_t** data, int size) : impl_(new SamplesImpl(data, size))
 {
-  impl_ = std::shared_ptr<SamplesImpl>(new SamplesImpl(data, size));
 }
 
 Samples::Samples(void)
 {
 }
 
-Samples::Samples(int channels, int size, AVSampleFormat format)
+Samples::Samples(int channels, int size, AVSampleFormat format) : impl_(new SamplesImpl(channels, size, format))
 {
-  impl_ = std::shared_ptr<SamplesImpl>(new SamplesImpl(channels, size, format));
 }
 
-Samples::Samples(const Samples& other)
+Samples::Samples(Samples const& other) : impl_(other.impl_)
 {
-  impl_ = other.impl_;
 }
 
-Samples::Samples(Samples&& other)
+Samples::Samples(Samples&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = other.impl_;
-  other.impl_.reset();
 }
 
 Samples& Samples::operator=(Samples other)

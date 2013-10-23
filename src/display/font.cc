@@ -29,33 +29,29 @@ FontImpl::~FontImpl(void)
   ttf::Quit();
 }
 
-Font::Font(std::string filename, int point, int r, int g, int b)
+Font::Font(std::string filename, int point, int r, int g, int b) : impl_(new FontImpl(filename, point, r, g, b))
 {
-  impl_ =   std::shared_ptr<class FontImpl>(new FontImpl(filename, point, r, g, b));
 }
 
 Font::Font(void)
 {
 }
 
-Font::Font(const Font& original)
+Font::Font(const Font& other) : impl_(other.impl_)
 {
-  impl_ = original.impl_;
 }
 
-Font::Font(Font&& original)
+Font::Font(Font&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = original.impl_;
-  original.impl_.reset();
 }
 
 Font::~Font(void)
 {
 }
 
-Font& Font::operator=(Font original)
+Font& Font::operator=(Font other)
 {
-  std::swap(impl_, original.impl_);
+  std::swap(impl_, other.impl_);
   return *this;
 }
 

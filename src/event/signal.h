@@ -29,18 +29,18 @@ public:
   the last reference, destroy the Signal.*/
   ~Signal(void);
 
-  /**Copy constructor.  Make this Signal be a reference to original.
-  @param[in] original Signal to reference.*/
-  Signal(const Signal& original);
+  /**Copy constructor.  Make this Signal be a reference to other.
+  @param[in] other Signal to reference.*/
+  Signal(const Signal& other);
 
-  /**Move constructor.  Make this Signal be a reference to original.
-  @param[in] original Signal to reference.*/
-  Signal(Signal&& original);
+  /**Move constructor.  Make this Signal be a reference to other.
+  @param[in] other Signal to reference.*/
+  Signal(Signal&& other);
 
-  /**Move assignment operator.  Make this Signal be a reference to original.
-  @param[in] original Signal to reference.
+  /**Move assignment operator.  Make this Signal be a reference to other.
+  @param[in] other Signal to reference.
   @return Reference to this.*/
-  Signal& operator=(Signal original);
+  Signal& operator=(Signal other);
 
   /**Emit a signal.  Notify any observers via their subscribed Callback.*/
   void Emit(void);

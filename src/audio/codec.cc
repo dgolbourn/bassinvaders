@@ -13,11 +13,7 @@ public:
   }
 };
 
-Codec::Codec(void)
-{    
-}
-
-Codec::Codec(Format& format)
+static AVCodecContext* InitAVCodecContext(Format& format)
 {
   AVCodecContext* codec = format.audio_stream()->codec;
   codec->codec = avcodec_find_decoder(codec->codec_id);
@@ -29,18 +25,23 @@ Codec::Codec(Format& format)
   {
     throw Exception();
   }
-  codec_ = std::shared_ptr<AVCodecContext>(codec, Deleter());
+  return codec;
 }
 
-Codec::Codec(const Codec& other)
+Codec::Codec(Format& format) : codec_(InitAVCodecContext(format), Deleter())
 {
-  codec_ = other.codec_;
 }
 
-Codec::Codec(Codec&& other)
+Codec::Codec(void)
+{    
+}
+
+Codec::Codec(Codec const& other) : codec_(other.codec_)
 {
-  codec_ = other.codec_;
-  other.codec_.reset();
+}
+
+Codec::Codec(Codec&& other) : codec_(std::move(other.codec_))
+{
 }
 
 Codec& Codec::operator=(Codec other)

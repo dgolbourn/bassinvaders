@@ -26,18 +26,18 @@ public:
   the last reference, destroy the Trigger.*/
   ~Trigger(void);
 
-  /**Copy constructor.  Make this Trigger be a reference to original.
-  @param[in] original Trigger to reference.*/
-  Trigger(const Trigger& original);
+  /**Copy constructor.  Make this Trigger be a reference to other.
+  @param[in] other Trigger to reference.*/
+  Trigger(const Trigger& other);
 
-  /**Move constructor.  Make this Trigger be a reference to original.
-  @param[in] original Trigger to reference.*/
-  Trigger(Trigger&& original);
+  /**Move constructor.  Make this Trigger be a reference to other.
+  @param[in] other Trigger to reference.*/
+  Trigger(Trigger&& other);
 
-  /**Move assignment operator.  Make this Trigger be a reference to original.
-  @param[in] original Trigger to reference.
+  /**Move assignment operator.  Make this Trigger be a reference to other.
+  @param[in] other Trigger to reference.
   @return Reference to this.*/
-  Trigger& operator=(Trigger original);
+  Trigger& operator=(Trigger other);
 private:
   std::shared_ptr<class TriggerImpl> impl_;
 };

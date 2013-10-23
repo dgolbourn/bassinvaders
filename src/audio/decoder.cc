@@ -137,20 +137,16 @@ Decoder::Decoder(void)
 {
 }
 
-Decoder::Decoder(std::string filename, int buffer_size)
+Decoder::Decoder(std::string filename, int buffer_size) : impl_(new DecoderImpl(filename, buffer_size))
 {
-  impl_ = std::shared_ptr<DecoderImpl>(new DecoderImpl(filename, buffer_size));
 }
 
-Decoder::Decoder(const Decoder& other)
+Decoder::Decoder(Decoder const& other) : impl_(other.impl_)
 {
-  impl_ = other.impl_;
 }
 
-Decoder::Decoder(Decoder&& other)
+Decoder::Decoder(Decoder&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = other.impl_;
-  other.impl_.reset();
 }
 
 Decoder& Decoder::operator=(Decoder other)

@@ -61,29 +61,25 @@ void Signal::Unsubscribe(Callback& callback)
   impl_->Unsubscribe(callback);
 }
 
-Signal::Signal(void)
+Signal::Signal(void) : impl_(new SignalImpl)
 {
-  impl_ = std::shared_ptr<SignalImpl>(new SignalImpl());
 }
 
-Signal::Signal(const Signal& original)
+Signal::Signal(Signal const& other) : impl_(other.impl_)
 {
-  impl_ = original.impl_;
 }
 
-Signal::Signal(Signal&& original)
+Signal::Signal(Signal&& other) : impl_(std::move(other.impl_))
 {
-  impl_ = original.impl_;
-  original.impl_.reset();
 }
 
 Signal::~Signal(void)
 {
 }
 
-Signal& Signal::operator=(Signal original)
+Signal& Signal::operator=(Signal other)
 {
-  std::swap(impl_, original.impl_);
+  std::swap(impl_, other.impl_);
   return *this;
 }
 

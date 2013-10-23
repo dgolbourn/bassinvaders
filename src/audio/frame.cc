@@ -18,25 +18,26 @@ public:
   }
 };
 
-Frame::Frame(void)
+static AVFrame* InitAVFrame(void)
 {
   AVFrame* frame = avcodec_alloc_frame();
   if(!frame)
   {
     throw Exception();
   }
-  frame_ = std::shared_ptr<AVFrame>(frame, Deleter());
+  return frame;
 }
 
-Frame::Frame(const Frame& other)
+Frame::Frame(void) : frame_(InitAVFrame(), Deleter())
 {
-  frame_ = other.frame_;
 }
 
-Frame::Frame(Frame&& other)
+Frame::Frame(Frame const& other) : frame_(other.frame_)
 {
-  frame_ = other.frame_;
-  other.frame_.reset();
+}
+
+Frame::Frame(Frame&& other) : frame_(std::move(other.frame_))
+{
 }
 
 Frame& Frame::operator=(Frame other)

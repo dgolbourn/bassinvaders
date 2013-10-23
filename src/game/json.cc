@@ -28,8 +28,7 @@ JSON::JSON(const JSON& other)
 
 JSON::JSON(JSON&& other)
 {
-  json_ = json_incref(other.json_);
-  json_decref(other.json_);
+  json_ = other.json_;
   other.json_ = nullptr;
 }
 

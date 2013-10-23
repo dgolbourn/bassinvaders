@@ -12,7 +12,7 @@ class Buffer
 public:
   Buffer(void);
   Buffer(int size);
-  Buffer(const Buffer& other);
+  Buffer(Buffer const& other);
   Buffer(Buffer&& other);
   Buffer& operator=(Buffer other);
   ~Buffer(void);

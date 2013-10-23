@@ -15,26 +15,27 @@ public:
   }
 };
 
-Packet::Packet(void)
+static AVPacket* InitAVPacket(void)
 {
   AVPacket* packet = (AVPacket*)malloc(sizeof(AVPacket));
   if(!packet)
   {
     throw cstd::Exception();
   }
-  packet_ = std::shared_ptr<AVPacket>(packet, Deleter());
   av_init_packet(packet);
+  return packet;
 }
 
-Packet::Packet(const Packet& other)
+Packet::Packet(void) : packet_(InitAVPacket(), Deleter())
 {
-  packet_ = other.packet_;
 }
 
-Packet::Packet(Packet&& other)
+Packet::Packet(Packet const& other) : packet_(other.packet_)
 {
-  packet_ = other.packet_;
-  other.packet_.reset();
+}
+
+Packet::Packet(Packet&& other) : packet_(std::move(other.packet_))
+{
 }
 
 Packet& Packet::operator=(Packet other)

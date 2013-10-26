@@ -11,9 +11,11 @@ class BufferImpl
 public:
   std::queue<Samples> queue_;
   uint8_t* data_;
-  int total_buffer_size_;
   int data_size_;
+
+  int total_buffer_size_;
   int target_buffer_size_;
+
   std::mutex mutex_;
 
   BufferImpl(int size);
@@ -92,6 +94,7 @@ int BufferImpl::Read(uint8_t* buffer, int size)
         data_ += size;
         data_size_ -= size;
         total_buffer_size_ -= size;
+        size = 0;
       }
       else
       {

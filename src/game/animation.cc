@@ -1,73 +1,198 @@
 #include "animation.h"
-//#include "texture.h"
-//#include "trigger.h"
-//#include "timer.h"
+#include "texture.h"
+#include "trigger.h"
+#include "timer.h"
 #include "jansson.h"
-#include <iostream>
 #include "json_exception.h"
 #include "json.h"
+#include "bounding_box.h"
+
+#include <string>
+#include <list>
+#include <mutex>
 
 namespace game
 {
+
 class AnimationImpl
 {
 public:
-  //display::Texture texture_;
-  //event::Trigger trigger_;
-  //event::Timer timer_;
-  void JanssonTest(void);
+  AnimationImpl(std::string& filename, display::Window& window);
+  ~AnimationImpl(void);
+
+  void Load(std::string& filename, display::Window& window);
+  void Next(void);
+  void Render(display::BoundingBox& destination);
+  void Pause(void);
+  void Resume(void);
+  void Restart(void);
+
+  display::Texture texture_;
+  event::Trigger trigger_;
+  event::Timer timer_;
+  std::list<display::BoundingBox> frames_;
+  std::list<display::BoundingBox>::iterator frame_;
+  std::mutex mutex_;
 };
 
-void AnimationImpl::JanssonTest(void)
+class AnimationCallback : public event::Callback
 {
-  json::JSON json = json::Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/file.json");
+public:
+  AnimationCallback(AnimationImpl& impl);
+  ~AnimationCallback(void);
+  void operator()(event::Signal& signal);
+  AnimationImpl& impl_;
+};
 
-  const char* str;
-  int i, h, w;
-  json_t* list;
+AnimationCallback::AnimationCallback(AnimationImpl& impl) : impl_(impl)
+{
+}
+
+AnimationCallback::~AnimationCallback(void)
+{
+}
+
+void AnimationCallback::operator()(event::Signal& signal)
+{
+  impl_.Next();
+}
+
+AnimationImpl::AnimationImpl(std::string& filename, display::Window& window)
+{
+  Load(filename, window);
+}
+
+AnimationImpl::~AnimationImpl(void)
+{
+}
+
+void AnimationImpl::Load(std::string& filename, display::Window& window)
+{
+  json::JSON json = json::Load(filename);
+
+  char const* sprite_sheet;
+  int interval;
+  int height;
+  int width;
+  json_t* frames;
+
   json_error_t error;
   if(json_unpack_ex(json.Get(), &error, JSON_STRICT, "{sssisisiso}", 
-    "sprite sheet", &str, 
-    "interval", &i,
-    "height", &h,
-    "width", &w,
-    "frames", &list) == -1)
+    "sprite sheet", &sprite_sheet, 
+    "interval", &interval,
+    "width", &width,
+    "height", &height,
+    "frames", &frames) == -1)
   { 
     throw json::Exception(error);
   }
   else
   {
-    std::cout << str << std::endl;
-    std::cout << i << std::endl;
-    std::cout << h << std::endl;
-    std::cout << w << std::endl;
+    texture_ = window.Load(std::string(sprite_sheet));
+    timer_ = event::Timer(interval, true);
+    timer_.Pause();
+    trigger_ = event::Trigger(AnimationCallback(*this), timer_.Signal());
 
     size_t index;
     json_t* value;
-    json_array_foreach(list, index, value)
+    json_array_foreach(frames, index, value)
     {
-      int a[2];
-      if(json_unpack_ex(value, &error, JSON_STRICT, "[ii]", &a[0], &a[1]) == -1)
+      int x;
+      int y;
+      if(json_unpack_ex(value, &error, JSON_STRICT, "[ii]", &x, &y) == -1)
       {
         throw json::Exception(error);
       }
       else
       {
-        std::cout << a[0] << std::endl;
-        std::cout << a[1] << std::endl;
+        frames_.push_back(display::BoundingBox(x, y, width, height));
       }
     }
+    frame_ = frames_.begin(); 
   }
+}
+
+void AnimationImpl::Next(void)
+{
+  mutex_.lock();
+  frame_++;
+  if(frame_ == frames_.end())
+  {
+    frame_ = frames_.begin();
+  }
+  mutex_.unlock();
+}
+
+void AnimationImpl::Render(display::BoundingBox& destination)
+{
+  mutex_.lock();
+  texture_.Render(*frame_, destination);
+  mutex_.unlock();
+}
+
+void AnimationImpl::Pause(void)
+{
+  timer_.Pause();
+}
+
+void AnimationImpl::Resume(void)
+{
+  timer_.Resume();
+}
+
+void AnimationImpl::Restart(void)
+{
+  mutex_.lock();
+  timer_.Restart();
+  frame_ = frames_.begin(); 
+  mutex_.unlock();
+}
+
+Animation::Animation(std::string& filename, display::Window& window)
+{
+  impl_ = std::shared_ptr<AnimationImpl>(new AnimationImpl(filename, window));
+}
+
+void Animation::Render(display::BoundingBox& destination)
+{
+  impl_->Render(destination);
+}
+
+void Animation::Pause(void)
+{
+  impl_->Pause();
+}
+
+void Animation::Resume(void)
+{
+  impl_->Resume();
+}
+
+void Animation::Restart(void)
+{
+  impl_->Restart();
 }
 
 Animation::Animation(void)
 {
-  impl_ = std::shared_ptr<AnimationImpl>(new AnimationImpl);
 }
 
-void Animation::Test(void)
+Animation::Animation(Animation const& other) : impl_(other.impl_)
 {
-  impl_->JanssonTest();
+}
+
+Animation::Animation(Animation&& other) : impl_(std::move(other.impl_))
+{
+}
+
+Animation::~Animation(void)
+{
+}
+
+Animation& Animation::operator=(Animation other)
+{
+  std::swap(impl_, other.impl_);
+  return *this;
 }
 
 }

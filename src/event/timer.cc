@@ -22,6 +22,7 @@ public:
   ~TimerImpl(void);
   void Pause(void);
   void Resume(void);
+  void Restart(void);
   Signal Signal(void);
   Uint32 Update(void);
 };
@@ -37,6 +38,8 @@ TimerImpl::TimerImpl(int interval, bool repeats)
   repeats_ = repeats;
   interval_ = (Uint32)interval;
   timer_ = SDL_AddTimer(interval_, TimerCallback, this);
+  paused_start_ = 0;
+  paused_time_ = 0;
 }
 
 TimerImpl::~TimerImpl(void)
@@ -60,6 +63,14 @@ void TimerImpl::Resume(void)
     paused_time_ += SDL_GetTicks() - paused_start_;
     paused_start_ = 0;
   }
+}
+
+void TimerImpl::Restart(void)
+{
+  SDL_RemoveTimer(timer_);
+  timer_ = SDL_AddTimer(interval_, TimerCallback, this);
+  paused_start_ = 0;
+  paused_time_ = 0;
 }
 
 Signal TimerImpl::Signal(void)
@@ -131,6 +142,11 @@ void Timer::Pause(void)
 void Timer::Resume(void)
 {
   impl_->Resume();
+}
+
+void Timer::Restart(void)
+{
+  impl_->Restart();
 }
 
 Signal Timer::Signal(void)

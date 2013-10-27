@@ -154,9 +154,7 @@ int main(int argc, char *argv[])
   event::Trigger L7(DownCallback(), timer.Signal());
   timer.Resume();
 
-  game::Animation anim;
-
-  anim.Test();
+  game::Animation anim(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/file.json"), w);
 
   while(!quitflag)
   {

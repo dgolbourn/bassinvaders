@@ -21,7 +21,7 @@ private:
   json_t* json_;
 };
 
-JSON Load(std::string filename);
+JSON Load(std::string& filename);
 
 }
 #endif

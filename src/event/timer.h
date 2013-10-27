@@ -18,6 +18,7 @@ public:
 
   void Pause(void);
   void Resume(void);
+  void Restart(void);
   Signal Signal(void);
 private:
   std::shared_ptr<class TimerImpl> impl_;

@@ -43,7 +43,7 @@ json_t* JSON::Get(void)
   return json_;
 }
 
-JSON Load(std::string filename)
+JSON Load(std::string& filename)
 {
   json_error_t error;
   json_t* json = json_load_file(filename.c_str(), 0, &error);

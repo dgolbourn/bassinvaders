@@ -31,7 +31,8 @@ void Init(void)
       throw Exception();
     }
 
-    if(Mix_OpenAudio(SAMPLE_RATE, MIX_FORMAT, CHANNELS, SAMPLES) == -1)
+    int const samples = 1 << 10;
+    if(Mix_OpenAudio(MIX_SAMPLE_RATE, MIX_FORMAT, MIX_CHANNEL_LAYOUT, samples) == -1)
     {
       sdl::Quit(SDL_INIT_AUDIO);
       MixQuit();

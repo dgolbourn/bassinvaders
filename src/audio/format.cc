@@ -10,11 +10,11 @@ public:
   AVFormatContext* format_;
   AVStream* audio_stream_;
 
-  FormatImpl(std::string filename);
+  FormatImpl(std::string& filename);
   ~FormatImpl(void);
 };
 
-FormatImpl::FormatImpl(std::string filename)
+FormatImpl::FormatImpl(std::string& filename)
 {
   format_ = avformat_alloc_context();
   if(!format_)
@@ -58,7 +58,7 @@ Format::Format(void)
 {    
 }
 
-Format::Format(std::string filename) : impl_(new FormatImpl(filename))
+Format::Format(std::string& filename) : impl_(new FormatImpl(filename))
 {
 }
 

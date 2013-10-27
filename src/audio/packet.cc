@@ -11,13 +11,13 @@ public:
   void operator()(AVPacket* packet)
   {
     av_free_packet(packet);
-    free(packet);
+    delete packet;
   }
 };
 
 static AVPacket* InitAVPacket(void)
 {
-  AVPacket* packet = (AVPacket*)malloc(sizeof(AVPacket));
+  AVPacket* packet = new AVPacket;
   if(!packet)
   {
     throw cstd::Exception();
@@ -56,6 +56,17 @@ AVPacket* Packet::operator->(void)
 AVPacket* Packet::Get(void)
 {
   return packet_.get();
+}
+
+void Packet::Next(int amount_used)
+{
+  packet_->data += amount_used;
+  packet_->size -= amount_used;
+}
+
+bool Packet::Empty(void)
+{
+  return packet_->size <= 0;
 }
 
 }

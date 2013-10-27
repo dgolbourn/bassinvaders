@@ -11,23 +11,12 @@ public:
   int size_;
 
   SamplesImpl(uint8_t** data, int size);
-  SamplesImpl(int channels, int size, AVSampleFormat format);
   ~SamplesImpl(void);
 };
 
 SamplesImpl::SamplesImpl(uint8_t** data, int size)
 {
   data_ = data;
-  size_ = size;
-}
-
-SamplesImpl::SamplesImpl(int channels, int size, AVSampleFormat format)
-{
-  if(av_samples_alloc_array_and_samples(&data_, nullptr, channels, size, format, 0) < 0)
-  {
-    data_ = nullptr;
-    throw Exception();
-  }
   size_ = size;
 }
 
@@ -45,10 +34,6 @@ Samples::Samples(uint8_t** data, int size) : impl_(new SamplesImpl(data, size))
 }
 
 Samples::Samples(void)
-{
-}
-
-Samples::Samples(int channels, int size, AVSampleFormat format) : impl_(new SamplesImpl(channels, size, format))
 {
 }
 
@@ -70,7 +55,7 @@ Samples::~Samples(void)
 {
 }
 
-uint8_t** Samples::data(void)
+uint8_t**& Samples::data(void)
 {
   return impl_->data_;
 }

@@ -13,7 +13,7 @@ class Callback
 {
 public:
   /** operator() is called by the associated Signal object's Emit() method.*/
-  virtual void operator() (class Signal) = 0;
+  virtual void operator() (class Signal&) = 0;
 };
 
 /**A Signal object is used to notify observers of an event.  When the event
@@ -31,7 +31,7 @@ public:
 
   /**Copy constructor.  Make this Signal be a reference to other.
   @param[in] other Signal to reference.*/
-  Signal(const Signal& other);
+  Signal(Signal const& other);
 
   /**Move constructor.  Make this Signal be a reference to other.
   @param[in] other Signal to reference.*/

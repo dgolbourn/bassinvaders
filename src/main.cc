@@ -14,11 +14,14 @@
 #include "sound.h"
 #include "timer.h"
 #include "animation.h"
+#include "libavutil/mem.h"
+#include "samples.h"
+#include "buffer.h"
 
 class TestCallback : public event::Callback
 {
 public:
-  void operator()(event::Signal signal)
+  void operator()(event::Signal& signal)
   {
     printf("what!\n");
   }
@@ -29,7 +32,7 @@ bool quitflag = false;
 class QuitCallback : public event::Callback
 {
 public:
-  void operator()(event::Signal signal)
+  void operator()(event::Signal& signal)
   {
     quitflag = true;
     printf("who!\n");
@@ -39,7 +42,7 @@ public:
 class UpCallback : public event::Callback
 {
 public:
-  void operator()(event::Signal signal)
+  void operator()(event::Signal& signal)
   {
     printf("up!\n");
   }
@@ -48,7 +51,7 @@ public:
 class DownCallback : public event::Callback
 {
 public:
-  void operator()(event::Signal signal)
+  void operator()(event::Signal& signal)
   {
     printf("down!\n");
   } 
@@ -57,7 +60,7 @@ public:
 class LeftCallback : public event::Callback
 {
 public:
-  void operator()(event::Signal signal)
+  void operator()(event::Signal& signal)
   {
     printf("left!\n");
   }
@@ -66,7 +69,7 @@ public:
 class RightCallback : public event::Callback
 {
 public:
-  void operator()(event::Signal signal)
+  void operator()(event::Signal& signal)
   {
     printf("right!\n");
   }
@@ -77,7 +80,7 @@ class Play : public event::Callback
 public:
   audio::Sound sound_;
 
-  void operator()(event::Signal signal)
+  void operator()(event::Signal& signal)
   {
     sound_.Play();
   }
@@ -94,33 +97,29 @@ void HandleOutput(uint8_t* output, int out_samples)
 int main(int argc, char *argv[]) 
 {
   int ret = 0;
-  display::Window w;
-  display::Texture T;
   try
   {
-    w = display::Window("Bass Invaders");
-    display::Texture S = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
-    T = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
-    T = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
-  }
-  catch(std::exception& e)
-  {
-    fprintf(stderr, "%s", e.what());
-    ret = -1;
-  }
+  
+  display::Window w;
+  display::Texture T;
 
-  display::Texture S0 = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
-  display::Texture S1 = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
-  display::Texture S2 = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
-  display::Texture S3 = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
+  w = display::Window(std::string("Bass Invaders"));
+  display::Texture S = w.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp"));
+  T = w.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp"));
+  T = w.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp"));
+
+  display::Texture S0 = w.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp"));
+  display::Texture S1 = w.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp"));
+  display::Texture S2 = w.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp"));
+  display::Texture S3 = w.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp"));
 
   {
-    display::Font f("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/lazy.ttf", 32, 255, 255, 255);
+    display::Font f(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/lazy.ttf"), 32, 255, 255, 255);
   }
 
-  display::Font g("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/fonts/Batang.ttf", 32, 255, 255, 255);
+  display::Font g(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/fonts/Batang.ttf"), 32, 255, 255, 255);
 
-  display::Texture S4 = w.Text("the quick brown fox...", display::Font("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/lazy.ttf", 32, 0, 0, 0));
+  display::Texture S4 = w.Text(std::string("the quick brown fox..."), display::Font(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/lazy.ttf"), 32, 0, 0, 0));
   w.Clear();
   S3.Render();
   S2.Render(display::BoundingBox(), display::BoundingBox(20,20,20,20));
@@ -141,11 +140,12 @@ int main(int argc, char *argv[])
   event::Trigger L3(DownCallback(), event::down);
   event::Trigger L4(LeftCallback(), event::left);
   event::Trigger L5(RightCallback(), event::right);
-
   audio::Mixer mixer;
   Play play;
-  play.sound_ = mixer.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav");
-  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
+
+  play.sound_ = mixer.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav"));
+  mixer.Music(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3"));
+//  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
   mixer.Resume();
 
   event::Trigger L6(play, event::up);
@@ -169,6 +169,14 @@ int main(int argc, char *argv[])
   }
   catch(...)
   {
+  }
+
+  }
+  catch(std::exception& e)
+  {
+    std::cout << e.what() << std::endl;
+    std::cin.get();
+    ret = -1;
   }
 
   return ret;

@@ -11,7 +11,7 @@ public:
 
   SignalImpl(void);
   ~SignalImpl(void);
-  void Emit(Signal signal);
+  void Emit(Signal& signal);
   void Subscribe(Callback& callback);
   void Unsubscribe(Callback& callback);
 };
@@ -24,7 +24,7 @@ SignalImpl::~SignalImpl(void)
 {
 }
 
-void SignalImpl::Emit(Signal signal)
+void SignalImpl::Emit(Signal& signal)
 {
   for(auto iter = callbacks_.begin(); iter != callbacks_.end(); ++iter)
   {

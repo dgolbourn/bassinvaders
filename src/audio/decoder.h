@@ -7,13 +7,11 @@
 
 namespace audio
 {
-#define BUFFER_SIZE_DEFAULT (1 << 20)
-
 class Decoder
 {
 public:
   Decoder(void);
-  Decoder(std::string filename, int buffer_size = BUFFER_SIZE_DEFAULT);
+  Decoder(std::string& filename, int buffer_size);
   Decoder(Decoder const& other);
   Decoder(Decoder&& other);
   Decoder& operator=(Decoder other);

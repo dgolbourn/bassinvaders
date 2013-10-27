@@ -16,7 +16,7 @@ class Format
 {
 public:
   Format(void);
-  Format(std::string filename);
+  Format(std::string& filename);
   Format(Format const& other);
   Format(Format&& other);
   Format& operator=(Format other);

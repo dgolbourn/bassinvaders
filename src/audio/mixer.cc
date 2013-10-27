@@ -15,11 +15,11 @@ public:
   MixerImpl(void);
   ~MixerImpl(void);
 
-  Sound Load(std::string filename);
-  void Free(std::string filename);
+  Sound Load(std::string& filename);
+  void Free(std::string& filename);
   void Pause(void);
   void Resume(void);
-  void Music(std::string filename);
+  void Music(std::string& filename);
   void SoundVolume(int volume);
   void MusicVolume(int volume);
   std::map<std::string, Sound> sounds_;
@@ -36,7 +36,7 @@ MixerImpl::~MixerImpl(void)
   mix::Quit();
 }  
 
-Sound MixerImpl::Load(std::string filename)
+Sound MixerImpl::Load(std::string& filename)
 {
   Sound sound;
 
@@ -60,7 +60,7 @@ Sound MixerImpl::Load(std::string filename)
   return sound;
 }
 
-void MixerImpl::Free(std::string filename)
+void MixerImpl::Free(std::string& filename)
 {
   auto fileiter = sounds_.find(filename);
   if(fileiter != sounds_.end())
@@ -96,9 +96,10 @@ static void MixCallback(void* music, Uint8* stream, int len)
   ((Decoder*)music)->Read(stream, len);
 }
 
-void MixerImpl::Music(std::string filename)
+void MixerImpl::Music(std::string& filename)
 {
-  music_ = Decoder(filename.c_str());
+  int const buffer_size = 1 << 12;
+  music_ = Decoder(filename, buffer_size);
   Mix_HookMusic(MixCallback, (void*)&music_);
   Mix_PauseMusic();
 }
@@ -125,12 +126,12 @@ Mixer& Mixer::operator=(Mixer other)
   return *this;
 }
 
-Sound Mixer::Load(std::string filename)
+Sound Mixer::Load(std::string& filename)
 {
   return impl_->Load(filename);
 }
 
-void Mixer::Free(std::string filename)
+void Mixer::Free(std::string& filename)
 {
   impl_->Free(filename);
 }
@@ -145,7 +146,7 @@ void Mixer::Resume(void)
   impl_->Resume();
 }
 
-void Mixer::Music(std::string filename)
+void Mixer::Music(std::string& filename)
 {
   impl_->Music(filename);
 }

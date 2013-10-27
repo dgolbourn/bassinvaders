@@ -7,9 +7,7 @@ namespace json
 static std::string ErrorString(json_error_t const& error)
 {
   std::stringstream message;
-
   message << error.text << " " << error.source << " " << error.line << " " << error.column << " " << error.position;
-
   return message.str();
 }
 

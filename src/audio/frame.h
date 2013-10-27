@@ -21,6 +21,7 @@ public:
 
   AVFrame* operator->(void);
   AVFrame* Get(void);
+  void Clear(void);
 private:
   std::shared_ptr<AVFrame> frame_;
 };

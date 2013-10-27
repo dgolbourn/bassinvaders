@@ -6,6 +6,7 @@
 #include "codec.h"
 #include "resampler.h"
 #include "frame.h"
+#include "ffmpeg_exception.h"
 
 #include <queue>
 #include <thread>
@@ -26,7 +27,7 @@ public:
 
   std::thread* thread_;
 
-  DecoderImpl(std::string filename, int buffer_size);
+  DecoderImpl(std::string& filename, int buffer_size);
   ~DecoderImpl(void);
 
   void Decode(void);
@@ -44,7 +45,7 @@ static void ReplenishBufferThread(DecoderImpl* impl)
   }
 }
 
-DecoderImpl::DecoderImpl(std::string filename, int buffer_size)
+DecoderImpl::DecoderImpl(std::string& filename, int buffer_size)
 {
   ffmpeg::Init();
   format_ = ffmpeg::Format(filename);
@@ -72,7 +73,7 @@ void DecoderImpl::Flush(void)
     int frameFinished = 0;
     while(avcodec_decode_audio4(codec_.Get(), frame_.Get(), &frameFinished, packet.Get()) >= 0 && frameFinished)
     {
-      av_frame_unref(frame_.Get());
+      frame_.Clear();
     }
   }
 }
@@ -86,14 +87,21 @@ void DecoderImpl::Decode(void)
     {
       if(packet->stream_index == format_.audio_stream()->index)
       {
-        int frame_finished = 0;
-        avcodec_decode_audio4(codec_.Get(), frame_.Get(), &frame_finished, packet.Get());
-
-        if(frame_finished)
+        while(!packet.Empty())
         {
-          ffmpeg::Samples samples = resampler_.Resample((uint8_t const**)frame_->data, frame_->nb_samples);
-          buffer_.Add(samples);
-          av_frame_unref(frame_.Get());
+          int frame_finished = 0;
+          int amount = avcodec_decode_audio4(codec_.Get(), frame_.Get(), &frame_finished, packet.Get());
+          if(amount < 0)
+          { 
+            throw ffmpeg::Exception();
+          }
+          if(frame_finished)
+          {
+            ffmpeg::Samples samples = resampler_.Resample((uint8_t const**)frame_->data, frame_->nb_samples);
+            buffer_.Add(samples);
+            frame_.Clear();
+          }
+          packet.Next(amount);
         }
       }
     }
@@ -137,7 +145,7 @@ Decoder::Decoder(void)
 {
 }
 
-Decoder::Decoder(std::string filename, int buffer_size) : impl_(new DecoderImpl(filename, buffer_size))
+Decoder::Decoder(std::string& filename, int buffer_size) : impl_(new DecoderImpl(filename, buffer_size))
 {
 }
 

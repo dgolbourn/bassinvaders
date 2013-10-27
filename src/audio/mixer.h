@@ -18,11 +18,11 @@ public:
   Mixer& operator=(Mixer other);
   ~Mixer(void);
 
-  Sound Load(std::string filename);
-  void Free(std::string filename);
+  Sound Load(std::string& filename);
+  void Free(std::string& filename);
   void Pause(void);
   void Resume(void);
-  void Music(std::string filename);
+  void Music(std::string& filename);
   void SoundVolume(int volume);
   void MusicVolume(int volume);
 private:

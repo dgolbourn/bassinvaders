@@ -28,7 +28,7 @@ public:
 
   /**Copy constructor.  Make this Trigger be a reference to other.
   @param[in] other Trigger to reference.*/
-  Trigger(const Trigger& other);
+  Trigger(Trigger const& other);
 
   /**Move constructor.  Make this Trigger be a reference to other.
   @param[in] other Trigger to reference.*/

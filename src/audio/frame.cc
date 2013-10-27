@@ -14,7 +14,7 @@ class Deleter
 public:
   void operator()(AVFrame* frame)
   {
-    av_free(frame);
+    avcodec_free_frame(&frame);
   }
 };
 
@@ -58,6 +58,11 @@ AVFrame* Frame::operator->(void)
 AVFrame* Frame::Get(void)
 {
   return frame_.get();
+}
+
+void Frame::Clear(void)
+{
+  av_frame_unref(frame_.get());
 }
 
 }

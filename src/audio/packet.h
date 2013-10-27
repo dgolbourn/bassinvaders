@@ -21,6 +21,8 @@ public:
 
   AVPacket* operator->(void);
   AVPacket* Get(void);
+  void Next(int amount_used);
+  bool Empty(void);
 private:
   std::shared_ptr<AVPacket> packet_;
 };

@@ -16,13 +16,12 @@ class Samples
 public:
   Samples(uint8_t** data, int size);
   Samples(void);
-  Samples(int channels, int size, AVSampleFormat format);
   Samples(Samples const& other);
   Samples(Samples&& other);
   Samples& operator=(Samples other);
   ~Samples(void);
 
-  uint8_t** data(void);
+  uint8_t**& data(void);
   int size(void);
 private:
   std::shared_ptr<class SamplesImpl> impl_;

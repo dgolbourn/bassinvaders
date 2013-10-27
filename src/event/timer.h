@@ -12,7 +12,7 @@ public:
   Timer(void);
   Timer(int interval, bool repeats);
   ~Timer(void);
-  Timer::Timer(const Timer& other);
+  Timer::Timer(Timer const& other);
   Timer(Timer&& other);
   Timer& operator=(Timer other);
 

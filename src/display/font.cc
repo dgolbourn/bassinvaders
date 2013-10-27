@@ -6,7 +6,7 @@
 namespace display
 {
 
-FontImpl::FontImpl(std::string filename, int point, int r, int g, int b)
+FontImpl::FontImpl(std::string& filename, int point, int r, int g, int b)
 {
   ttf::Init();
   font_ = TTF_OpenFont(filename.c_str(), point);
@@ -29,7 +29,7 @@ FontImpl::~FontImpl(void)
   ttf::Quit();
 }
 
-Font::Font(std::string filename, int point, int r, int g, int b) : impl_(new FontImpl(filename, point, r, g, b))
+Font::Font(std::string& filename, int point, int r, int g, int b) : impl_(new FontImpl(filename, point, r, g, b))
 {
 }
 

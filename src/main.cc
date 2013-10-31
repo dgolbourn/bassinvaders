@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
   Play* play = new Play;
   play->sound_ = mixer.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav"));;
   event::Observer L6(play); event::up.Subscribe(L6);
-  event::Timer timer(1000, true);
+  event::Timer timer(1000);
   timer.Pause();
   event::Observer L7(new DownCallback); timer.Signal().Subscribe(L7);
   timer.Resume();

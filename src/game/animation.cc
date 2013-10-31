@@ -84,7 +84,7 @@ void AnimationImpl::Load(std::string& filename, display::Window& window)
   else
   {
     texture_ = window.Load(std::string(sprite_sheet));
-    timer_ = event::Timer(interval, true);
+    timer_ = event::Timer(interval);
     timer_.Pause();
     trigger_ = event::Observer(new AnimationCallback(*this));
     timer_.Signal().Subscribe(trigger_);
@@ -139,7 +139,7 @@ void AnimationImpl::Resume(void)
 void AnimationImpl::Restart(void)
 {
   mutex_.lock();
-  timer_.Restart();
+  timer_.Resume();
   frame_ = frames_.begin(); 
   mutex_.unlock();
 }

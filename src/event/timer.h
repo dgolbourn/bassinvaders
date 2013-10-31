@@ -10,7 +10,7 @@ class Timer
 {
 public:
   Timer(void);
-  Timer(int interval, bool repeats);
+  Timer(int interval);
   ~Timer(void);
   Timer::Timer(Timer const& other);
   Timer(Timer&& other);
@@ -18,7 +18,6 @@ public:
 
   void Pause(void);
   void Resume(void);
-  void Restart(void);
   Signal Signal(void);
 private:
   std::shared_ptr<class TimerImpl> impl_;

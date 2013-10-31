@@ -25,7 +25,7 @@ public:
 
   bool packets_finished_;
 
-  std::thread* thread_;
+  std::thread thread_;
 
   DecoderImpl(std::string& filename, int buffer_size);
   ~DecoderImpl(void);
@@ -55,13 +55,13 @@ DecoderImpl::DecoderImpl(std::string& filename, int buffer_size)
 
   packets_finished_ = false;
   ReplenishBuffer();
-  thread_ = new std::thread(ReplenishBufferThread, this);
+  thread_ = std::thread(ReplenishBufferThread, this);
 }
 
 DecoderImpl::~DecoderImpl(void)
 {
   packets_finished_ = true;
-  thread_->join();
+  thread_.join();
   Flush();
 }
 

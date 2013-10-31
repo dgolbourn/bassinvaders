@@ -1,6 +1,7 @@
 #include "timer.h"
 #include "SDL_timer.h"
 #include "sdl_manager.h"
+#include "sdl_exception.h"
 
 namespace event
 {
@@ -8,69 +9,87 @@ namespace event
 class TimerImpl
 {
 public:
-  Uint32 paused_start_;
-  Uint32 paused_time_;
+  Uint32 interval_;
+
+  Uint32 last_update_;
+  Uint32 resume_interval_;
 
   SDL_TimerID timer_;
 
-  Uint32 interval_;
-  bool repeats_;
-
   Signal signal_;
 
-  TimerImpl(int interval, bool repeats);
+  TimerImpl(int interval);
   ~TimerImpl(void);
   void Pause(void);
   void Resume(void);
-  void Restart(void);
   Signal Signal(void);
   Uint32 Update(void);
 };
 
 static Uint32 TimerCallback(Uint32 interval, void* param)
 {
-  return ((TimerImpl*)param)->Update();
+  return static_cast<TimerImpl*>(param)->Update();
 }
 
-TimerImpl::TimerImpl(int interval, bool repeats)
+TimerImpl::TimerImpl(int interval)
 {
   sdl::Init(SDL_INIT_TIMER);
-  repeats_ = repeats;
+  timer_ = SDL_AddTimer(interval, TimerCallback, this);
+  if(!timer_)
+  {
+    throw sdl::Exception();
+  }
   interval_ = (Uint32)interval;
-  timer_ = SDL_AddTimer(interval_, TimerCallback, this);
-  paused_start_ = 0;
-  paused_time_ = 0;
+  last_update_ = SDL_GetTicks();
 }
 
 TimerImpl::~TimerImpl(void)
 {
-  SDL_RemoveTimer(timer_);
+  if(timer_)
+  {
+    if(!SDL_RemoveTimer(timer_))
+    {
+      throw sdl::Exception();
+    }
+  }
   sdl::Quit(SDL_INIT_TIMER);
 }
 
 void TimerImpl::Pause(void)
 {
-  if(!paused_start_)
+  if(timer_)
   {
-    paused_start_ = SDL_GetTicks();
+    if(!SDL_RemoveTimer(timer_))
+    {
+      throw sdl::Exception();
+    }
+    timer_ = NULL;
+    resume_interval_ = interval_ - SDL_GetTicks() + last_update_;
   }
 }
 
 void TimerImpl::Resume(void)
 {
-  if(paused_start_)
+  Uint32 interval;
+  if(!timer_)
   {
-    paused_time_ += SDL_GetTicks() - paused_start_;
-    paused_start_ = 0;
+    interval = resume_interval_;
+    last_update_ = SDL_GetTicks() - interval_ + resume_interval_;
   }
-}
-
-void TimerImpl::Restart(void)
-{
-  SDL_RemoveTimer(timer_);
-  timer_ = SDL_AddTimer(interval_, TimerCallback, this);
-  paused_start_ = 0;
-  paused_time_ = 0;
+  else
+  {
+    if(!SDL_RemoveTimer(timer_))
+    {
+      throw sdl::Exception();
+    }
+    interval = interval_;
+    last_update_ = SDL_GetTicks();
+  }
+  timer_ = SDL_AddTimer(interval, TimerCallback, this);
+  if(!timer_)
+  {
+    throw sdl::Exception();
+  }
 }
 
 Signal TimerImpl::Signal(void)
@@ -80,39 +99,15 @@ Signal TimerImpl::Signal(void)
 
 Uint32 TimerImpl::Update(void)
 {
-  Uint32 interval;
-  if(paused_start_)
-  {
-    interval = 1;
-  }
-  else
-  {
-    if(paused_time_)
-    {
-      interval = paused_time_;
-    }
-    else
-    {
-      signal_.Notify();
-      if(repeats_)
-      {
-        interval = interval_;
-      }
-      else
-      {
-        interval = 0;
-      }
-    }
-    paused_time_ = 0;
-  }
-  return interval;
+  signal_.Notify();
+  return interval_;
 }
 
 Timer::Timer(void)
 {
 }
 
-Timer::Timer(int interval, bool repeats) : impl_(new TimerImpl(interval, repeats))
+Timer::Timer(int interval) : impl_(new TimerImpl(interval))
 {
 }
 
@@ -142,11 +137,6 @@ void Timer::Pause(void)
 void Timer::Resume(void)
 {
   impl_->Resume();
-}
-
-void Timer::Restart(void)
-{
-  impl_->Restart();
 }
 
 Signal Timer::Signal(void)

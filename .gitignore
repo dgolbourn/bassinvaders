@@ -11,3 +11,4 @@ build/
 *.project
 *.xcodeproj
 Debug/
+lib/

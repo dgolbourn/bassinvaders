@@ -1,6 +1,6 @@
 #include "animation.h"
 #include "texture.h"
-#include "trigger.h"
+#include "signal.h"
 #include "timer.h"
 #include "jansson.h"
 #include "json_exception.h"
@@ -28,19 +28,18 @@ public:
   void Restart(void);
 
   display::Texture texture_;
-  event::Trigger trigger_;
+  event::Observer trigger_;
   event::Timer timer_;
   std::list<display::BoundingBox> frames_;
   std::list<display::BoundingBox>::iterator frame_;
   std::mutex mutex_;
 };
 
-class AnimationCallback : public event::Callback
+class AnimationCallback : public event::Notification
 {
 public:
   AnimationCallback(AnimationImpl& impl);
-  ~AnimationCallback(void);
-  void operator()(event::Signal& signal);
+  void operator()(void);
   AnimationImpl& impl_;
 };
 
@@ -48,11 +47,7 @@ AnimationCallback::AnimationCallback(AnimationImpl& impl) : impl_(impl)
 {
 }
 
-AnimationCallback::~AnimationCallback(void)
-{
-}
-
-void AnimationCallback::operator()(event::Signal& signal)
+void AnimationCallback::operator()(void)
 {
   impl_.Next();
 }
@@ -91,7 +86,8 @@ void AnimationImpl::Load(std::string& filename, display::Window& window)
     texture_ = window.Load(std::string(sprite_sheet));
     timer_ = event::Timer(interval, true);
     timer_.Pause();
-    trigger_ = event::Trigger(AnimationCallback(*this), timer_.Signal());
+    trigger_ = event::Observer(new AnimationCallback(*this));
+    timer_.Signal().Subscribe(trigger_);
 
     size_t index;
     json_t* value;

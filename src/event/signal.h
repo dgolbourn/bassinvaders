@@ -6,19 +6,17 @@
 namespace event
 {
 
-/**Callback is a function object called by Signal objects when their
-Emit() method is called.  The Callback object should be created by an observer
-who wishes to be informed when a Signal is emitted.*/
-class Callback
+class Notification
 {
 public:
-  /** operator() is called by the associated Signal object's Emit() method.*/
-  virtual void operator() (class Signal&) = 0;
+  virtual void operator()(void) = 0;
 };
 
+typedef std::shared_ptr<Notification> Observer;
+
 /**A Signal object is used to notify observers of an event.  When the event
-occurs, the Signal's Emit() method should be called.  This will notify all
-subscribed observers of the event via their subscribed Callback objects.*/
+occurs, the Signal's Notify() method should be called by the subject.  This
+will call the Notification function objects of each subscribed Observer.*/
 class Signal
 {
 public:
@@ -42,16 +40,12 @@ public:
   @return Reference to this.*/
   Signal& operator=(Signal other);
 
-  /**Emit a signal.  Notify any observers via their subscribed Callback.*/
-  void Emit(void);
+  /**Notify Observers of an event via their Notify methods.*/
+  void Notify(void);
 
-  /**Subscribe a Callback to the Signal.
-  @param[in] callback Reference to the Callback to subscribe.*/
-  void Subscribe(Callback& callback);
-
-  /**Unsubscribe a Callback from the Signal.
-  @param[in] callback Reference to the Callback to unsubscribe.*/
-  void Unsubscribe(Callback& callback);
+  /**Subscribe an Observer to the Signal.
+  @param[in] observer Reference to the Observer to subscribe.*/
+  void Subscribe(Observer const& observer);
 private:
   std::shared_ptr<class SignalImpl> impl_;
 };

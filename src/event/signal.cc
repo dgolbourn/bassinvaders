@@ -4,61 +4,46 @@
 namespace event
 {
 
+typedef std::set<std::weak_ptr<Notification>, std::owner_less<std::weak_ptr<Notification>>> ObserverSet;
+
 class SignalImpl
 {
 public:
-  std::set<Callback*> callbacks_;
+  ObserverSet observers_;
 
-  SignalImpl(void);
-  ~SignalImpl(void);
-  void Emit(Signal& signal);
-  void Subscribe(Callback& callback);
-  void Unsubscribe(Callback& callback);
+  void Notify(void);
+  void Subscribe(Observer const& observer);
 };
 
-SignalImpl::SignalImpl(void)
+void SignalImpl::Notify(void)
 {
-}
-
-SignalImpl::~SignalImpl(void)
-{
-}
-
-void SignalImpl::Emit(Signal& signal)
-{
-  for(auto iter = callbacks_.begin(); iter != callbacks_.end(); ++iter)
+  for(auto iter = observers_.begin(); iter != observers_.end(); ++iter)
   {
-    (**iter)(signal);
+    auto observer = iter->lock();
+    if(observer)
+    {
+      observer->operator()();
+    }
+    else
+    {
+      observers_.erase(iter);
+    }
   }
 }
 
-void SignalImpl::Subscribe(Callback& callback)
+void SignalImpl::Subscribe(Observer const& observer)
 {
-  callbacks_.insert(&callback);
+  observers_.insert(observer);
 }
 
-void SignalImpl::Unsubscribe(Callback& callback)
+void Signal::Notify(void)
 {
-  auto iter = callbacks_.find(&callback);
-  if(iter != callbacks_.end())
-  {
-    callbacks_.erase(iter);
-  }
+  impl_->Notify();
 }
 
-void Signal::Emit(void)
+void Signal::Subscribe(Observer const& observer)
 {
-  impl_->Emit(*this);
-}
-
-void Signal::Subscribe(Callback& callback)
-{
-  impl_->Subscribe(callback);
-}
-
-void Signal::Unsubscribe(Callback& callback)
-{
-  impl_->Unsubscribe(callback);
+  impl_->Subscribe(observer);
 }
 
 Signal::Signal(void) : impl_(new SignalImpl)

@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-namespace audio
+namespace ffmpeg
 {
 class Decoder
 {

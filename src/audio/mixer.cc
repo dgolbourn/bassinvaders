@@ -23,7 +23,7 @@ public:
   void SoundVolume(int volume);
   void MusicVolume(int volume);
   std::map<std::string, Sound> sounds_;
-  Decoder music_;
+  ffmpeg::Decoder music_;
 };
 
 MixerImpl::MixerImpl(void)
@@ -93,13 +93,13 @@ void MixerImpl::MusicVolume(int volume)
 
 static void MixCallback(void* music, Uint8* stream, int len)
 {
-  ((Decoder*)music)->Read(stream, len);
+  ((ffmpeg::Decoder*)music)->Read(stream, len);
 }
 
 void MixerImpl::Music(std::string& filename)
 {
   int const buffer_size = 1 << 12;
-  music_ = Decoder(filename, buffer_size);
+  music_ = ffmpeg::Decoder(filename, buffer_size);
   Mix_HookMusic(MixCallback, (void*)&music_);
   Mix_PauseMusic();
 }

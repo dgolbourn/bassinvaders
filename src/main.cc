@@ -6,7 +6,6 @@
 #include "cstd_exception.h"
 #include "bounding_box.h"
 #include "signal.h"
-#include "trigger.h"
 #include "event.h"
 #include "decoder.h"
 #include "audio_format.h"
@@ -18,10 +17,10 @@
 #include "samples.h"
 #include "buffer.h"
 
-class TestCallback : public event::Callback
+class TestCallback : public event::Notification
 {
 public:
-  void operator()(event::Signal& signal)
+  void operator()(void)
   {
     printf("what!\n");
   }
@@ -29,58 +28,58 @@ public:
 
 bool quitflag = false;
 
-class QuitCallback : public event::Callback
+class QuitCallback : public event::Notification
 {
 public:
-  void operator()(event::Signal& signal)
+  void operator()(void)
   {
     quitflag = true;
     printf("who!\n");
   }
 };
 
-class UpCallback : public event::Callback
+class UpCallback : public event::Notification
 {
 public:
-  void operator()(event::Signal& signal)
+  void operator()(void)
   {
     printf("up!\n");
   }
 };
 
-class DownCallback : public event::Callback
+class DownCallback : public event::Notification
 {
 public:
-  void operator()(event::Signal& signal)
+  void operator()(void)
   {
     printf("down!\n");
   } 
 };
 
-class LeftCallback : public event::Callback
+class LeftCallback : public event::Notification
 {
 public:
-  void operator()(event::Signal& signal)
+  void operator()(void)
   {
     printf("left!\n");
   }
 };
 
-class RightCallback : public event::Callback
+class RightCallback : public event::Notification
 {
 public:
-  void operator()(event::Signal& signal)
+  void operator()(void)
   {
     printf("right!\n");
   }
 };
 
-class Play : public event::Callback
+class Play : public event::Notification
 {
 public:
   audio::Sound sound_;
 
-  void operator()(event::Signal& signal)
+  void operator()(void)
   {
     sound_.Play();
   }
@@ -128,30 +127,30 @@ int main(int argc, char *argv[])
   w.Show();
 
   event::Signal E;
-  event::Trigger L(TestCallback(), E);
+  event::Observer L(new TestCallback);
+  E.Subscribe(L);
 
-  E.Emit();
-  E.Emit();
-  E.Emit();
-  
-  event::Trigger L0(QuitCallback(), event::quit);
-  event::Trigger L1(QuitCallback(), event::trigger);
-  event::Trigger L2(UpCallback(), event::up);
-  event::Trigger L3(DownCallback(), event::down);
-  event::Trigger L4(LeftCallback(), event::left);
-  event::Trigger L5(RightCallback(), event::right);
+  E.Notify();
+  E.Notify();
+  E.Notify();
+
+  event::Observer L0(new QuitCallback); event::quit.Subscribe(L0);
+  event::Observer L1(new QuitCallback); event::trigger.Subscribe(L1);
+  event::Observer L2(new UpCallback); event::up.Subscribe(L2);
+  event::Observer L3(new DownCallback); event::down.Subscribe(L3);
+  event::Observer L4(new LeftCallback); event::left.Subscribe(L4);
+  event::Observer L5(new RightCallback); event::right.Subscribe(L5);
   audio::Mixer mixer;
-  Play play;
-
-  play.sound_ = mixer.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav"));
   mixer.Music(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3"));
 //  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
   mixer.Resume();
 
-  event::Trigger L6(play, event::up);
+  Play* play = new Play;
+  play->sound_ = mixer.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav"));;
+  event::Observer L6(play); event::up.Subscribe(L6);
   event::Timer timer(1000, true);
   timer.Pause();
-  event::Trigger L7(DownCallback(), timer.Signal());
+  event::Observer L7(new DownCallback); timer.Signal().Subscribe(L7);
   timer.Resume();
 
   game::Animation anim(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/file.json"), w);

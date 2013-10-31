@@ -15,7 +15,7 @@ Signal trigger;
 
 static void QuitEvent(void)
 {
-  quit.Emit();
+  quit.Notify();
 }
 
 static void KeydownEvent(SDL_KeyboardEvent& keyboard_event)
@@ -24,22 +24,22 @@ static void KeydownEvent(SDL_KeyboardEvent& keyboard_event)
   {
   case SDL_SCANCODE_UP:
   case SDL_SCANCODE_W:
-    up.Emit();
+    up.Notify();
     break;
   case SDL_SCANCODE_DOWN:
   case SDL_SCANCODE_S:
-    down.Emit();
+    down.Notify();
     break;
   case SDL_SCANCODE_LEFT:
   case SDL_SCANCODE_A:
-    left.Emit();
+    left.Notify();
     break;
   case SDL_SCANCODE_RIGHT:
   case SDL_SCANCODE_D:
-    right.Emit();
+    right.Notify();
     break;
   case SDL_SCANCODE_SPACE:
-    trigger.Emit();
+    trigger.Notify();
     break;
   default:
     break;

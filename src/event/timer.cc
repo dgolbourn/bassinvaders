@@ -93,7 +93,7 @@ Uint32 TimerImpl::Update(void)
     }
     else
     {
-      signal_.Emit();
+      signal_.Notify();
       if(repeats_)
       {
         interval = interval_;

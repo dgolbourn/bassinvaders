@@ -11,7 +11,7 @@
 #include <queue>
 #include <thread>
 
-namespace audio
+namespace ffmpeg
 {
 
 class DecoderImpl

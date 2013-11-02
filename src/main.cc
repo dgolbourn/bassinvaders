@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
   int ret = 0;
   try
   {
-  
+  event::Init();
   display::Window w;
   display::Texture T;
 
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
   E.Notify();
 
   event::Observer L0(new QuitCallback); event::quit.Subscribe(L0);
-  event::Observer L1(new QuitCallback); event::trigger.Subscribe(L1);
+  event::Observer L1(new QuitCallback); event::button1.Subscribe(L1);
   event::Observer L2(new UpCallback); event::up.Subscribe(L2);
   event::Observer L3(new DownCallback); event::down.Subscribe(L3);
   event::Observer L4(new LeftCallback); event::left.Subscribe(L4);

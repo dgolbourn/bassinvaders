@@ -10,10 +10,8 @@ class TimerImpl
 {
 public:
   Uint32 interval_;
-
   Uint32 last_update_;
   Uint32 resume_interval_;
-
   SDL_TimerID timer_;
 
   Signal signal_;
@@ -31,14 +29,28 @@ static Uint32 TimerCallback(Uint32 interval, void* param)
   return static_cast<TimerImpl*>(param)->Update();
 }
 
-TimerImpl::TimerImpl(int interval)
+static SDL_TimerID AddTimer(Uint32 const interval, SDL_TimerCallback const callback, void* const param)
 {
-  sdl::Init(SDL_INIT_TIMER);
-  timer_ = SDL_AddTimer(interval, TimerCallback, this);
-  if(!timer_)
+  SDL_TimerID timer = SDL_AddTimer(interval, callback, param);
+  if(!timer)
   {
     throw sdl::Exception();
   }
+  return timer;
+}
+
+static void RemoveTimer(SDL_TimerID const id)
+{
+  if(!SDL_RemoveTimer(id))
+  {
+    throw sdl::Exception();
+  }
+}
+
+TimerImpl::TimerImpl(int interval)
+{
+  sdl::Init(SDL_INIT_TIMER);
+  timer_ = AddTimer(interval, TimerCallback, this);
   interval_ = (Uint32)interval;
   last_update_ = SDL_GetTicks();
 }
@@ -47,10 +59,7 @@ TimerImpl::~TimerImpl(void)
 {
   if(timer_)
   {
-    if(!SDL_RemoveTimer(timer_))
-    {
-      throw sdl::Exception();
-    }
+    RemoveTimer(timer_);
   }
   sdl::Quit(SDL_INIT_TIMER);
 }
@@ -59,10 +68,7 @@ void TimerImpl::Pause(void)
 {
   if(timer_)
   {
-    if(!SDL_RemoveTimer(timer_))
-    {
-      throw sdl::Exception();
-    }
+    SDL_RemoveTimer(timer_);
     timer_ = NULL;
     resume_interval_ = interval_ - SDL_GetTicks() + last_update_;
   }
@@ -78,18 +84,11 @@ void TimerImpl::Resume(void)
   }
   else
   {
-    if(!SDL_RemoveTimer(timer_))
-    {
-      throw sdl::Exception();
-    }
+    SDL_RemoveTimer(timer_);
     interval = interval_;
     last_update_ = SDL_GetTicks();
   }
-  timer_ = SDL_AddTimer(interval, TimerCallback, this);
-  if(!timer_)
-  {
-    throw sdl::Exception();
-  }
+  timer_ = AddTimer(interval, TimerCallback, this);
 }
 
 Signal TimerImpl::Signal(void)

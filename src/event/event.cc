@@ -3,47 +3,55 @@
 
 namespace event
 {
-
 Signal quit;
 
 Signal up;
 Signal down;
 Signal left;
 Signal right;
+Signal button1;
 
-Signal trigger;
-
-static void QuitEvent(void)
-{
-  quit.Notify();
-}
+std::map<SDL_Scancode, Action> key_map;
 
 static void KeydownEvent(SDL_KeyboardEvent& keyboard_event)
 {
-  switch(keyboard_event.keysym.scancode)
+  auto iter = key_map.find(keyboard_event.keysym.scancode);
+  if(iter != key_map.end())
   {
-  case SDL_SCANCODE_UP:
-  case SDL_SCANCODE_W:
-    up.Notify();
-    break;
-  case SDL_SCANCODE_DOWN:
-  case SDL_SCANCODE_S:
-    down.Notify();
-    break;
-  case SDL_SCANCODE_LEFT:
-  case SDL_SCANCODE_A:
-    left.Notify();
-    break;
-  case SDL_SCANCODE_RIGHT:
-  case SDL_SCANCODE_D:
-    right.Notify();
-    break;
-  case SDL_SCANCODE_SPACE:
-    trigger.Notify();
-    break;
-  default:
-    break;
+    switch(iter->second)
+    {
+    case UP:
+      up.Notify();
+      break;
+    case DOWN:
+      down.Notify();
+      break;
+    case LEFT:
+      left.Notify();
+      break;
+    case RIGHT:
+      right.Notify();
+      break;
+    case BUTTON1:
+      button1.Notify();
+      break;
+    default:
+      break;
+    }
   }
+}
+
+void Init(void)
+{
+  key_map[SDL_SCANCODE_UP] = UP;
+  key_map[SDL_SCANCODE_W] = UP;
+  key_map[SDL_SCANCODE_DOWN] = DOWN;
+  key_map[SDL_SCANCODE_S] = DOWN;
+  key_map[SDL_SCANCODE_LEFT] = LEFT;
+  key_map[SDL_SCANCODE_A] = LEFT;
+  key_map[SDL_SCANCODE_RIGHT] = RIGHT;
+  key_map[SDL_SCANCODE_D] = RIGHT;
+  key_map[SDL_SCANCODE_SPACE] = BUTTON1;
 }
 
 void Events(void)
@@ -54,7 +62,7 @@ void Events(void)
     switch(event.type)
     {
     case SDL_QUIT:
-      QuitEvent();
+      quit.Notify();
       break;
     case SDL_KEYDOWN:
       KeydownEvent(event.key);

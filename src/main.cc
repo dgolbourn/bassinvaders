@@ -32,10 +32,12 @@ class QuitCallback : public event::Notification
 public:
   void operator()(void)
   {
-    quitflag = true;
     printf("who!\n");
   }
 };
+
+int x;
+int y;
 
 class UpCallback : public event::Notification
 {
@@ -43,6 +45,7 @@ public:
   void operator()(void)
   {
     printf("up!\n");
+    y++;
   }
 };
 
@@ -52,6 +55,7 @@ public:
   void operator()(void)
   {
     printf("down!\n");
+    y--;
   } 
 };
 
@@ -61,6 +65,7 @@ public:
   void operator()(void)
   {
     printf("left!\n");
+    x++;
   }
 };
 
@@ -70,6 +75,7 @@ public:
   void operator()(void)
   {
     printf("right!\n");
+    x--;
   }
 };
 
@@ -146,7 +152,7 @@ int main(int argc, char *argv[])
 
   Play* play = new Play;
   play->sound_ = mixer.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav");
-  event::Observer L6(play); event::up.Subscribe(L6);
+  event::Observer L6(play); event::button1.Subscribe(L6);
   event::Timer timer(1000);
   timer.Pause();
   event::Observer L7(new DownCallback); timer.Signal().Subscribe(L7);
@@ -159,7 +165,7 @@ int main(int argc, char *argv[])
   {
     w.Clear();
     event::Event();
-    anim.Render(display::BoundingBox(50,50,400,400));
+    anim.Render(display::BoundingBox(50-10*x,50-10*y,250,250));
     w.Show();
   }
 

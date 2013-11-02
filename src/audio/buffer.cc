@@ -21,7 +21,7 @@ public:
   BufferImpl(int size);
   ~BufferImpl(void);
 
-  void Add(Samples& samples);
+  void Add(Samples const& samples);
   bool Full(void);
   bool Empty(void);
   int Read(uint8_t* buffer, int size);
@@ -43,7 +43,7 @@ BufferImpl::~BufferImpl(void)
 {
 }
 
-void BufferImpl::Add(Samples& samples)
+void BufferImpl::Add(Samples const& samples)
 {
   mutex_.lock();
   bool empty_flag = false;
@@ -125,7 +125,7 @@ int BufferImpl::Read(uint8_t* buffer, int size)
   return start_size;
 }
 
-void Buffer::Add(Samples& samples)
+void Buffer::Add(Samples const& samples)
 {
   impl_->Add(samples);
 }

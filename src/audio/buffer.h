@@ -17,7 +17,7 @@ public:
   Buffer& operator=(Buffer other);
   ~Buffer(void);
 
-  void Add(Samples& samples);
+  void Add(Samples const& samples);
   bool Full(void);
   bool Empty(void);
   int Read(uint8_t* buffer, int size);

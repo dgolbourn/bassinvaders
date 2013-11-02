@@ -11,7 +11,7 @@ class Decoder
 {
 public:
   Decoder(void);
-  Decoder(std::string& filename, int buffer_size);
+  Decoder(std::string const& filename, int buffer_size);
   Decoder(Decoder const& other);
   Decoder(Decoder&& other);
   Decoder& operator=(Decoder other);

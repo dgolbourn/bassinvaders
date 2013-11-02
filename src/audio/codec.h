@@ -15,14 +15,14 @@ class Codec
 {
 public:
   Codec(void);
-  Codec(Format& format);
+  Codec(Format const& format);
   Codec(Codec const& other);
   Codec(Codec&& other);
   Codec& operator=(Codec other);
   ~Codec(void);
 
-  AVCodecContext* operator->(void);
-  AVCodecContext* Get(void);
+  AVCodecContext* operator->(void) const;
+  AVCodecContext* Get(void) const; 
 private:
   std::shared_ptr<AVCodecContext> codec_;
 };

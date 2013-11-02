@@ -19,9 +19,10 @@ public:
   Frame& operator=(Frame other);
   ~Frame(void);
 
-  AVFrame* operator->(void);
-  AVFrame* Get(void);
+  AVFrame* operator->(void) const;
+  AVFrame* Get(void) const;
   void Clear(void);
+  uint8_t const** data(void) const;
 private:
   std::shared_ptr<AVFrame> frame_;
 };

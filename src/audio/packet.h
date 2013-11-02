@@ -19,10 +19,10 @@ public:
   Packet& operator=(Packet other);
   ~Packet(void);
 
-  AVPacket* operator->(void);
-  AVPacket* Get(void);
+  AVPacket* operator->(void) const;
+  AVPacket* Get(void) const;
   void Next(int amount_used);
-  bool Empty(void);
+  bool Empty(void) const;
 private:
   std::shared_ptr<AVPacket> packet_;
 };

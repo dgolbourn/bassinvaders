@@ -17,12 +17,12 @@ public:
   int input_sample_rate_;
   int channels_;
 
-  ResamplerImpl(Codec& codec);
+  ResamplerImpl(Codec const& codec);
   ~ResamplerImpl(void);
   Samples Resample(uint8_t const** input, int in_samples);
 };
 
-ResamplerImpl::ResamplerImpl(Codec& codec)
+ResamplerImpl::ResamplerImpl(Codec const& codec)
 {
   swr_ = swr_alloc();
   if(!swr_)
@@ -60,7 +60,7 @@ Samples ResamplerImpl::Resample(uint8_t const** input, int in_samples)
 {
   uint8_t** output;
   int64_t delay = swr_get_delay(swr_, input_sample_rate_) + in_samples;
-  int out_samples = (int)av_rescale_rnd(delay, FFMPEG_SAMPLE_RATE, input_sample_rate_, AV_ROUND_UP);   
+  int out_samples = static_cast<int>(av_rescale_rnd(delay, FFMPEG_SAMPLE_RATE, input_sample_rate_, AV_ROUND_UP));   
   if(av_samples_alloc_array_and_samples(&output, nullptr, channels_, out_samples, FFMPEG_FORMAT, 0) < 0)
   {
     throw Exception();
@@ -78,7 +78,7 @@ Resampler::Resampler(void)
 {
 }
 
-Resampler::Resampler(Codec& codec) : impl_(new ResamplerImpl(codec))
+Resampler::Resampler(Codec const& codec) : impl_(new ResamplerImpl(codec))
 {
 }
   

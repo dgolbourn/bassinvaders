@@ -15,7 +15,7 @@ public:
   SoundImpl(Mix_Chunk* sound);
   ~SoundImpl(void);
 
-  void Play(void);
+  void Play(void) const;
 };
 
 }

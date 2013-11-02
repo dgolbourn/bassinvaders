@@ -48,12 +48,12 @@ Packet::~Packet(void)
 {
 }
 
-AVPacket* Packet::operator->(void)
+AVPacket* Packet::operator->(void) const
 {
   return packet_.operator->();
 }
 
-AVPacket* Packet::Get(void)
+AVPacket* Packet::Get(void) const
 {
   return packet_.get();
 }
@@ -64,7 +64,7 @@ void Packet::Next(int amount_used)
   packet_->size -= amount_used;
 }
 
-bool Packet::Empty(void)
+bool Packet::Empty(void) const
 {
   return packet_->size <= 0;
 }

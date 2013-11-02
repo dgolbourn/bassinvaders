@@ -50,12 +50,12 @@ Frame::~Frame(void)
 {
 }
 
-AVFrame* Frame::operator->(void)
+AVFrame* Frame::operator->(void) const
 {
   return frame_.operator->();
 }
 
-AVFrame* Frame::Get(void)
+AVFrame* Frame::Get(void) const
 {
   return frame_.get();
 }
@@ -63,6 +63,11 @@ AVFrame* Frame::Get(void)
 void Frame::Clear(void)
 {
   av_frame_unref(frame_.get());
+}
+
+uint8_t const** Frame::data(void) const
+{
+  return (uint8_t const**)frame_.get()->data;
 }
 
 }

@@ -27,7 +27,7 @@ public:
 
   std::thread thread_;
 
-  DecoderImpl(std::string& filename, int buffer_size);
+  DecoderImpl(std::string const& filename, int buffer_size);
   ~DecoderImpl(void);
 
   void Decode(void);
@@ -45,7 +45,7 @@ static void ReplenishBufferThread(DecoderImpl* impl)
   }
 }
 
-DecoderImpl::DecoderImpl(std::string& filename, int buffer_size)
+DecoderImpl::DecoderImpl(std::string const& filename, int buffer_size)
 {
   ffmpeg::Init();
   format_ = ffmpeg::Format(filename);
@@ -97,7 +97,7 @@ void DecoderImpl::Decode(void)
           }
           if(frame_finished)
           {
-            ffmpeg::Samples samples = resampler_.Resample((uint8_t const**)frame_->data, frame_->nb_samples);
+            ffmpeg::Samples samples = resampler_.Resample(frame_.data(), frame_->nb_samples);
             buffer_.Add(samples);
             frame_.Clear();
           }
@@ -145,7 +145,7 @@ Decoder::Decoder(void)
 {
 }
 
-Decoder::Decoder(std::string& filename, int buffer_size) : impl_(new DecoderImpl(filename, buffer_size))
+Decoder::Decoder(std::string const& filename, int buffer_size) : impl_(new DecoderImpl(filename, buffer_size))
 {
 }
 

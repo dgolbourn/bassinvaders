@@ -55,12 +55,12 @@ Samples::~Samples(void)
 {
 }
 
-uint8_t**& Samples::data(void)
+uint8_t**& Samples::data(void) const
 {
   return impl_->data_;
 }
 
-int Samples::size(void)
+int Samples::size(void) const
 {
   return impl_->size_;
 }

@@ -16,7 +16,7 @@ public:
   Sound& operator=(Sound other);
   ~Sound(void);
 
-  void Play(void);
+  void Play(void) const;
 private:
   std::shared_ptr<class SoundImpl> impl_;
 };

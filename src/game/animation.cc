@@ -28,7 +28,7 @@ public:
   void Restart(void);
 
   display::Texture texture_;
-  event::Observer trigger_;
+  event::Observer observer_;
   event::Timer timer_;
   std::list<display::BoundingBox> frames_;
   std::list<display::BoundingBox>::iterator frame_;
@@ -86,8 +86,8 @@ void AnimationImpl::Load(std::string const& filename, display::Window& window)
     texture_ = window.Load(std::string(sprite_sheet));
     timer_ = event::Timer(interval);
     timer_.Pause();
-    trigger_ = event::Observer(new AnimationCallback(*this));
-    timer_.Signal().Subscribe(trigger_);
+    observer_ = event::Observer(new AnimationCallback(*this));
+    timer_.Signal().Subscribe(observer_);
 
     size_t index;
     json_t* value;

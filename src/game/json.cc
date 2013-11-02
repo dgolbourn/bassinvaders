@@ -21,7 +21,7 @@ JSON::~JSON(void)
   }
 }
 
-JSON::JSON(const JSON& other)
+JSON::JSON(JSON const& other)
 {
   json_ = json_incref(other.json_);
 }

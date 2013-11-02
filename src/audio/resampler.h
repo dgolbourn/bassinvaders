@@ -13,7 +13,7 @@ class Resampler
 {
 public:
   Resampler(void);
-  Resampler(Codec& codec);
+  Resampler(Codec const& codec);
   Resampler(Resampler const& other);
   Resampler(Resampler&& other);
   Resampler& operator=(Resampler other);

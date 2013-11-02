@@ -13,7 +13,7 @@ public:
   }
 };
 
-static AVCodecContext* InitAVCodecContext(Format& format)
+static AVCodecContext* InitAVCodecContext(Format const& format)
 {
   AVCodecContext* codec = format.audio_stream()->codec;
   codec->codec = avcodec_find_decoder(codec->codec_id);
@@ -28,7 +28,7 @@ static AVCodecContext* InitAVCodecContext(Format& format)
   return codec;
 }
 
-Codec::Codec(Format& format) : codec_(InitAVCodecContext(format), Deleter())
+Codec::Codec(Format const& format) : codec_(InitAVCodecContext(format), Deleter())
 {
 }
 
@@ -54,12 +54,12 @@ Codec::~Codec(void)
 {
 }
 
-AVCodecContext* Codec::operator->(void)
+AVCodecContext* Codec::operator->(void) const
 {
   return codec_.operator->();
 }
 
-AVCodecContext* Codec::Get(void)
+AVCodecContext* Codec::Get(void) const
 {
   return codec_.get();
 }

@@ -18,13 +18,13 @@ public:
   Mixer& operator=(Mixer other);
   ~Mixer(void);
 
-  Sound Load(std::string& filename);
-  void Free(std::string& filename);
-  void Pause(void);
-  void Resume(void);
-  void Music(std::string& filename);
-  void SoundVolume(int volume);
-  void MusicVolume(int volume);
+  Sound Load(std::string const& filename);
+  void Free(std::string const& filename);
+  void Pause(void) const;
+  void Resume(void) const;
+  void Music(std::string const& filename);
+  void SoundVolume(int volume) const;
+  void MusicVolume(int volume) const;
 private:
   std::shared_ptr<class MixerImpl> impl_;
 };

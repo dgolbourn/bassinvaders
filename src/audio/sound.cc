@@ -15,7 +15,7 @@ SoundImpl::~SoundImpl(void)
   Mix_FreeChunk(sound_);
 }
 
-void SoundImpl::Play(void)
+void SoundImpl::Play(void) const
 {
   if(Mix_PlayChannel(-1, sound_, 0) == -1)
   {
@@ -45,7 +45,7 @@ Sound& Sound::operator=(Sound other)
   return *this;
 }
 
-void Sound::Play(void)
+void Sound::Play(void) const
 {
   impl_->Play();
 }

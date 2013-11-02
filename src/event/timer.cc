@@ -29,7 +29,7 @@ static Uint32 TimerCallback(Uint32 interval, void* param)
   return static_cast<TimerImpl*>(param)->Update();
 }
 
-static SDL_TimerID AddTimer(Uint32 const interval, SDL_TimerCallback const callback, void* const param)
+static SDL_TimerID AddTimer(Uint32 interval, SDL_TimerCallback callback, void* param)
 {
   SDL_TimerID timer = SDL_AddTimer(interval, callback, param);
   if(!timer)
@@ -39,7 +39,7 @@ static SDL_TimerID AddTimer(Uint32 const interval, SDL_TimerCallback const callb
   return timer;
 }
 
-static void RemoveTimer(SDL_TimerID const id)
+static void RemoveTimer(SDL_TimerID id)
 {
   if(!SDL_RemoveTimer(id))
   {
@@ -51,7 +51,7 @@ TimerImpl::TimerImpl(int interval)
 {
   sdl::Init(SDL_INIT_TIMER);
   timer_ = AddTimer(interval, TimerCallback, this);
-  interval_ = (Uint32)interval;
+  interval_ = static_cast<Uint32>(interval);
   last_update_ = SDL_GetTicks();
 }
 
@@ -99,6 +99,7 @@ Signal TimerImpl::Signal(void)
 Uint32 TimerImpl::Update(void)
 {
   signal_.Notify();
+  last_update_ = SDL_GetTicks();
   return interval_;
 }
 

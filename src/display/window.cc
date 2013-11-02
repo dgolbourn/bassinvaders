@@ -16,21 +16,21 @@ namespace display
 class WindowImpl
 {
 public:
-  WindowImpl(std::string& name);
+  WindowImpl(std::string const& name);
   ~WindowImpl(void);
 
-  Texture Load(std::string& filename);
-  Texture Text(std::string& text, Font& font);
-  void Free(std::string& filename);
-  void Clear(void);
-  void Show(void);
+  Texture Load(std::string const& filename);
+  Texture Text(std::string const& text, Font const& font);
+  void Free(std::string const& filename);
+  void Clear(void) const;
+  void Show(void) const;
 
   SDL_Window* window_;
   SDL_Renderer* renderer_;
   std::map<std::string, Texture> files_;
 };
 
-WindowImpl::WindowImpl(std::string& name)
+WindowImpl::WindowImpl(std::string const& name)
 {
   sdl::Init(SDL_INIT_VIDEO);
   img::Init(IMG_INIT_PNG);
@@ -70,7 +70,7 @@ WindowImpl::~WindowImpl(void)
   sdl::Quit(SDL_INIT_VIDEO);
 }
 
-Texture WindowImpl::Load(std::string& filename)
+Texture WindowImpl::Load(std::string const& filename)
 {
   Texture texture;
 
@@ -102,7 +102,7 @@ Texture WindowImpl::Load(std::string& filename)
   return texture;
 }
 
-Texture WindowImpl::Text(std::string& text, Font& font)
+Texture WindowImpl::Text(std::string const& text, Font const& font)
 {
   SDL_Surface* surface = TTF_RenderText_Solid(font.impl_->font_, text.c_str(),
     *font.impl_->colour_);
@@ -124,18 +124,18 @@ Texture WindowImpl::Text(std::string& text, Font& font)
   return texture;
 }
 
-void WindowImpl::Clear(void)
+void WindowImpl::Clear(void) const
 {
   SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF );
   SDL_RenderClear(renderer_);
 }
 
-void WindowImpl::Show(void)
+void WindowImpl::Show(void) const
 {
   SDL_RenderPresent(renderer_);
 }
 
-void WindowImpl::Free(std::string& filename)
+void WindowImpl::Free(std::string const& filename)
 {
   auto fileiter = files_.find(filename);
   if(fileiter != files_.end())
@@ -144,7 +144,7 @@ void WindowImpl::Free(std::string& filename)
   }    
 }
 
-Window::Window(std::string& name) : impl_(new WindowImpl(name))
+Window::Window(std::string const& name) : impl_(new WindowImpl(name))
 {
 }
 
@@ -170,27 +170,27 @@ Window& Window::operator=(Window other)
   return *this;
 }
 
-Texture Window::Load(std::string& filename)
+Texture Window::Load(std::string const& filename)
 {
   return impl_->Load(filename);
 }
 
-void Window::Clear(void)
+void Window::Clear(void) const
 {
   return impl_->Clear();
 }
 
-void Window::Show(void)
+void Window::Show(void) const
 {
   return impl_->Show();
 }
 
-Texture Window::Text(std::string& text, Font& font)
+Texture Window::Text(std::string const& text, Font const& font)
 {
   return impl_->Text(text, font);
 }
 
-void Window::Free(std::string& filename)
+void Window::Free(std::string const& filename)
 {
   impl_->Free(filename);
 }

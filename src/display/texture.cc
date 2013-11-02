@@ -19,7 +19,7 @@ TextureImpl::~TextureImpl(void)
   SDL_DestroyTexture(texture_);
 }
 
-void TextureImpl::Render(int x, int y)
+void TextureImpl::Render(int x, int y) const
 {
   SDL_Rect rect;
   rect.x = x;
@@ -33,12 +33,12 @@ void TextureImpl::Render(int x, int y)
   SDL_RenderCopy(renderer_, texture_, nullptr, &rect);
 }
 
-void TextureImpl::Render(void)
+void TextureImpl::Render(void) const
 {
   SDL_RenderCopy(renderer_, texture_, nullptr, nullptr);
 }
 
-void TextureImpl::Render(BoundingBox& source, BoundingBox& destination)
+void TextureImpl::Render(BoundingBox const& source, BoundingBox const& destination) const
 {
   SDL_Rect* source_rect = nullptr;
   if(source.impl_)
@@ -77,17 +77,17 @@ Texture& Texture::operator=(Texture other)
   return *this;
 }
 
-void Texture::Render(int x, int y)
+void Texture::Render(int x, int y) const
 {
   impl_->Render(x, y);
 }
 
-void Texture::Render(void)
+void Texture::Render(void) const
 {
   impl_->Render();
 }
 
-void Texture::Render(BoundingBox& source, BoundingBox& destination)
+void Texture::Render(BoundingBox const& source, BoundingBox const& destination) const
 {
   impl_->Render(source, destination);
 }

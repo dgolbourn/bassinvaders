@@ -54,7 +54,7 @@ void Init(void)
   key_map[SDL_SCANCODE_SPACE] = BUTTON1;
 }
 
-void Events(void)
+void Event(void)
 {
   SDL_Event event;
   while(SDL_PollEvent(&event))

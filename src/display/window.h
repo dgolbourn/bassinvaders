@@ -17,7 +17,7 @@ class Window
 public:
 /**@throw std::exception Text of exception contains information retrieved 
 from SDL_GetError().*/
-  Window(std::string& name);
+  Window(std::string const& name);
   Window(void);
   ~Window(void);
   Window(Window const& other);
@@ -31,15 +31,15 @@ an SDL texture which is managed such that it is only loaded once.
 @return Texture object.
 @throw std::exception Text of exception contains information retrieved from 
 SDL_GetError() or IMG_GetError() as required.*/
-  Texture Load(std::string& filename);
+  Texture Load(std::string const& filename);
 
-  Texture Text(std::string& text, Font& font);
+  Texture Text(std::string const& text, Font const& font);
 
-  void Free(std::string& filename);
+  void Free(std::string const& filename);
 
-  void Clear(void);
+  void Clear(void) const;
 
-  void Show(void);
+  void Show(void) const;
 private:
   std::shared_ptr<class WindowImpl> impl_;
 };

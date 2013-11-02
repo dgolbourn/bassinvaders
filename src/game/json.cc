@@ -38,12 +38,12 @@ JSON& JSON::operator=(JSON other)
   return *this;
 }
 
-json_t* JSON::Get(void)
+json_t* JSON::Get(void) const
 {
   return json_;
 }
 
-JSON Load(std::string& filename)
+JSON Load(std::string const& filename)
 {
   json_error_t error;
   json_t* json = json_load_file(filename.c_str(), 0, &error);

@@ -11,7 +11,7 @@ class Font
 {
   friend class WindowImpl;
 public:
-  Font(std::string& filename, int point, int r, int g, int b);
+  Font(std::string const& filename, int point, int r, int g, int b);
   Font(void);
   Font(Font const& other);
   Font(Font&& other);

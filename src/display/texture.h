@@ -22,9 +22,9 @@ public:
   ~Texture(void);
   Texture& operator=(Texture other);
 
-  void Render(void);
-  void Render(BoundingBox& source, BoundingBox& destination);
-  void Render(int x, int y);
+  void Render(void) const;
+  void Render(BoundingBox const& source, BoundingBox const& destination) const;
+  void Render(int x, int y) const;
  
 private:
   std::shared_ptr<class TextureImpl> impl_;

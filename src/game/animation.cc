@@ -17,12 +17,12 @@ namespace game
 class AnimationImpl
 {
 public:
-  AnimationImpl(std::string& filename, display::Window& window);
+  AnimationImpl(std::string const& filename, display::Window& window);
   ~AnimationImpl(void);
 
-  void Load(std::string& filename, display::Window& window);
+  void Load(std::string const& filename, display::Window& window);
   void Next(void);
-  void Render(display::BoundingBox& destination);
+  void Render(display::BoundingBox const& destination);
   void Pause(void);
   void Resume(void);
   void Restart(void);
@@ -52,7 +52,7 @@ void AnimationCallback::operator()(void)
   impl_.Next();
 }
 
-AnimationImpl::AnimationImpl(std::string& filename, display::Window& window)
+AnimationImpl::AnimationImpl(std::string const& filename, display::Window& window)
 {
   Load(filename, window);
 }
@@ -61,7 +61,7 @@ AnimationImpl::~AnimationImpl(void)
 {
 }
 
-void AnimationImpl::Load(std::string& filename, display::Window& window)
+void AnimationImpl::Load(std::string const& filename, display::Window& window)
 {
   json::JSON json = json::Load(filename);
 
@@ -119,7 +119,7 @@ void AnimationImpl::Next(void)
   mutex_.unlock();
 }
 
-void AnimationImpl::Render(display::BoundingBox& destination)
+void AnimationImpl::Render(display::BoundingBox const& destination)
 {
   mutex_.lock();
   texture_.Render(*frame_, destination);
@@ -144,12 +144,12 @@ void AnimationImpl::Restart(void)
   mutex_.unlock();
 }
 
-Animation::Animation(std::string& filename, display::Window& window)
+Animation::Animation(std::string const& filename, display::Window& window)
 {
   impl_ = std::shared_ptr<AnimationImpl>(new AnimationImpl(filename, window));
 }
 
-void Animation::Render(display::BoundingBox& destination)
+void Animation::Render(display::BoundingBox const& destination)
 {
   impl_->Render(destination);
 }

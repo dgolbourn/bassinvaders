@@ -16,12 +16,12 @@ public:
   JSON(JSON&& other);
   JSON& operator=(JSON other);
 
-  json_t* Get(void);
+  json_t* Get(void) const;
 private:
   json_t* json_;
 };
 
-JSON Load(std::string& filename);
+JSON Load(std::string const& filename);
 
 }
 #endif

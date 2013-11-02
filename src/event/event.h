@@ -26,7 +26,7 @@ extern Signal left;
 extern Signal right;
 extern Signal button1;
 
-void Events(void);
+void Event(void);
 
 void Init(void);
 }

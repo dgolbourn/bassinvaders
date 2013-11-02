@@ -5,12 +5,12 @@
 namespace display
 {
 
-bool BoundingBox::operator ==(BoundingBox const& compare) const
+bool BoundingBox::operator==(BoundingBox const& compare) const
 {
   return SDL_RectEquals(&impl_->rect_, &compare.impl_->rect_) != 0;
 }
 
-BoundingBox BoundingBox::operator |(BoundingBox const& other)
+BoundingBox BoundingBox::operator|(BoundingBox const& other) const
 {
   BoundingBox intersection;
   (void)SDL_IntersectRect(&impl_->rect_, 
@@ -19,7 +19,7 @@ BoundingBox BoundingBox::operator |(BoundingBox const& other)
   return intersection;
 }
 
-BoundingBox BoundingBox::operator &(BoundingBox const& other)
+BoundingBox BoundingBox::operator&(BoundingBox const& other) const
 {
   BoundingBox complement;
   SDL_UnionRect(&impl_->rect_, 
@@ -28,12 +28,12 @@ BoundingBox BoundingBox::operator &(BoundingBox const& other)
   return complement;
 }
 
-bool BoundingBox::operator &&(BoundingBox const& other)
+bool BoundingBox::operator&&(BoundingBox const& other) const
 {
   return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_) != 0;
 }
 
-bool BoundingBox::Empty(void)
+bool BoundingBox::Empty(void) const
 {
   return SDL_RectEmpty(&impl_->rect_) != 0;
 }

@@ -15,9 +15,9 @@ public:
   TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer);
   ~TextureImpl(void);
 
-  void Render(void);
-  void Render(BoundingBox& source, BoundingBox& destination);
-  void Render(int x, int y);
+  void Render(void) const;
+  void Render(BoundingBox const& source, BoundingBox const& destination) const;
+  void Render(int x, int y) const;
   
   SDL_Texture* texture_;
   SDL_Renderer* renderer_;

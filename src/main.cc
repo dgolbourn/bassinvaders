@@ -13,7 +13,6 @@
 #include "sound.h"
 #include "timer.h"
 #include "animation.h"
-#include "libavutil/mem.h"
 #include "samples.h"
 #include "buffer.h"
 
@@ -141,12 +140,12 @@ int main(int argc, char *argv[])
   event::Observer L4(new LeftCallback); event::left.Subscribe(L4);
   event::Observer L5(new RightCallback); event::right.Subscribe(L5);
   audio::Mixer mixer;
-  mixer.Music(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3"));
+  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
 //  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
   mixer.Resume();
 
   Play* play = new Play;
-  play->sound_ = mixer.Load(std::string("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav"));;
+  play->sound_ = mixer.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav");
   event::Observer L6(play); event::up.Subscribe(L6);
   event::Timer timer(1000);
   timer.Pause();
@@ -154,10 +153,14 @@ int main(int argc, char *argv[])
   timer.Resume();
 
   game::Animation anim("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/file.json", w);
+  anim.Resume();
 
   while(!quitflag)
   {
+    w.Clear();
     event::Event();
+    anim.Render(display::BoundingBox(50,50,400,400));
+    w.Show();
   }
 
   try

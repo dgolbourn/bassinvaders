@@ -35,19 +35,19 @@ public:
   std::mutex mutex_;
 };
 
-class AnimationCallback : public event::Notification
+class AnimationNotification : public event::Notification
 {
 public:
-  AnimationCallback(AnimationImpl& impl);
+  AnimationNotification(AnimationImpl& impl);
   void operator()(void);
   AnimationImpl& impl_;
 };
 
-AnimationCallback::AnimationCallback(AnimationImpl& impl) : impl_(impl)
+AnimationNotification::AnimationNotification(AnimationImpl& impl) : impl_(impl)
 {
 }
 
-void AnimationCallback::operator()(void)
+void AnimationNotification::operator()(void)
 {
   impl_.Next();
 }
@@ -86,7 +86,7 @@ void AnimationImpl::Load(std::string const& filename, display::Window& window)
     texture_ = window.Load(std::string(sprite_sheet));
     timer_ = event::Timer(interval);
     timer_.Pause();
-    observer_ = event::Observer(new AnimationCallback(*this));
+    observer_ = event::Observer(new AnimationNotification(*this));
     timer_.Signal().Subscribe(observer_);
 
     size_t index;

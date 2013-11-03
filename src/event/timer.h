@@ -1,7 +1,6 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 #include <memory>
-#include <vector>
 #include "signal.h"
 
 namespace event

@@ -7,19 +7,12 @@
 
 namespace event
 {
-enum Action
-{
-  UP,
-  DOWN,
-  LEFT,
-  RIGHT,
-  BUTTON1
-};
 
-extern std::map<SDL_Scancode, Action> key_map;
+typedef std::map<SDL_Scancode, Signal> KeyMap;
+
+extern KeyMap key_map;
 
 extern Signal quit;
-
 extern Signal up;
 extern Signal down;
 extern Signal left;

@@ -15,8 +15,9 @@
 #include "animation.h"
 #include "samples.h"
 #include "buffer.h"
+#include "scene.h"
 
-class TestCallback : public event::Notification
+class TestCallback : public event::NotifyCommandImpl
 {
 public:
   void operator()(void)
@@ -27,7 +28,7 @@ public:
 
 bool quitflag = false;
 
-class QuitCallback : public event::Notification
+class QuitCallback : public event::NotifyCommandImpl
 {
 public:
   void operator()(void)
@@ -39,7 +40,7 @@ public:
 int x;
 int y;
 
-class UpCallback : public event::Notification
+class UpCallback : public event::NotifyCommandImpl
 {
 public:
   void operator()(void)
@@ -49,7 +50,7 @@ public:
   }
 };
 
-class DownCallback : public event::Notification
+class DownCallback : public event::NotifyCommandImpl
 {
 public:
   void operator()(void)
@@ -59,7 +60,7 @@ public:
   } 
 };
 
-class LeftCallback : public event::Notification
+class LeftCallback : public event::NotifyCommandImpl
 {
 public:
   void operator()(void)
@@ -69,7 +70,7 @@ public:
   }
 };
 
-class RightCallback : public event::Notification
+class RightCallback : public event::NotifyCommandImpl
 {
 public:
   void operator()(void)
@@ -79,7 +80,7 @@ public:
   }
 };
 
-class Play : public event::Notification
+class Play : public event::NotifyCommandImpl
 {
 public:
   audio::Sound sound_;
@@ -87,6 +88,17 @@ public:
   void operator()(void)
   {
     sound_.Play();
+  }
+};
+
+class Show : public game::RenderCommandImpl
+{
+public:
+  game::Animation anim_;
+
+  void operator()(void)
+  {
+    anim_.Render(display::BoundingBox(50-10*x,50-10*y,250,250));
   }
 };
 
@@ -132,19 +144,19 @@ int main(int argc, char *argv[])
   w.Show();
 
   event::Signal E;
-  event::Observer L(new TestCallback);
+  event::NotifyCommand L(new TestCallback);
   E.Subscribe(L);
 
   E.Notify();
   E.Notify();
   E.Notify();
 
-  event::Observer L0(new QuitCallback); event::quit.Subscribe(L0);
-  event::Observer L1(new QuitCallback); event::button1.Subscribe(L1);
-  event::Observer L2(new UpCallback); event::up.Subscribe(L2);
-  event::Observer L3(new DownCallback); event::down.Subscribe(L3);
-  event::Observer L4(new LeftCallback); event::left.Subscribe(L4);
-  event::Observer L5(new RightCallback); event::right.Subscribe(L5);
+  event::NotifyCommand L0(new QuitCallback); event::quit.Subscribe(L0);
+  event::NotifyCommand L1(new QuitCallback); event::button1.Subscribe(L1);
+  event::NotifyCommand L2(new UpCallback); event::up.Subscribe(L2);
+  event::NotifyCommand L3(new DownCallback); event::down.Subscribe(L3);
+  event::NotifyCommand L4(new LeftCallback); event::left.Subscribe(L4);
+  event::NotifyCommand L5(new RightCallback); event::right.Subscribe(L5);
   audio::Mixer mixer;
   mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
 //  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
@@ -152,20 +164,27 @@ int main(int argc, char *argv[])
 
   Play* play = new Play;
   play->sound_ = mixer.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav");
-  event::Observer L6(play); event::button1.Subscribe(L6);
+  event::NotifyCommand L6(play); event::button1.Subscribe(L6);
   event::Timer timer(1000);
   timer.Pause();
-  event::Observer L7(new DownCallback); timer.Signal().Subscribe(L7);
+  event::NotifyCommand L7(new DownCallback); timer.Signal().Subscribe(L7);
   timer.Resume();
 
   game::Animation anim("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/file.json", w);
   anim.Resume();
 
+  Show* Sh = new Show;
+  Sh->anim_ = anim;
+  auto sr = game::RenderCommand(Sh);
+
+  game::Scene Sc;
+  Sc.Subscribe(sr, 0);
+
   while(!quitflag)
   {
-    w.Clear();
     event::Event();
-    anim.Render(display::BoundingBox(50-10*x,50-10*y,250,250));
+    w.Clear();
+    Sc.Render();
     w.Show();
   }
 

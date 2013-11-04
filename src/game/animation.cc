@@ -8,7 +8,7 @@
 #include "bounding_box.h"
 
 #include <string>
-#include <list>
+#include <vector>
 #include <mutex>
 
 namespace game
@@ -18,8 +18,6 @@ class AnimationImpl
 {
 public:
   AnimationImpl(std::string const& filename, display::Window& window);
-  ~AnimationImpl(void);
-
   void Load(std::string const& filename, display::Window& window);
   void Next(void);
   void Render(display::BoundingBox const& destination);
@@ -28,26 +26,26 @@ public:
   void Restart(void);
 
   display::Texture texture_;
-  event::Observer observer_;
+  event::NotifyCommand notify_;
   event::Timer timer_;
-  std::list<display::BoundingBox> frames_;
-  std::list<display::BoundingBox>::iterator frame_;
+  std::vector<display::BoundingBox> frames_;
+  std::vector<display::BoundingBox>::iterator frame_;
   std::mutex mutex_;
 };
 
-class AnimationNotification : public event::Notification
+class AnimationCommand : public event::NotifyCommandImpl
 {
 public:
-  AnimationNotification(AnimationImpl& impl);
+  AnimationCommand(AnimationImpl& impl);
   void operator()(void);
   AnimationImpl& impl_;
 };
 
-AnimationNotification::AnimationNotification(AnimationImpl& impl) : impl_(impl)
+AnimationCommand::AnimationCommand(AnimationImpl& impl) : impl_(impl)
 {
 }
 
-void AnimationNotification::operator()(void)
+void AnimationCommand::operator()(void)
 {
   impl_.Next();
 }
@@ -55,10 +53,6 @@ void AnimationNotification::operator()(void)
 AnimationImpl::AnimationImpl(std::string const& filename, display::Window& window)
 {
   Load(filename, window);
-}
-
-AnimationImpl::~AnimationImpl(void)
-{
 }
 
 void AnimationImpl::Load(std::string const& filename, display::Window& window)
@@ -86,8 +80,8 @@ void AnimationImpl::Load(std::string const& filename, display::Window& window)
     texture_ = window.Load(std::string(sprite_sheet));
     timer_ = event::Timer(interval);
     timer_.Pause();
-    observer_ = event::Observer(new AnimationNotification(*this));
-    timer_.Signal().Subscribe(observer_);
+    notify_ = event::NotifyCommand(new AnimationCommand(*this));
+    timer_.Signal().Subscribe(notify_);
 
     size_t index;
     json_t* value;

@@ -10,14 +10,14 @@ class Timer
 public:
   Timer(void);
   Timer(int interval);
-  ~Timer(void);
-  Timer::Timer(Timer const& other);
-  Timer(Timer&& other);
-  Timer& operator=(Timer other);
-
   void Pause(void);
   void Resume(void);
   Signal Signal(void);
+
+  ~Timer(void);
+  Timer(Timer const& other);
+  Timer(Timer&& other);
+  Timer& operator=(Timer other);
 private:
   std::shared_ptr<class TimerImpl> impl_;
 };

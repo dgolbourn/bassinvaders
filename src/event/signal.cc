@@ -4,36 +4,36 @@
 namespace event
 {
 
-typedef std::set<std::weak_ptr<Notification>, std::owner_less<std::weak_ptr<Notification>>> ObserverSet;
+typedef std::set<std::weak_ptr<NotifyCommandImpl>, std::owner_less<std::weak_ptr<NotifyCommandImpl>>> NotifyCommandSet;
 
 class SignalImpl
 {
 public:
-  ObserverSet observers_;
+  NotifyCommandSet notifies_;
 
   void Notify(void);
-  void Subscribe(Observer const& observer);
+  void Subscribe(NotifyCommand const& notify);
 };
 
 void SignalImpl::Notify(void)
 {
-  for(auto iter = observers_.begin(); iter != observers_.end(); ++iter)
+  for(auto iter = notifies_.begin(); iter != notifies_.end(); ++iter)
   {
-    auto observer = iter->lock();
-    if(observer)
+    auto notify = iter->lock();
+    if(notify)
     {
-      observer->operator()();
+      notify->operator()();
     }
     else
     {
-      observers_.erase(iter);
+      notifies_.erase(iter);
     }
   }
 }
 
-void SignalImpl::Subscribe(Observer const& observer)
+void SignalImpl::Subscribe(NotifyCommand const& notify)
 {
-  observers_.insert(observer);
+  notifies_.insert(notify);
 }
 
 void Signal::Notify(void)
@@ -41,9 +41,9 @@ void Signal::Notify(void)
   impl_->Notify();
 }
 
-void Signal::Subscribe(Observer const& observer)
+void Signal::Subscribe(NotifyCommand const& notify)
 {
-  impl_->Subscribe(observer);
+  impl_->Subscribe(notify);
 }
 
 Signal::Signal(void) : impl_(new SignalImpl)

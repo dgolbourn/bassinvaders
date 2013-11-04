@@ -11,12 +11,12 @@ class Sound
   friend class MixerImpl;
 public:
   Sound(void);
+  void Play(void) const;
+
   Sound(Sound const& other);
   Sound(Sound&& other);
   Sound& operator=(Sound other);
   ~Sound(void);
-
-  void Play(void) const;
 private:
   std::shared_ptr<class SoundImpl> impl_;
 };

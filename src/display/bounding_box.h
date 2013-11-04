@@ -12,10 +12,6 @@ class BoundingBox
 public:
   BoundingBox(void);
   BoundingBox(int x, int y, int w, int h);
-  BoundingBox(BoundingBox const& other);
-  BoundingBox(BoundingBox&& other);
-  ~BoundingBox(void);
-  BoundingBox& operator=(BoundingBox other);
 
   /**Return true if both bounding boxes are identical.*/
   bool operator==(BoundingBox const& compare) const;
@@ -31,6 +27,11 @@ public:
 
   /**Return true if the bounding box has no extent.*/
   bool Empty(void) const;
+
+  BoundingBox(BoundingBox const& other);
+  BoundingBox(BoundingBox&& other);
+  ~BoundingBox(void);
+  BoundingBox& operator=(BoundingBox other);
 private:
   std::shared_ptr<class BoundingBoxImpl> impl_;
 };

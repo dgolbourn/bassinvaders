@@ -1,6 +1,6 @@
 #include "window.h"
 #include <memory>
-#include <map>
+#include <unordered_map>
 #include "sdl_manager.h"
 #include "img_manager.h"
 #include "ttf_manager.h"
@@ -27,7 +27,7 @@ public:
 
   SDL_Window* window_;
   SDL_Renderer* renderer_;
-  std::map<std::string, Texture> files_;
+  std::unordered_map<std::string, Texture> files_;
 };
 
 WindowImpl::WindowImpl(std::string const& name)

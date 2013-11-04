@@ -3,12 +3,12 @@
 
 #include "signal.h"
 #include "SDL_scancode.h"
-#include <map>
+#include <unordered_map>
 
 namespace event
 {
 
-typedef std::map<SDL_Scancode, Signal> KeyMap;
+typedef std::unordered_map<SDL_Scancode, Signal> KeyMap;
 
 extern KeyMap key_map;
 

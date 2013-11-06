@@ -22,7 +22,3 @@
 	path = lib/ffmpeg
 	url = https://github.com/FFmpeg/FFmpeg.git
 	ignore = dirty	
-[submodule "lib/ode"]
-	path = lib/ode
-	url = https://github.com/vancegroup-mirrors/open-dynamics-engine-svnmirror.git
-	ignore = dirty

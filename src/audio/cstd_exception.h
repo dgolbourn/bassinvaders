@@ -13,5 +13,4 @@ public:
   Exception() : std::system_error(errno, std::system_category()){}
 };
 }
-
 #endif

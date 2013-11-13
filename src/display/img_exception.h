@@ -14,5 +14,4 @@ public:
   Exception() : std::runtime_error(IMG_GetError()) { }
 };
 }
-
 #endif

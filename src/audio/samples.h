@@ -10,23 +10,20 @@ extern "C"
 
 namespace ffmpeg
 {
-
 class Samples
 {
 public:
   Samples(uint8_t** data, int size);
   Samples(void);
+  uint8_t**& data(void) const;
+  int size(void) const;
+
+  ~Samples(void);
   Samples(Samples const& other);
   Samples(Samples&& other);
   Samples& operator=(Samples other);
-  ~Samples(void);
-
-  uint8_t**& data(void) const;
-  int size(void) const;
 private:
   std::shared_ptr<class SamplesImpl> impl_;
 };
-
 }
-
 #endif

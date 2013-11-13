@@ -14,5 +14,4 @@ public:
   Exception(json_error_t const& error);
 };
 }
-
 #endif

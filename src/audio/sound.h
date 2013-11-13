@@ -5,7 +5,6 @@
 
 namespace audio
 {
-
 class Sound
 {
   friend class MixerImpl;
@@ -20,7 +19,5 @@ public:
 private:
   std::shared_ptr<class SoundImpl> impl_;
 };
-
 }
-
 #endif

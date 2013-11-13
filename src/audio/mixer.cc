@@ -8,13 +8,10 @@
 
 namespace audio
 {
-
 class MixerImpl
 {  
 public:
   MixerImpl(void);
-  ~MixerImpl(void);
-
   Sound Load(std::string const& filename);
   void Free(std::string const& filename);
   void Pause(void) const;
@@ -22,6 +19,9 @@ public:
   void Music(std::string const& filename);
   void SoundVolume(int volume) const;
   void MusicVolume(int volume) const;
+
+  ~MixerImpl(void);
+
   std::map<std::string, Sound> sounds_;
   ffmpeg::Decoder music_;
 };
@@ -104,7 +104,7 @@ void MixerImpl::Music(std::string const& filename)
   Mix_PauseMusic();
 }
 
-Mixer::Mixer(void) : impl_((new MixerImpl))
+Mixer::Mixer(void) : impl_(new MixerImpl())
 {
 }
 

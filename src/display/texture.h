@@ -22,6 +22,5 @@ public:
 private:
   std::shared_ptr<class TextureImpl> impl_;
 };
-
 }
 #endif

@@ -7,7 +7,6 @@
 
 namespace event
 {
-
 typedef std::unordered_map<SDL_Scancode, Signal> KeyMap;
 
 extern KeyMap key_map;
@@ -23,5 +22,4 @@ void Event(void);
 
 void Init(void);
 }
-
 #endif

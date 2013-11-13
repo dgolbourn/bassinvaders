@@ -17,13 +17,13 @@ class WindowImpl
 {
 public:
   WindowImpl(std::string const& name);
-  ~WindowImpl(void);
-
   Texture Load(std::string const& filename);
   Texture Text(std::string const& text, Font const& font);
   void Free(std::string const& filename);
   void Clear(void) const;
   void Show(void) const;
+
+  ~WindowImpl(void);
 
   SDL_Window* window_;
   SDL_Renderer* renderer_;
@@ -105,7 +105,7 @@ Texture WindowImpl::Load(std::string const& filename)
 Texture WindowImpl::Text(std::string const& text, Font const& font)
 {
   SDL_Surface* surface = TTF_RenderText_Solid(font.impl_->font_, text.c_str(),
-    *font.impl_->colour_);
+    font.impl_->colour_);
   if(!surface)
   {
     throw ttf::Exception();

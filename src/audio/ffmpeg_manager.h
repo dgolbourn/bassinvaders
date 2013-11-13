@@ -5,5 +5,4 @@ namespace ffmpeg
 {
 void Init(void);
 }
-
 #endif

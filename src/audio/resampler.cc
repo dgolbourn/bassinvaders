@@ -9,17 +9,17 @@ extern "C"
 
 namespace ffmpeg
 {
-
 class ResamplerImpl
 {
 public:
+  ResamplerImpl(Codec const& codec);
+  Samples Resample(uint8_t const** input, int in_samples);
+
+  ~ResamplerImpl(void);
+
   SwrContext* swr_;
   int input_sample_rate_;
   int channels_;
-
-  ResamplerImpl(Codec const& codec);
-  ~ResamplerImpl(void);
-  Samples Resample(uint8_t const** input, int in_samples);
 };
 
 ResamplerImpl::ResamplerImpl(Codec const& codec)

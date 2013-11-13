@@ -1,7 +1,7 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 #include <memory>
-#include "signal.h"
+#include "command.h"
 
 namespace event
 {
@@ -12,7 +12,7 @@ public:
   Timer(int interval);
   void Pause(void);
   void Resume(void);
-  Signal Signal(void);
+  void Add(Command const& command);
 
   ~Timer(void);
   Timer(Timer const& other);

@@ -10,23 +10,20 @@ extern "C"
 
 namespace ffmpeg
 {
-
 class Codec
 {
 public:
   Codec(void);
   Codec(Format const& format);
+  AVCodecContext* operator->(void) const;
+  operator AVCodecContext*(void) const;
+
   Codec(Codec const& other);
   Codec(Codec&& other);
   Codec& operator=(Codec other);
   ~Codec(void);
-
-  AVCodecContext* operator->(void) const;
-  AVCodecContext* Get(void) const; 
 private:
   std::shared_ptr<AVCodecContext> codec_;
 };
-
 }
-
 #endif

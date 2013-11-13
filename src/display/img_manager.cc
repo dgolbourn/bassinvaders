@@ -19,7 +19,7 @@ void Init(int flags)
     if(flags & 0x01)
     {
       reference_count[index]++;
-      quit_flags &= ~((int)0x01 << index);
+      quit_flags &= ~(static_cast<int>(0x01) << index);
     }
     flags >>= 1u;
     index++;
@@ -39,7 +39,7 @@ void Quit(int flags)
 
         if(reference_count[index] == 0)
         {
-          quit_flags |= ((int)0x01 << index);
+          quit_flags |= static_cast<int>(0x01) << index;
         }
       }
     }

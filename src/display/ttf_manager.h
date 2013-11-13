@@ -15,5 +15,4 @@ void Init(void);
 reference count is 0.*/
 void Quit(void);
 }
-
 #endif

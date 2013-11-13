@@ -5,13 +5,10 @@
 
 namespace display
 {
-
 class BoundingBoxImpl
 {
 public:
   SDL_Rect rect_;
 };
-
 }
-
 #endif

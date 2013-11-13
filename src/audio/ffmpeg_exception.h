@@ -11,5 +11,4 @@ public:
   Exception() : std::runtime_error("FFMPEG error") { }
 };
 }
-
 #endif

@@ -12,5 +12,4 @@ public:
   Exception() : std::runtime_error(Mix_GetError()) { }
 };
 }
-
 #endif

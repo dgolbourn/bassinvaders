@@ -1,24 +1,34 @@
 #include "json.h"
+#include "va_list.h"
+#include "jansson.h"
 #include "json_exception.h"
 
 namespace json
 {
 JSON::JSON(void)
 {
-  json_ = nullptr;
+  json_ = json_null();
 }
 
 JSON::JSON(json_t* json)
 {
+  json_ = json_incref(json);
+}
+
+JSON::JSON(std::string const& filename)
+{
+  json_error_t error;
+  json_t* json = json_load_file(filename.c_str(), 0, &error);
+  if(!json)
+  {
+    throw Exception(error);
+  }
   json_ = json;
 }
 
 JSON::~JSON(void)
 {
-  if(json_)
-  {
-    json_object_clear(json_);
-  }
+  json_object_clear(json_);
 }
 
 JSON::JSON(JSON const& other)
@@ -26,10 +36,9 @@ JSON::JSON(JSON const& other)
   json_ = json_incref(other.json_);
 }
 
-JSON::JSON(JSON&& other)
+JSON::JSON(JSON&& other) : JSON()
 {
-  json_ = other.json_;
-  other.json_ = nullptr;
+  std::swap(json_, other.json_);
 }
 
 JSON& JSON::operator=(JSON other)
@@ -38,20 +47,12 @@ JSON& JSON::operator=(JSON other)
   return *this;
 }
 
-json_t* JSON::Get(void) const
-{
-  return json_;
-}
-
-JSON Load(std::string const& filename)
+void JSON::Unpack(std::string const& format, int dummy, ...) const
 {
   json_error_t error;
-  json_t* json = json_load_file(filename.c_str(), 0, &error);
-  if(!json) 
+  if(json_vunpack_ex(json_, &error, JSON_STRICT, format.c_str(), cstd::VAList<int>(dummy)) == -1)
   {
-    throw Exception(error);
+    throw json::Exception(error);
   }
-  return JSON(json);
 }
-
 }

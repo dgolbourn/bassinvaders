@@ -6,7 +6,6 @@
 
 namespace display
 {
-
 class Font
 {
   friend class WindowImpl;
@@ -21,6 +20,5 @@ public:
 private:
   std::shared_ptr<class FontImpl> impl_;
 };
-
 }
 #endif

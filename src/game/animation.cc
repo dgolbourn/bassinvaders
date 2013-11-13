@@ -4,7 +4,6 @@
 #include "timer.h"
 #include "jansson.h"
 #include "json_exception.h"
-#include "json.h"
 #include "bounding_box.h"
 
 #include <string>
@@ -13,12 +12,12 @@
 
 namespace game
 {
-
 class AnimationImpl
 {
 public:
   AnimationImpl(std::string const& filename, display::Window& window);
-  void Load(std::string const& filename, display::Window& window);
+  AnimationImpl(json::JSON const& json, display::Window& window);
+  void Load(json::JSON const& json, display::Window& window);
   void Next(void);
   void Render(display::BoundingBox const& destination);
   void Pause(void);
@@ -26,18 +25,18 @@ public:
   void Restart(void);
 
   display::Texture texture_;
-  event::NotifyCommand notify_;
+  event::Command notify_;
   event::Timer timer_;
   std::vector<display::BoundingBox> frames_;
   std::vector<display::BoundingBox>::iterator frame_;
   std::mutex mutex_;
 };
 
-class AnimationCommand : public event::NotifyCommandImpl
+class AnimationCommand : public event::CommandImpl
 {
 public:
   AnimationCommand(AnimationImpl& impl);
-  void operator()(void);
+  void operator()(void) final;
   AnimationImpl& impl_;
 };
 
@@ -52,54 +51,48 @@ void AnimationCommand::operator()(void)
 
 AnimationImpl::AnimationImpl(std::string const& filename, display::Window& window)
 {
-  Load(filename, window);
+  Load(json::JSON(filename), window);
 }
 
-void AnimationImpl::Load(std::string const& filename, display::Window& window)
+AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
 {
-  json::JSON json = json::Load(filename);
+  Load(json, window);
+}
 
+void AnimationImpl::Load(json::JSON const& json, display::Window& window)
+{
   char const* sprite_sheet;
   int interval;
-  int height;
   int width;
+  int height;
   json_t* frames;
 
-  json_error_t error;
-  if(json_unpack_ex(json.Get(), &error, JSON_STRICT, "{sssisisiso}", 
-    "sprite sheet", &sprite_sheet, 
+  json.Unpack("{sssisisiso}", 0, 
+    "sprite sheet", &sprite_sheet,
     "interval", &interval,
     "width", &width,
     "height", &height,
-    "frames", &frames) == -1)
-  { 
-    throw json::Exception(error);
-  }
-  else
-  {
-    texture_ = window.Load(std::string(sprite_sheet));
-    timer_ = event::Timer(interval);
-    timer_.Pause();
-    notify_ = event::NotifyCommand(new AnimationCommand(*this));
-    timer_.Signal().Subscribe(notify_);
+    "frames", &frames);
 
-    size_t index;
-    json_t* value;
-    json_array_foreach(frames, index, value)
-    {
-      int x;
-      int y;
-      if(json_unpack_ex(value, &error, JSON_STRICT, "[ii]", &x, &y) == -1)
-      {
-        throw json::Exception(error);
-      }
-      else
-      {
-        frames_.push_back(display::BoundingBox(x, y, width, height));
-      }
-    }
-    frame_ = frames_.begin(); 
+  texture_ = window.Load(std::string(sprite_sheet));
+  notify_ = event::Command(new AnimationCommand(*this));
+  timer_ = event::Timer(interval);
+  timer_.Pause();
+  timer_.Add(notify_);
+  frames_ = std::vector<display::BoundingBox>(json_array_size(frames));
+  frame_ = frames_.begin();
+
+  size_t index;
+  json_t* value;
+  json_array_foreach(frames, index, value)
+  {
+    int x;
+    int y;
+    json::JSON(value).Unpack("[ii]", 0, &x, &y);
+    *frame_ = display::BoundingBox(x, y, width, height);
+    ++frame_;
   }
+  frame_ = frames_.begin(); 
 }
 
 void AnimationImpl::Next(void)
@@ -143,6 +136,11 @@ Animation::Animation(std::string const& filename, display::Window& window)
   impl_ = std::shared_ptr<AnimationImpl>(new AnimationImpl(filename, window));
 }
 
+Animation::Animation(json::JSON const& json, display::Window& window)
+{
+  impl_ = std::shared_ptr<AnimationImpl>(new AnimationImpl(json, window));
+}
+
 void Animation::Render(display::BoundingBox const& destination)
 {
   impl_->Render(destination);
@@ -184,5 +182,4 @@ Animation& Animation::operator=(Animation other)
   std::swap(impl_, other.impl_);
   return *this;
 }
-
 }

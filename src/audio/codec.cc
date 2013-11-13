@@ -3,7 +3,6 @@
 
 namespace ffmpeg
 {
-
 class Deleter
 {
 public:
@@ -59,7 +58,7 @@ AVCodecContext* Codec::operator->(void) const
   return codec_.operator->();
 }
 
-AVCodecContext* Codec::Get(void) const
+Codec::operator AVCodecContext*(void) const
 {
   return codec_.get();
 }

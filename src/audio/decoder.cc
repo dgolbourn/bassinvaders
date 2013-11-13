@@ -13,35 +13,32 @@
 
 namespace ffmpeg
 {
-
 class DecoderImpl
 {
 public:
+  DecoderImpl(std::string const& filename, int buffer_size);
+  void Decode(void);
+  void FillBuffer(void);
+  bool Empty(void) const;
+  void Read(uint8_t* buffer, int size);
+  void Flush(void);
+
+  ~DecoderImpl(void);
+
   ffmpeg::Format format_;
   ffmpeg::Codec codec_;
   ffmpeg::Resampler resampler_;
   ffmpeg::Frame frame_;
   ffmpeg::Buffer buffer_;
-
   bool packets_finished_;
-
   std::thread thread_;
-
-  DecoderImpl(std::string const& filename, int buffer_size);
-  ~DecoderImpl(void);
-
-  void Decode(void);
-  void ReplenishBuffer(void);
-  bool Empty(void);
-  void Read(uint8_t* buffer, int size);
-  void Flush(void);
 };
 
-static void ReplenishBufferThread(DecoderImpl* impl)
+static void FillBufferThread(DecoderImpl* impl)
 {
   while(!impl->packets_finished_)
   {
-    impl->ReplenishBuffer();
+    impl->FillBuffer();
   }
 }
 
@@ -54,8 +51,8 @@ DecoderImpl::DecoderImpl(std::string const& filename, int buffer_size)
   buffer_ = ffmpeg::Buffer(buffer_size);
 
   packets_finished_ = false;
-  ReplenishBuffer();
-  thread_ = std::thread(ReplenishBufferThread, this);
+  FillBuffer();
+  thread_ = std::thread(FillBufferThread, this);
 }
 
 DecoderImpl::~DecoderImpl(void)
@@ -71,7 +68,7 @@ void DecoderImpl::Flush(void)
   {
     ffmpeg::Packet packet;
     int frameFinished = 0;
-    while(avcodec_decode_audio4(codec_.Get(), frame_.Get(), &frameFinished, packet.Get()) >= 0 && frameFinished)
+    while(avcodec_decode_audio4(codec_, frame_, &frameFinished, packet) >= 0 && frameFinished)
     {
       frame_.Clear();
     }
@@ -83,14 +80,14 @@ void DecoderImpl::Decode(void)
   if(!packets_finished_) 
   {
     ffmpeg::Packet packet;
-    if(av_read_frame(format_.format(), packet.Get()) == 0)
+    if(av_read_frame(format_.format(), packet) == 0)
     {
       if(packet->stream_index == format_.audio_stream()->index)
       {
-        while(!packet.Empty())
+        while(packet)
         {
           int frame_finished = 0;
-          int amount = avcodec_decode_audio4(codec_.Get(), frame_.Get(), &frame_finished, packet.Get());
+          int amount = avcodec_decode_audio4(codec_, frame_, &frame_finished, packet);
           if(amount < 0)
           { 
             throw ffmpeg::Exception();
@@ -112,7 +109,7 @@ void DecoderImpl::Decode(void)
   }
 }
 
-void DecoderImpl::ReplenishBuffer(void)
+void DecoderImpl::FillBuffer(void)
 {
   while(!buffer_.Full() && !packets_finished_)
   {
@@ -120,9 +117,9 @@ void DecoderImpl::ReplenishBuffer(void)
   } 
 }
 
-bool DecoderImpl::Empty(void)
+bool DecoderImpl::Empty(void) const
 {
-  return buffer_.Empty() && packets_finished_;
+  return !buffer_ && packets_finished_;
 }
 
 void DecoderImpl::Read(uint8_t* buffer, int size)
@@ -172,9 +169,9 @@ void Decoder::Read(uint8_t* buffer, int size)
   impl_->Read(buffer, size);
 }
 
-bool Decoder::Empty(void)
+Decoder::operator bool(void) const
 {
-  return impl_->Empty();
+  return !impl_->Empty();
 }
 
 }

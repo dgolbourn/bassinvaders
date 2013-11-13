@@ -7,16 +7,15 @@
 
 namespace display
 {
-
 class FontImpl
 {
 public:
   FontImpl(std::string const& filename, int point, int r, int g, int b);
+  
   ~FontImpl(void);
 
   TTF_Font* font_;
-  SDL_Color* colour_;
+  SDL_Color colour_;
 };
-
 }
 #endif

@@ -15,16 +15,14 @@ FontImpl::FontImpl(std::string const& filename, int point, int r, int g, int b)
     throw ttf::Exception();
   }
 
-  colour_ = new SDL_Color;
-  colour_->r = r;
-  colour_->g = g;
-  colour_->b = b;
-  colour_->a = 0;
+  colour_.r = r;
+  colour_.g = g;
+  colour_.b = b;
+  colour_.a = 0;
 }
 
 FontImpl::~FontImpl(void)
 {
-  delete colour_;
   TTF_CloseFont(font_);
   ttf::Quit();
 }

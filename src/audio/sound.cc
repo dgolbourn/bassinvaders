@@ -4,10 +4,8 @@
 
 namespace audio
 {
-
-SoundImpl::SoundImpl(Mix_Chunk* sound)
+SoundImpl::SoundImpl(Mix_Chunk* sound) : sound_(sound)
 {
-  sound_ = sound;
 }
 
 SoundImpl::~SoundImpl(void)
@@ -49,5 +47,4 @@ void Sound::Play(void) const
 {
   impl_->Play();
 }
-
 }

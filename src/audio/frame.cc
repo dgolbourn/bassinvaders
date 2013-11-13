@@ -8,7 +8,6 @@ extern "C"
 
 namespace ffmpeg
 {
-
 class Deleter
 {
 public:
@@ -55,7 +54,7 @@ AVFrame* Frame::operator->(void) const
   return frame_.operator->();
 }
 
-AVFrame* Frame::Get(void) const
+Frame::operator AVFrame* (void) const
 {
   return frame_.get();
 }
@@ -69,5 +68,4 @@ uint8_t const** Frame::data(void) const
 {
   return (uint8_t const**)frame_.get()->data;
 }
-
 }

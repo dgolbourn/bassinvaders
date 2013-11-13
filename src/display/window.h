@@ -8,7 +8,6 @@
 
 namespace display
 {
-
 class Window
 {
 public:
@@ -27,6 +26,5 @@ public:
 private:
   std::shared_ptr<class WindowImpl> impl_;
 };
-
 }
 #endif

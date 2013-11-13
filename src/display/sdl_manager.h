@@ -18,5 +18,4 @@ inactive, then quit SDL.
 @param[in] flags Subsystem initialization flags. See init().*/
 void Quit(Uint32 flags);
 }
-
 #endif

@@ -2,24 +2,16 @@
 #define SIGNAL_H_
 
 #include <memory>
+#include "command.h"
 
 namespace event
 {
-
-class NotifyCommandImpl
-{
-public:
-  virtual void operator()(void) = 0;
-};
-
-typedef std::shared_ptr<NotifyCommandImpl> NotifyCommand;
-
 class Signal
 {
 public:
   Signal(void);
   void Notify(void);
-  void Subscribe(NotifyCommand const& notifiable);
+  void Add(Command const& command);
 
   ~Signal(void);
   Signal(Signal const& other);
@@ -28,7 +20,5 @@ public:
 private:
   std::shared_ptr<class SignalImpl> impl_;
 };
-
 }
-
 #endif

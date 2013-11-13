@@ -9,24 +9,21 @@ extern "C"
 
 namespace ffmpeg
 {
-
 class Frame
 {
 public:
   Frame(void);
+  AVFrame* operator->(void) const;
+  operator AVFrame* (void) const;
+  void Clear(void);
+  uint8_t const** data(void) const;
+
   Frame(Frame const& other);
   Frame(Frame&& other);
   Frame& operator=(Frame other);
   ~Frame(void);
-
-  AVFrame* operator->(void) const;
-  AVFrame* Get(void) const;
-  void Clear(void);
-  uint8_t const** data(void) const;
 private:
   std::shared_ptr<AVFrame> frame_;
 };
-
 }
-
 #endif

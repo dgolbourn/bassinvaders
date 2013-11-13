@@ -8,20 +8,18 @@
 
 namespace display
 {
-
 class TextureImpl
 {
 public:
   TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer);
-  ~TextureImpl(void);
-
   void Render(void) const;
   void Render(BoundingBox const& source, BoundingBox const& destination) const;
   void Render(int x, int y) const;
   
+  ~TextureImpl(void);
+
   SDL_Texture* texture_;
   SDL_Renderer* renderer_;
 };
-
 }
 #endif

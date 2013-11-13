@@ -1,30 +1,24 @@
 #include "buffer.h"
-
 #include <queue>
 #include <mutex>
 
 namespace ffmpeg
 {
-
 class BufferImpl
 {
 public:
+  BufferImpl(int size);
+  void Add(Samples const& samples);
+  bool Full(void);
+  explicit operator bool(void) const;
+  int Read(uint8_t* buffer, int size);
+
   std::queue<Samples> queue_;
   uint8_t* data_;
   int data_size_;
-
   int total_buffer_size_;
   int target_buffer_size_;
-
   std::mutex mutex_;
-
-  BufferImpl(int size);
-  ~BufferImpl(void);
-
-  void Add(Samples const& samples);
-  bool Full(void);
-  bool Empty(void);
-  int Read(uint8_t* buffer, int size);
 };
 
 BufferImpl::BufferImpl(int size)
@@ -37,10 +31,6 @@ BufferImpl::BufferImpl(int size)
     size = 1;
   }
   target_buffer_size_ = size;
-}
-
-BufferImpl::~BufferImpl(void)
-{
 }
 
 void BufferImpl::Add(Samples const& samples)
@@ -71,12 +61,9 @@ bool BufferImpl::Full(void)
   return full;
 }
 
-bool BufferImpl::Empty(void)
+BufferImpl::operator bool(void) const
 {
-  mutex_.lock();
-  bool empty = queue_.empty();
-  mutex_.unlock();
-  return empty;
+  return !queue_.empty();
 }
 
 int BufferImpl::Read(uint8_t* buffer, int size)
@@ -135,9 +122,9 @@ bool Buffer::Full(void)
   return impl_->Full();
 }
 
-bool Buffer::Empty(void)
+Buffer::operator bool(void) const
 {
-  return impl_->Empty();
+  return bool(impl_);
 }
 
 int Buffer::Read(uint8_t* buffer, int size)

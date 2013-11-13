@@ -3,15 +3,15 @@
 
 namespace ffmpeg
 {
-
 class SamplesImpl
 {
 public:
+  SamplesImpl(uint8_t** data, int size);
+
+  ~SamplesImpl(void);
+
   uint8_t** data_;
   int size_;
-
-  SamplesImpl(uint8_t** data, int size);
-  ~SamplesImpl(void);
 };
 
 SamplesImpl::SamplesImpl(uint8_t** data, int size)
@@ -64,5 +64,4 @@ int Samples::size(void) const
 {
   return impl_->size_;
 }
-
 }

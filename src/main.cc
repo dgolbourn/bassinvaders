@@ -16,11 +16,12 @@
 #include "samples.h"
 #include "buffer.h"
 #include "scene.h"
+#include "command.h"
 
-class TestCallback : public event::NotifyCommandImpl
+class TestCallback : public event::CommandImpl
 {
 public:
-  void operator()(void)
+  void operator()(void) final
   {
     printf("what!\n");
   }
@@ -28,10 +29,10 @@ public:
 
 bool quitflag = false;
 
-class QuitCallback : public event::NotifyCommandImpl
+class QuitCallback : public event::CommandImpl
 {
 public:
-  void operator()(void)
+  void operator()(void) final
   {
     printf("who!\n");
   }
@@ -40,65 +41,76 @@ public:
 int x;
 int y;
 
-class UpCallback : public event::NotifyCommandImpl
+class UpCallback : public event::CommandImpl
 {
 public:
-  void operator()(void)
+  void operator()(void) final
   {
     printf("up!\n");
     y++;
   }
 };
 
-class DownCallback : public event::NotifyCommandImpl
+class DownCallback : public event::CommandImpl
 {
 public:
-  void operator()(void)
+  void operator()(void) final
   {
     printf("down!\n");
     y--;
   } 
 };
 
-class LeftCallback : public event::NotifyCommandImpl
+class LeftCallback : public event::CommandImpl
 {
 public:
-  void operator()(void)
+  void operator()(void) final
   {
     printf("left!\n");
     x++;
   }
 };
 
-class RightCallback : public event::NotifyCommandImpl
+class RightCallback : public event::CommandImpl
 {
 public:
-  void operator()(void)
+  void operator()(void) final
   {
     printf("right!\n");
     x--;
   }
 };
 
-class Play : public event::NotifyCommandImpl
+class Play : public event::CommandImpl
 {
 public:
   audio::Sound sound_;
 
-  void operator()(void)
+  void operator()(void) final
   {
     sound_.Play();
   }
 };
 
-class Show : public game::RenderCommandImpl
+class Show : public event::CommandImpl
 {
 public:
   game::Animation anim_;
 
-  void operator()(void)
+  void operator()(void) final
   {
-    anim_.Render(display::BoundingBox(50-10*x,50-10*y,250,250));
+    display::BoundingBox box(50, 50, 250, 250);
+    box.x() -= 10 * x;
+    box.y() -= 10 * y;
+    anim_.Render(box);
+  }
+};
+
+class SpawnBaddie : public event::CommandImpl
+{
+public:
+  void operator()(void) final
+  {
   }
 };
 
@@ -144,19 +156,19 @@ int main(int argc, char *argv[])
   w.Show();
 
   event::Signal E;
-  event::NotifyCommand L(new TestCallback);
-  E.Subscribe(L);
+  event::Command L(new TestCallback);
+  E.Add(L);
 
   E.Notify();
   E.Notify();
   E.Notify();
 
-  event::NotifyCommand L0(new QuitCallback); event::quit.Subscribe(L0);
-  event::NotifyCommand L1(new QuitCallback); event::button1.Subscribe(L1);
-  event::NotifyCommand L2(new UpCallback); event::up.Subscribe(L2);
-  event::NotifyCommand L3(new DownCallback); event::down.Subscribe(L3);
-  event::NotifyCommand L4(new LeftCallback); event::left.Subscribe(L4);
-  event::NotifyCommand L5(new RightCallback); event::right.Subscribe(L5);
+  event::Command L0(new QuitCallback); event::quit.Add(L0);
+  event::Command L1(new QuitCallback); event::button1.Add(L1);
+  event::Command L2(new UpCallback); event::up.Add(L2);
+  event::Command L3(new DownCallback); event::down.Add(L3);
+  event::Command L4(new LeftCallback); event::left.Add(L4);
+  event::Command L5(new RightCallback); event::right.Add(L5);
   audio::Mixer mixer;
   mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
 //  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
@@ -164,21 +176,20 @@ int main(int argc, char *argv[])
 
   Play* play = new Play;
   play->sound_ = mixer.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav");
-  event::NotifyCommand L6(play); event::button1.Subscribe(L6);
-  event::Timer timer(1000);
-  timer.Pause();
-  event::NotifyCommand L7(new DownCallback); timer.Signal().Subscribe(L7);
-  timer.Resume();
-
+  event::Command L6(play); event::button1.Add(L6);
   game::Animation anim("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/file.json", w);
   anim.Resume();
 
   Show* Sh = new Show;
   Sh->anim_ = anim;
-  auto sr = game::RenderCommand(Sh);
-
+  auto sr = event::Command(Sh);
   game::Scene Sc;
-  Sc.Subscribe(sr, 0);
+  Sc.Add(sr, 0);
+
+  event::Timer timer(5000);
+  timer.Pause();
+  event::Command L7(new SpawnBaddie()); timer.Add(L7);
+  timer.Resume();
 
   while(!quitflag)
   {

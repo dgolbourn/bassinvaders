@@ -2,26 +2,26 @@
 #include "SDL_timer.h"
 #include "sdl_manager.h"
 #include "sdl_exception.h"
+#include "signal.h"
 
 namespace event
 {
-
 class TimerImpl
 {
 public:
+  TimerImpl(int interval);
+  void Pause(void);
+  void Resume(void);
+  void Add(Command const& command);
+  Uint32 Update(void);
+
+  ~TimerImpl(void);
+
   Uint32 interval_;
   Uint32 last_update_;
   Uint32 resume_interval_;
   SDL_TimerID timer_;
-
   Signal signal_;
-
-  TimerImpl(int interval);
-  ~TimerImpl(void);
-  void Pause(void);
-  void Resume(void);
-  Signal Signal(void);
-  Uint32 Update(void);
 };
 
 static Uint32 TimerCallback(Uint32 interval, void* param)
@@ -69,7 +69,7 @@ void TimerImpl::Pause(void)
   if(timer_)
   {
     SDL_RemoveTimer(timer_);
-    timer_ = NULL;
+    timer_ = static_cast<SDL_TimerID>(NULL);
     resume_interval_ = interval_ - SDL_GetTicks() + last_update_;
   }
 }
@@ -91,9 +91,9 @@ void TimerImpl::Resume(void)
   timer_ = AddTimer(interval, TimerCallback, this);
 }
 
-Signal TimerImpl::Signal(void)
+void TimerImpl::Add(event::Command const& command)
 {
-  return signal_;
+  return signal_.Add(command);
 }
 
 Uint32 TimerImpl::Update(void)
@@ -139,9 +139,8 @@ void Timer::Resume(void)
   impl_->Resume();
 }
 
-Signal Timer::Signal(void)
+void Timer::Add(event::Command const& command)
 {
-  return impl_->Signal();
+  return impl_->Add(command);
 }
-
 }

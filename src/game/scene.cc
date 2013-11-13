@@ -3,41 +3,42 @@
 
 namespace game
 {
-typedef std::multimap<int, std::weak_ptr<RenderCommandImpl>> RenderCommandMap;
+typedef std::weak_ptr<event::CommandImpl> RenderCommandPtr;
+typedef std::multimap<int, RenderCommandPtr> RenderCommandMap;
+typedef std::pair<int, RenderCommandPtr> RenderCommandPair;
 
 class SceneImpl
 {
 public:
-  void Subscribe(RenderCommand const& render, int z);
+  void Add(event::Command const& render, int z);
   void Render(void);
-
-  RenderCommandMap renders_;
+  RenderCommandMap commands_;
 };
 
 void SceneImpl::Render(void)
 {
-  for(auto iter = renders_.begin(); iter != renders_.end(); ++iter)
+  for(auto iter = commands_.begin(); iter != commands_.end();)
   {
-    auto render = iter->second.lock();
-    if(render)
+    if(auto command = iter->second.lock())
     {
-      render->operator()();
+      command->operator()();
+      ++iter;
     }
     else
     {
-      renders_.erase(iter);
+      iter = commands_.erase(iter);
     }
   }
 }
 
-void SceneImpl::Subscribe(RenderCommand const& render, int z)
+void SceneImpl::Add(event::Command const& command, int z)
 {
-  renders_.insert(std::pair<int, std::weak_ptr<RenderCommandImpl>>(z, render));
+  commands_.insert(RenderCommandPair(z, command));
 }
 
 Scene::Scene(void)
 {
-  impl_ = std::shared_ptr<SceneImpl>(new SceneImpl);
+  impl_ = std::shared_ptr<SceneImpl>(new SceneImpl());
 }
 
 void Scene::Render(void)
@@ -45,9 +46,9 @@ void Scene::Render(void)
   impl_->Render();
 }
 
-void Scene::Subscribe(RenderCommand const& render, int z)
+void Scene::Add(event::Command const& command, int z)
 {
-  impl_->Subscribe(render, z);
+  impl_->Add(command, z);
 }
 
 Scene::Scene(Scene const& other) : impl_(other.impl_)

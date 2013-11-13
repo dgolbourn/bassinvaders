@@ -4,38 +4,49 @@
 
 namespace display
 {
-
-bool BoundingBox::operator==(BoundingBox const& compare) const
+void BoundingBox::Reset(void)
 {
-  return SDL_RectEquals(&impl_->rect_, &compare.impl_->rect_) != 0;
+  impl_.reset();
 }
 
-BoundingBox BoundingBox::operator|(BoundingBox const& other) const
+bool BoundingBox::operator==(BoundingBox const& other) const
 {
-  BoundingBox intersection;
-  (void)SDL_IntersectRect(&impl_->rect_, 
-                          &other.impl_->rect_,
-                          &intersection.impl_->rect_);
-  return intersection;
-}
-
-BoundingBox BoundingBox::operator&(BoundingBox const& other) const
-{
-  BoundingBox complement;
-  SDL_UnionRect(&impl_->rect_, 
-                &other.impl_->rect_,
-                &complement.impl_->rect_);
-  return complement;
+  return impl_ == other.impl_;
 }
 
 bool BoundingBox::operator&&(BoundingBox const& other) const
 {
-  return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_) != 0;
+  return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_) != SDL_FALSE;
 }
 
-bool BoundingBox::Empty(void) const
+bool BoundingBox::operator<(BoundingBox const& other) const
 {
-  return SDL_RectEmpty(&impl_->rect_) != 0;
+  return impl_ < other.impl_;
+}
+
+BoundingBox::operator bool(void) const
+{
+  return impl_ && (SDL_RectEmpty(&impl_->rect_) == SDL_FALSE);
+}
+
+int& BoundingBox::x(void) const
+{
+  return impl_->rect_.x;
+}
+
+int& BoundingBox::y(void) const
+{
+  return impl_->rect_.y;
+}
+
+int& BoundingBox::w(void) const
+{
+  return impl_->rect_.w;
+}
+
+int& BoundingBox::h(void) const
+{
+  return impl_->rect_.h;
 }
 
 BoundingBox::BoundingBox(void)

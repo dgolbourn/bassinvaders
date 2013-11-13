@@ -18,5 +18,4 @@ has reached 0.
 @param[in] flags Image formats mask as defined in SDL_image.h.*/
 void Quit(int flags);
 }
-
 #endif

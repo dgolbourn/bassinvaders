@@ -3,15 +3,15 @@
 
 namespace ffmpeg
 {
-
 class FormatImpl
 {
 public:
+  FormatImpl(std::string const& filename);
+
+  ~FormatImpl(void);
+
   AVFormatContext* format_;
   AVStream* audio_stream_;
-
-  FormatImpl(std::string const& filename);
-  ~FormatImpl(void);
 };
 
 FormatImpl::FormatImpl(std::string const& filename)
@@ -89,5 +89,4 @@ AVStream* Format::audio_stream(void) const
 {
   return impl_->audio_stream_;
 }
-
 }

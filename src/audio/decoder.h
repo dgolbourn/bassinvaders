@@ -12,17 +12,15 @@ class Decoder
 public:
   Decoder(void);
   Decoder(std::string const& filename, int buffer_size);
+  void Read(uint8_t* buffer, int size);
+  explicit operator bool(void) const;
+
   Decoder(Decoder const& other);
   Decoder(Decoder&& other);
   Decoder& operator=(Decoder other);
   ~Decoder(void);
-
-  void Read(uint8_t* buffer, int size);
-  bool Empty(void);
 private:
   std::shared_ptr<class DecoderImpl> impl_;
 };
-
 }
-
 #endif

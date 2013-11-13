@@ -6,18 +6,15 @@
 
 namespace audio
 {
-
 class SoundImpl
 {
 public:
-  Mix_Chunk* sound_;
-
   SoundImpl(Mix_Chunk* sound);
+  void Play(void) const;
+
   ~SoundImpl(void);
 
-  void Play(void) const;
+  Mix_Chunk* sound_;
 };
-
 }
-
 #endif

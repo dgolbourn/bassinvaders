@@ -79,25 +79,25 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene
 void HeroImpl::Load(json::JSON const& json, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause, audio::Mixer const& mixer)
 {
   json_t* moving;
-  int mdx, mdy, mw, mh;
+  json_t* moving_render_box;
   char const* ms;
   int mi;
   json_t* destroyed;
+  json_t* destroyed_render_box;
   char const* ds;
   int di;
-  int ddx, ddy, dw, dh;
-  int cdx, cdy, cw, ch;
+  json_t* collision_box;
 
-  json.Unpack("{s{sos[iiii]s{sssi}}s{sos[iiii]s{sssi}}s[iiii]}", 0,
-    "moving", "animation", &moving, "render box", &mdx, &mdy, &mw, &mh, "sound effect", "file", &ms, "repeat interval", &mi,
-    "destroyed", "animation", &destroyed, "render box", &ddx, &ddy, &dw, &dh, "sound effect", "file", &ds, "repeat interval", &di,
-    "collision box", &cdx, &cdy, &cw, &ch);
+  json.Unpack("{s{sosos{sssi}}s{sosos{sssi}}so}", 0,
+    "moving", "animation", &moving, "render box", &moving_render_box, "sound effect", "file", &ms, "repeat interval", &mi,
+    "destroyed", "animation", &destroyed, "render box", &destroyed_render_box, "sound effect", "file", &ds, "repeat interval", &di,
+    "collision box", &collision_box);
 
   moving_ = Animation(moving, window);
-  moving_render_box_ = display::BoundingBox(mdx, mdy, mw, mh);
+  moving_render_box_ = display::BoundingBox(moving_render_box);
   destroyed_ = Animation(destroyed, window);
-  destroyed_render_box_ = display::BoundingBox(ddx, ddy, dw, dh);
-  collision_box_ = display::BoundingBox(cdx, cdy, cw, ch);
+  destroyed_render_box_ = display::BoundingBox(destroyed_render_box);
+  collision_box_ = display::BoundingBox(collision_box);
   render_ = event::Command(new RenderCommand(moving_, moving_render_box_));
   scene.Add(render_, 0);
   paused_ = true;

@@ -41,13 +41,13 @@ void TextureImpl::Render(void) const
 void TextureImpl::Render(BoundingBox const& source, BoundingBox const& destination) const
 {
   SDL_Rect* source_rect = nullptr;
-  if(source.impl_)
+  if(source)
   {
     source_rect = &source.impl_->rect_;
   }
 
   SDL_Rect* destination_rect = nullptr;
-  if(destination.impl_)
+  if(destination)
   {
     destination_rect = &destination.impl_->rect_;
   }

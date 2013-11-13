@@ -2,6 +2,8 @@
 #define BOUNDING_BOX_H_
 
 #include <memory>
+#include <string>
+#include "json.h"
 
 namespace display
 {
@@ -11,6 +13,8 @@ class BoundingBox
 public:
   BoundingBox(void);
   BoundingBox(int x, int y, int w, int h);
+  BoundingBox(std::string const& filename);
+  BoundingBox(json::JSON const& json);
   void Reset(void);
   bool operator==(BoundingBox const& other) const;
   bool operator&&(BoundingBox const& other) const;

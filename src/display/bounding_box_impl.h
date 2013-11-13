@@ -9,10 +9,9 @@ namespace display
 class BoundingBoxImpl
 {
 public:
-  SDL_Rect rect_;
-
   BoundingBoxImpl(int x, int y, int w, int h);
-  void Load(json::JSON const& json);
+  BoundingBoxImpl(json::JSON const& json);
+  SDL_Rect rect_;
 };
 }
 #endif

@@ -1,12 +1,10 @@
 #include "animation.h"
 #include "texture.h"
-#include "signal.h"
 #include "timer.h"
 #include "jansson.h"
 #include "json_exception.h"
 #include "bounding_box.h"
 
-#include <string>
 #include <vector>
 #include <mutex>
 
@@ -15,9 +13,7 @@ namespace game
 class AnimationImpl
 {
 public:
-  AnimationImpl(std::string const& filename, display::Window& window);
   AnimationImpl(json::JSON const& json, display::Window& window);
-  void Load(json::JSON const& json, display::Window& window);
   void Next(void);
   void Render(display::BoundingBox const& destination);
   void Pause(void);
@@ -25,7 +21,7 @@ public:
   void Restart(void);
 
   display::Texture texture_;
-  event::Command notify_;
+  event::Command command_;
   event::Timer timer_;
   std::vector<display::BoundingBox> frames_;
   std::vector<display::BoundingBox>::iterator frame_;
@@ -49,17 +45,7 @@ void AnimationCommand::operator()(void)
   impl_.Next();
 }
 
-AnimationImpl::AnimationImpl(std::string const& filename, display::Window& window)
-{
-  Load(json::JSON(filename), window);
-}
-
 AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
-{
-  Load(json, window);
-}
-
-void AnimationImpl::Load(json::JSON const& json, display::Window& window)
 {
   char const* sprite_sheet;
   int interval;
@@ -75,10 +61,10 @@ void AnimationImpl::Load(json::JSON const& json, display::Window& window)
     "frames", &frames);
 
   texture_ = window.Load(std::string(sprite_sheet));
-  notify_ = event::Command(new AnimationCommand(*this));
+  command_ = event::Command(new AnimationCommand(*this));
   timer_ = event::Timer(interval);
   timer_.Pause();
-  timer_.Add(notify_);
+  timer_.Add(command_);
   frames_ = std::vector<display::BoundingBox>(json_array_size(frames));
   frame_ = frames_.begin();
 
@@ -133,7 +119,7 @@ void AnimationImpl::Restart(void)
 
 Animation::Animation(std::string const& filename, display::Window& window)
 {
-  impl_ = std::shared_ptr<AnimationImpl>(new AnimationImpl(filename, window));
+  impl_ = std::shared_ptr<AnimationImpl>(new AnimationImpl(json::JSON(filename), window));
 }
 
 Animation::Animation(json::JSON const& json, display::Window& window)

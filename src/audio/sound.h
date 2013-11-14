@@ -10,7 +10,10 @@ class Sound
   friend class MixerImpl;
 public:
   Sound(void);
-  void Play(void) const;
+  void Play(int loops = 0);
+  void Pause(void) const;
+  void Resume(void) const;
+  void Stop(void) const;
 
   Sound(Sound const& other);
   Sound(Sound&& other);

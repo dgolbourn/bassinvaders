@@ -1,7 +1,7 @@
 #include "hero.h"
 #include "animation.h"
 #include "bounding_box.h"
-#include "alarm.h"
+#include "sound.h"
 
 namespace game
 {
@@ -11,17 +11,18 @@ public:
   HeroImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause, audio::Mixer& mixer);
   Animation moving_animation_;
   display::BoundingBox moving_render_box_;
-  Alarm moving_sound_effect_;
+  audio::Sound moving_sound_effect_;
   Animation destroyed_animation_;
   display::BoundingBox destroyed_render_box_;
-  Alarm destroyed_sound_effect_;
+  audio::Sound destroyed_sound_effect_;
   display::BoundingBox collision_box_;
   event::Command render_;
   event::Command pause_;
   bool paused_;
   Animation animation_;
   display::BoundingBox render_box_;
-  Alarm sound_effect_;
+  audio::Sound sound_effect_;
+  bool sound_repeat_;
 };
 
 class RenderCommand : public event::CommandImpl
@@ -73,15 +74,15 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene
 {
   json_t* moving_animation;
   json_t* moving_render_box;
-  json_t* moving_sound_effect;
+  char const* moving_sound_effect;
 
   json_t* destroyed_animation;
   json_t* destroyed_render_box;
-  json_t* destroyed_sound_effect;
+  char const* destroyed_sound_effect;
 
   json_t* collision_box;
 
-  json.Unpack("{s{sososo}s{sososo}so}", 0,
+  json.Unpack("{s{sososs}s{sososs}so}", 0,
     "moving", "animation", &moving_animation, 
     "render box", &moving_render_box, 
     "sound effect", &moving_sound_effect,
@@ -92,11 +93,11 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene
 
   moving_animation_ = Animation(moving_animation, window);
   moving_render_box_ = display::BoundingBox(moving_render_box);
-  moving_sound_effect_ = Alarm(moving_sound_effect, mixer);
+  moving_sound_effect_ = mixer.Load(moving_sound_effect);
     
   destroyed_animation_ = Animation(destroyed_animation, window);
   destroyed_render_box_ = display::BoundingBox(destroyed_render_box);
-  destroyed_sound_effect_ = Alarm(destroyed_sound_effect, mixer);
+  destroyed_sound_effect_ = mixer.Load(destroyed_sound_effect);
   
   collision_box_ = display::BoundingBox(collision_box);
   render_ = event::Command(new RenderCommand(*this));
@@ -108,6 +109,7 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene
   animation_ = moving_animation_;
   render_box_ = moving_render_box_;
   sound_effect_ = moving_sound_effect_;
+  sound_repeat_ = true;
 }
 
 Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause, audio::Mixer& mixer)

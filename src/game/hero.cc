@@ -2,6 +2,7 @@
 #include "animation.h"
 #include "bounding_box.h"
 #include "sound.h"
+#include "event.h"
 
 namespace game
 {
@@ -22,7 +23,13 @@ public:
   Animation animation_;
   display::BoundingBox render_box_;
   audio::Sound sound_effect_;
-  bool sound_repeat_;
+  event::Command attack_;
+  event::Command up_;
+  event::Command down_;
+  event::Command left_;
+  event::Command right_;
+  int x_;
+  int y_;
 };
 
 class RenderCommand : public event::CommandImpl
@@ -39,7 +46,12 @@ RenderCommand::RenderCommand(HeroImpl& impl) : impl_(impl)
 
 void RenderCommand::operator()(void)
 {
-  impl_.animation_.Render(impl_.render_box_);
+  display::BoundingBox destination(
+    impl_.render_box_.x() + impl_.x_, 
+    impl_.render_box_.y() + impl_.y_,
+    impl_.render_box_.w(),
+    impl_.render_box_.h());
+  impl_.animation_.Render(destination);
 }
 
 class PauseCommand : public event::CommandImpl
@@ -68,6 +80,90 @@ void PauseCommand::operator()(void)
     impl_.animation_.Pause();
     impl_.sound_effect_.Pause();
   }
+}
+
+class AttackCommand : public event::CommandImpl
+{
+public:
+  AttackCommand(HeroImpl& impl);
+  void operator()(void) final;
+  HeroImpl& impl_;
+};
+
+AttackCommand::AttackCommand(HeroImpl& impl) : impl_(impl)
+{
+}
+
+void AttackCommand::operator()(void)
+{
+}
+
+class UpCommand : public event::CommandImpl
+{
+public:
+  UpCommand(HeroImpl& impl);
+  void operator()(void) final;
+  HeroImpl& impl_;
+};
+
+UpCommand::UpCommand(HeroImpl& impl) : impl_(impl)
+{
+}
+
+void UpCommand::operator()(void)
+{
+  impl_.y_--;
+}
+
+class DownCommand : public event::CommandImpl
+{
+public:
+  DownCommand(HeroImpl& impl);
+  void operator()(void) final;
+  HeroImpl& impl_;
+};
+
+DownCommand::DownCommand(HeroImpl& impl) : impl_(impl)
+{
+}
+
+void DownCommand::operator()(void)
+{
+  impl_.y_++;
+}
+
+class LeftCommand : public event::CommandImpl
+{
+public:
+  LeftCommand(HeroImpl& impl);
+  void operator()(void) final;
+  HeroImpl& impl_;
+};
+
+LeftCommand::LeftCommand(HeroImpl& impl) : impl_(impl)
+{
+}
+
+void LeftCommand::operator()(void)
+{
+  impl_.x_--;
+}
+
+class RightCommand : public event::CommandImpl
+{
+public:
+  RightCommand(HeroImpl& impl);
+  void operator()(void) final;
+  HeroImpl& impl_;
+};
+
+RightCommand::RightCommand(HeroImpl& impl) : impl_(impl)
+{
+}
+
+void RightCommand::operator()(void)
+{
+  impl_.x_++;
 }
 
 HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause, audio::Mixer& mixer)
@@ -109,7 +205,29 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene
   animation_ = moving_animation_;
   render_box_ = moving_render_box_;
   sound_effect_ = moving_sound_effect_;
-  sound_repeat_ = true;
+  sound_effect_.Play(-1);
+  sound_effect_.Pause();
+
+  attack_ = event::Command(new AttackCommand(*this)); 
+  event::button1.Add(attack_);
+  up_ = event::Command(new UpCommand(*this)); 
+  event::up.Add(up_);
+  down_ = event::Command(new DownCommand(*this)); 
+  event::down.Add(down_);
+  left_ = event::Command(new LeftCommand(*this)); 
+  event::left.Add(left_);
+  right_ = event::Command(new RightCommand(*this)); 
+  event::right.Add(right_);
+}
+
+int& Hero::x(void)
+{
+  return impl_->x_;
+}
+
+int& Hero::y(void)
+{
+  return impl_->y_;
 }
 
 Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause, audio::Mixer& mixer)

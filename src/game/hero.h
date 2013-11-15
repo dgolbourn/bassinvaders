@@ -1,5 +1,5 @@
-#ifndef ENTITY_H_
-#define ENTITY_H_
+#ifndef HERO_H_
+#define HERO_H_
 
 #include <memory>
 #include <string>
@@ -18,6 +18,8 @@ public:
   Hero(std::string const& filename, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause, audio::Mixer& mixer);
   Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause, audio::Mixer& mixer);
   Hero(void);
+  int& x(void);
+  int& y(void);
 
   ~Hero(void);
   Hero::Hero(Hero const& other);

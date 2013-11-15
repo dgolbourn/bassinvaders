@@ -17,6 +17,7 @@
 #include "buffer.h"
 #include "scene.h"
 #include "command.h"
+#include "hero.h"
 
 class TestCallback : public event::CommandImpl
 {
@@ -184,13 +185,18 @@ int main(int argc, char *argv[])
   Sh->anim_ = anim;
   auto sr = event::Command(Sh);
   game::Scene Sc;
-  Sc.Add(sr, 0);
+  Sc.Add(sr, 1);
 
   event::Timer timer(5000);
   timer.Pause();
   event::Command L7(new SpawnBaddie()); timer.Add(L7);
   timer.Resume();
 
+  event::Signal pau;
+  game::Hero h("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json", w, Sc, game::Collision(), pau, mixer);
+  pau.Notify();
+  h.x() = 100;
+  h.y() = 100;
   while(!quitflag)
   {
     event::Event();

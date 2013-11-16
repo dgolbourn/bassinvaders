@@ -67,5 +67,4 @@ Packet::operator bool(void) const
 {
   return packet_->size > 0;
 }
-
 }

@@ -97,5 +97,4 @@ void Texture::Render(BoundingBox const& source, BoundingBox const& destination) 
 {
   impl_->Render(source, destination);
 }
-
 }

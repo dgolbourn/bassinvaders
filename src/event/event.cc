@@ -1,5 +1,6 @@
 #include "event.h"
 #include "SDL_events.h"
+#include "sdl_manager.h"
 
 namespace event
 {
@@ -22,6 +23,16 @@ static void KeydownEvent(SDL_KeyboardEvent const& keyboard_event)
 }
 
 void Init(void)
+{
+  sdl::Init(SDL_INIT_EVENTS);
+}
+
+void Quit(void)
+{
+  sdl::Quit(SDL_INIT_EVENTS);
+}
+
+void DefaultKeys(void)
 {
   key_map[SDL_SCANCODE_UP] = up;
   key_map[SDL_SCANCODE_W] = up;
@@ -52,5 +63,4 @@ void Event(void)
     }
   }
 }
-
 }

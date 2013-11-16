@@ -68,5 +68,4 @@ Scene& Scene::operator=(Scene other)
   std::swap(impl_, other.impl_);
   return *this;
 }
-
 }

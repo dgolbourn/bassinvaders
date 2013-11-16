@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
   try
   {
   event::Init();
+  event::DefaultKeys();
   display::Window w;
   display::Texture T;
 
@@ -203,7 +204,7 @@ int main(int argc, char *argv[])
     Sc.Render();
     w.Show();
   }
-
+  event::Quit();
   try
   {
     cstd::Exception();
@@ -219,6 +220,5 @@ int main(int argc, char *argv[])
     std::cin.get();
     ret = -1;
   }
-
   return ret;
 }

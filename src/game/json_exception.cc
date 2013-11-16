@@ -3,7 +3,6 @@
 
 namespace json
 {
-
 static std::string ErrorString(json_error_t const& error)
 {
   std::stringstream message;

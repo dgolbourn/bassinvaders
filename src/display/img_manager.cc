@@ -52,5 +52,4 @@ void Quit(int flags)
     IMG_Quit();
   }
 }
-
 }

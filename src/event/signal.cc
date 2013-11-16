@@ -67,5 +67,4 @@ Signal& Signal::operator=(Signal other)
   std::swap(impl_, other.impl_);
   return *this;
 }
-
 }

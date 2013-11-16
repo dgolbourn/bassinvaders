@@ -19,7 +19,8 @@ extern Signal right;
 extern Signal button1;
 
 void Event(void);
-
 void Init(void);
+void Quit(void);
+void DefaultKeys(void);
 }
 #endif

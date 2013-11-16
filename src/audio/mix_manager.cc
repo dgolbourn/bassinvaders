@@ -48,8 +48,6 @@ void Init(void)
       Mix_CloseAudio();
       throw Exception();
     }
-
-    audio::Init();
   }
   reference_count++;
 }

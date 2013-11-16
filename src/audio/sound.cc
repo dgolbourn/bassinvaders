@@ -2,11 +2,29 @@
 #include "sound_impl.h"
 #include "mix_exception.h"
 #include <unordered_map>
+#include "chunk.h"
 
 namespace audio
 {
+typedef std::weak_ptr<class SoundImpl> SoundPtr;
+
+class SoundImpl
+{
+public:
+  SoundImpl(std::string const& filename);
+  void Play(int loops, SoundPtr const& impl);
+  void Pause(void) const;
+  void Resume(void) const;
+  void Stop(void) const;
+  void Volume(int volume);
+
+  mix::Chunk chunk_;
+  int volume_;
+  int channel_;
+};
+
 static bool initialised;
-static int const finished = -1;
+static int const no_channel = -1;
 static std::unordered_map<int, SoundPtr> active_channels;
 
 static void ChannelFinishedCallback(int channel)
@@ -16,13 +34,13 @@ static void ChannelFinishedCallback(int channel)
   {
     if(auto sound = sound_iter->second.lock())
     {
-      sound->channel_ = finished;
+      sound->channel_ = no_channel;
       active_channels.erase(sound_iter);
     }
   }
 }
 
-void Init(void)
+static void Init(void)
 {
   if(!initialised)
   {
@@ -31,32 +49,24 @@ void Init(void)
   }
 }
 
-SoundImpl::SoundImpl(Mix_Chunk* sound) : sound_(sound), channel_(finished)
+static int const default_volume = -1;
+SoundImpl::SoundImpl(std::string const& filename) : chunk_(filename), volume_(default_volume), channel_(no_channel)
 {
-}
-
-SoundImpl::~SoundImpl(void)
-{
-  Mix_FreeChunk(sound_);
+  Init();
 }
 
 void SoundImpl::Play(int loops, SoundPtr const& impl)
 {
-  if(channel_ == finished)
+  if(channel_ == no_channel)
   {
-    int channel = Mix_PlayChannel(-1, sound_, loops);
-    if(channel == -1)
-    {
-      throw mix::Exception();
-    }
-    channel_ = channel;
-    active_channels[channel] = impl;
+    channel_ = chunk_.Play(loops, volume_);
+    active_channels[channel_] = impl;
   }
 }
 
 void SoundImpl::Pause(void) const
 {
-  if(channel_ != finished)
+  if(channel_ != no_channel)
   {
     Mix_Pause(channel_);
   }
@@ -64,7 +74,7 @@ void SoundImpl::Pause(void) const
 
 void SoundImpl::Resume(void) const
 {
-  if(channel_ != finished)
+  if(channel_ != no_channel)
   {
     Mix_Resume(channel_);
   }
@@ -72,10 +82,20 @@ void SoundImpl::Resume(void) const
 
 void SoundImpl::Stop(void) const
 {
-  if(channel_ != finished)
+  if(channel_ != no_channel)
   {
     Mix_HaltChannel(channel_);
   }
+}
+
+void SoundImpl::Volume(int volume)
+{
+  volume_ = volume;
+}
+
+Sound::Sound(std::string const& filename)
+{
+  impl_ = std::shared_ptr<SoundImpl>(new SoundImpl(filename));
 }
 
 Sound::Sound(void)
@@ -118,5 +138,10 @@ void Sound::Resume(void) const
 void Sound::Stop(void) const
 {
   impl_->Stop();
+}
+
+void Sound::Volume(int volume)
+{
+  impl_->Volume(volume);
 }
 }

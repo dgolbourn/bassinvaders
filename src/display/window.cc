@@ -36,8 +36,8 @@ WindowImpl::WindowImpl(std::string const& name)
   img::Init(IMG_INIT_PNG);
   ttf::Init();
 
-  SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
-  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+  (void)SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
+  (void)SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
   window_ = SDL_CreateWindow(name.c_str(), SDL_WINDOWPOS_UNDEFINED, 
     SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
@@ -55,7 +55,10 @@ WindowImpl::WindowImpl(std::string const& name)
     }
     else
     {
-      SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF);
+      if(SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF))
+      {
+        throw sdl::Exception();
+      }
     }
   }
 }
@@ -126,8 +129,14 @@ Texture WindowImpl::Text(std::string const& text, Font const& font)
 
 void WindowImpl::Clear(void) const
 {
-  SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF );
-  SDL_RenderClear(renderer_);
+  if(SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF))
+  {
+    throw sdl::Exception();
+  }
+  if(SDL_RenderClear(renderer_))
+  {
+    throw sdl::Exception();
+  }
 }
 
 void WindowImpl::Show(void) const

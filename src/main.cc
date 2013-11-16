@@ -9,7 +9,7 @@
 #include "event.h"
 #include "decoder.h"
 #include "audio_format.h"
-#include "mixer.h"
+#include "music.h"
 #include "sound.h"
 #include "timer.h"
 #include "animation.h"
@@ -170,13 +170,12 @@ int main(int argc, char *argv[])
   event::Command L3(new DownCallback); event::down.Add(L3);
   event::Command L4(new LeftCallback); event::left.Add(L4);
   event::Command L5(new RightCallback); event::right.Add(L5);
-  audio::Mixer mixer;
-  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
+  audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
 //  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
   mixer.Resume();
 
   Play* play = new Play;
-  play->sound_ = mixer.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav");
+  play->sound_ = audio::Sound("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav");
   event::Command L6(play); event::button1.Add(L6);
   game::Animation anim("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/file.json", w);
   anim.Resume();
@@ -193,7 +192,7 @@ int main(int argc, char *argv[])
   timer.Resume();
 
   event::Signal pau;
-  game::Hero h("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json", w, Sc, game::Collision(), pau, mixer);
+  game::Hero h("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json", w, Sc, game::Collision(), pau);
   pau.Notify();
   h.x() = 100;
   h.y() = 100;

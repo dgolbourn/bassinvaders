@@ -11,7 +11,7 @@ class Sound
 public:
   Sound(void);
   Sound(std::string const& filename);
-  void Play(int loops = 0);
+  void Play(int repeats = 0);
   void Pause(void) const;
   void Resume(void) const;
   void Stop(void) const;

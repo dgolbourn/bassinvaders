@@ -1,7 +1,6 @@
 #include "sound.h"
-#include "sound_impl.h"
-#include "mix_exception.h"
 #include <unordered_map>
+#include "SDL_mixer.h"
 #include "chunk.h"
 
 namespace audio
@@ -12,7 +11,7 @@ class SoundImpl
 {
 public:
   SoundImpl(std::string const& filename);
-  void Play(int loops, SoundPtr const& impl);
+  void Play(int repeats, SoundPtr const& impl);
   void Pause(void) const;
   void Resume(void) const;
   void Stop(void) const;
@@ -55,11 +54,11 @@ SoundImpl::SoundImpl(std::string const& filename) : chunk_(filename), volume_(de
   Init();
 }
 
-void SoundImpl::Play(int loops, SoundPtr const& impl)
+void SoundImpl::Play(int repeats, SoundPtr const& impl)
 {
   if(channel_ == no_channel)
   {
-    channel_ = chunk_.Play(loops, volume_);
+    channel_ = chunk_.Play(repeats, volume_);
     active_channels[channel_] = impl;
   }
 }
@@ -84,7 +83,7 @@ void SoundImpl::Stop(void) const
 {
   if(channel_ != no_channel)
   {
-    Mix_HaltChannel(channel_);
+    (void)Mix_HaltChannel(channel_);
   }
 }
 
@@ -120,9 +119,9 @@ Sound& Sound::operator=(Sound other)
   return *this;
 }
 
-void Sound::Play(int loops)
+void Sound::Play(int repeats)
 {
-  impl_->Play(loops, impl_);
+  impl_->Play(repeats, impl_);
 }
 
 void Sound::Pause(void) const

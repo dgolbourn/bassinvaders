@@ -5,7 +5,6 @@
 #include "sdl_manager.h"
 #include "mix_exception.h"
 #include "audio_format.h"
-#include "sound_impl.h"
 
 namespace mix
 {

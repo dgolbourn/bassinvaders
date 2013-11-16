@@ -4,7 +4,7 @@
 namespace sdl
 {
 static bool initialised;
-static int reference_count[8 * sizeof(Uint32)];
+static int reference_count[32];
 
 void Init(Uint32 flags)
 {
@@ -69,5 +69,4 @@ void Quit(Uint32 flags)
     initialised = false;
   }
 }
-
 }

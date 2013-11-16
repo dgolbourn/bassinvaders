@@ -7,11 +7,8 @@
 
 namespace display
 {
-
-TextureImpl::TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer)
+TextureImpl::TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer) : texture_(texture), renderer_(renderer)
 {
-  texture_ = texture;
-  renderer_ = renderer;
 }
 
 TextureImpl::~TextureImpl(void)
@@ -30,12 +27,18 @@ void TextureImpl::Render(int x, int y) const
     throw sdl::Exception();
   }
 
-  SDL_RenderCopy(renderer_, texture_, nullptr, &rect);
+  if(SDL_RenderCopy(renderer_, texture_, nullptr, &rect))
+  {
+    throw sdl::Exception();
+  }
 }
 
 void TextureImpl::Render(void) const
 {
-  SDL_RenderCopy(renderer_, texture_, nullptr, nullptr);
+  if(SDL_RenderCopy(renderer_, texture_, nullptr, nullptr))
+  {
+    throw sdl::Exception();
+  }
 }
 
 void TextureImpl::Render(BoundingBox const& source, BoundingBox const& destination) const
@@ -52,7 +55,10 @@ void TextureImpl::Render(BoundingBox const& source, BoundingBox const& destinati
     destination_rect = &destination.impl_->rect_;
   }
 
-  SDL_RenderCopy(renderer_, texture_, source_rect, destination_rect);
+  if(SDL_RenderCopy(renderer_, texture_, source_rect, destination_rect))
+  {
+    throw sdl::Exception();
+  }
 }
 
 Texture::Texture(void)

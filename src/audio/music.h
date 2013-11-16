@@ -1,5 +1,5 @@
-#ifndef MIXER_H_
-#define MIXER_H_
+#ifndef MUSIC_H_
+#define MUSIC_H_
 
 #include <string>
 #include <memory>

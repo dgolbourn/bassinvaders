@@ -14,6 +14,7 @@ class ResamplerImpl
 public:
   ResamplerImpl(Codec const& codec);
   Samples Resample(uint8_t const** input, int in_samples);
+  void Destroy(void);
 
   ~ResamplerImpl(void);
 
@@ -21,6 +22,11 @@ public:
   int input_sample_rate_;
   int channels_;
 };
+
+void ResamplerImpl::Destroy(void)
+{
+  swr_free(&swr_);
+}
 
 ResamplerImpl::ResamplerImpl(Codec const& codec)
 {
@@ -39,11 +45,13 @@ ResamplerImpl::ResamplerImpl(Codec const& codec)
   err |= av_opt_set_sample_fmt(swr_, "out_sample_fmt", FFMPEG_FORMAT, 0);
   if(err)
   {
+    Destroy();
     throw Exception();
   }
 
   if(swr_init(swr_))
   {
+    Destroy();
     throw Exception();
   }
 
@@ -53,7 +61,7 @@ ResamplerImpl::ResamplerImpl(Codec const& codec)
 
 ResamplerImpl::~ResamplerImpl(void)
 {
-  swr_free(&swr_);
+  Destroy();
 }
 
 Samples ResamplerImpl::Resample(uint8_t const** input, int in_samples)
@@ -104,5 +112,4 @@ Samples Resampler::Resample(uint8_t const** input, int in_samples)
 {
   return impl_->Resample(input, in_samples);
 }
-
 }

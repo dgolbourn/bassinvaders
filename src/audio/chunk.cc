@@ -33,12 +33,12 @@ void Free(void)
 ChunkImpl::ChunkImpl(std::string const& filename)
 {
   mix::Init();
-  Mix_Chunk* chunk = Mix_LoadWAV(filename.c_str());
-  if(!chunk)
+  chunk_ = Mix_LoadWAV(filename.c_str());
+  if(!chunk_)
   {
+    mix::Quit();
     throw mix::Exception();
   }
-  chunk_ = chunk;
 }
 
 ChunkImpl::~ChunkImpl(void)
@@ -50,7 +50,7 @@ ChunkImpl::~ChunkImpl(void)
 Chunk::Chunk(std::string const& filename)
 {
   auto fileiter = chunks.find(filename);
-  if (fileiter != chunks.end())
+  if(fileiter != chunks.end())
   {
     impl_ = fileiter->second;
   }

@@ -12,7 +12,6 @@
 
 namespace display
 {
-
 class WindowImpl
 {
 public:
@@ -22,6 +21,7 @@ public:
   void Free(std::string const& filename);
   void Clear(void) const;
   void Show(void) const;
+  void Destroy(void);
 
   ~WindowImpl(void);
 
@@ -29,6 +29,22 @@ public:
   SDL_Renderer* renderer_;
   std::unordered_map<std::string, Texture> files_;
 };
+
+void WindowImpl::Destroy(void)
+{
+  if(renderer_)
+  {
+    SDL_DestroyRenderer(renderer_);
+  }
+  if(window_)
+  {
+    SDL_DestroyWindow(window_);
+  }
+
+  ttf::Quit();
+  img::Quit(IMG_INIT_PNG);
+  sdl::Quit(SDL_INIT_VIDEO);
+}
 
 WindowImpl::WindowImpl(std::string const& name)
 {
@@ -41,36 +57,29 @@ WindowImpl::WindowImpl(std::string const& name)
 
   window_ = SDL_CreateWindow(name.c_str(), SDL_WINDOWPOS_UNDEFINED, 
     SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
-
   if(!window_)
   {
+    Destroy();
     throw sdl::Exception();
   }
-  else
+
+  renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
+  if(!renderer_)
   {
-    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
-    if(!renderer_)
-    {
-      throw sdl::Exception();
-    }
-    else
-    {
-      if(SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF))
-      {
-        throw sdl::Exception();
-      }
-    }
+    Destroy();
+    throw sdl::Exception();
+  }
+
+  if(SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF))
+  {
+    Destroy();
+    throw sdl::Exception();
   }
 }
 
 WindowImpl::~WindowImpl(void)
 {
-  SDL_DestroyRenderer(renderer_);
-  SDL_DestroyWindow(window_);
-  
-  ttf::Quit();
-  img::Quit(IMG_INIT_PNG);
-  sdl::Quit(SDL_INIT_VIDEO);
+  Destroy();
 }
 
 Texture WindowImpl::Load(std::string const& filename)
@@ -89,7 +98,7 @@ Texture WindowImpl::Load(std::string const& filename)
     {
       throw img::Exception();
     }
-    SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 255, 0));
+    (void)SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 255, 0));
 
     SDL_Texture* sdl_texture = SDL_CreateTextureFromSurface(renderer_, surface);
     SDL_FreeSurface(surface);
@@ -203,5 +212,4 @@ void Window::Free(std::string const& filename)
 {
   impl_->Free(filename);
 }
-
 }

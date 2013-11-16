@@ -18,12 +18,11 @@ JSON::JSON(json_t* json)
 JSON::JSON(std::string const& filename)
 {
   json_error_t error;
-  json_t* json = json_load_file(filename.c_str(), 0, &error);
-  if(!json)
+  json_ = json_load_file(filename.c_str(), 0, &error);
+  if(!json_)
   {
     throw Exception(error);
   }
-  json_ = json;
 }
 
 JSON::~JSON(void)

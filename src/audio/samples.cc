@@ -14,10 +14,8 @@ public:
   int size_;
 };
 
-SamplesImpl::SamplesImpl(uint8_t** data, int size)
+SamplesImpl::SamplesImpl(uint8_t** data, int size) : data_(data), size_(size)
 {
-  data_ = data;
-  size_ = size;
 }
 
 SamplesImpl::~SamplesImpl(void)

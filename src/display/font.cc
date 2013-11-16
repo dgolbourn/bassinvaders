@@ -5,20 +5,15 @@
 
 namespace display
 {
-
-FontImpl::FontImpl(std::string const& filename, int point, int r, int g, int b)
+FontImpl::FontImpl(std::string const& filename, int point, int r, int g, int b) : colour_({r, g, b, 0})
 {
   ttf::Init();
   font_ = TTF_OpenFont(filename.c_str(), point);
   if(!font_)
   {
+    ttf::Quit();
     throw ttf::Exception();
   }
-
-  colour_.r = r;
-  colour_.g = g;
-  colour_.b = b;
-  colour_.a = 0;
 }
 
 FontImpl::~FontImpl(void)
@@ -52,5 +47,4 @@ Font& Font::operator=(Font other)
   std::swap(impl_, other.impl_);
   return *this;
 }
-
 }

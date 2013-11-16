@@ -68,7 +68,7 @@ void TimerImpl::Pause(void)
 {
   if(timer_)
   {
-    SDL_RemoveTimer(timer_);
+    RemoveTimer(timer_);
     timer_ = static_cast<SDL_TimerID>(NULL);
     resume_interval_ = interval_ - SDL_GetTicks() + last_update_;
   }
@@ -84,7 +84,7 @@ void TimerImpl::Resume(void)
   }
   else
   {
-    SDL_RemoveTimer(timer_);
+    RemoveTimer(timer_);
     interval = interval_;
     last_update_ = SDL_GetTicks();
   }

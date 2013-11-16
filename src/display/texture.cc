@@ -16,6 +16,14 @@ TextureImpl::~TextureImpl(void)
   SDL_DestroyTexture(texture_);
 }
 
+static void RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination)
+{
+  if(SDL_RenderCopy(renderer, texture, source, destination))
+  {
+    throw sdl::Exception();
+  }
+}
+
 void TextureImpl::Render(int x, int y) const
 {
   SDL_Rect rect;
@@ -27,18 +35,12 @@ void TextureImpl::Render(int x, int y) const
     throw sdl::Exception();
   }
 
-  if(SDL_RenderCopy(renderer_, texture_, nullptr, &rect))
-  {
-    throw sdl::Exception();
-  }
+  RenderCopy(renderer_, texture_, nullptr, &rect);
 }
 
 void TextureImpl::Render(void) const
 {
-  if(SDL_RenderCopy(renderer_, texture_, nullptr, nullptr))
-  {
-    throw sdl::Exception();
-  }
+  RenderCopy(renderer_, texture_, nullptr, nullptr);
 }
 
 void TextureImpl::Render(BoundingBox const& source, BoundingBox const& destination) const
@@ -55,10 +57,7 @@ void TextureImpl::Render(BoundingBox const& source, BoundingBox const& destinati
     destination_rect = &destination.impl_->rect_;
   }
 
-  if(SDL_RenderCopy(renderer_, texture_, source_rect, destination_rect))
-  {
-    throw sdl::Exception();
-  }
+  RenderCopy(renderer_, texture_, source_rect, destination_rect);
 }
 
 Texture::Texture(void)

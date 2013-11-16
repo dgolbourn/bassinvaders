@@ -1,5 +1,4 @@
 #include "window.h"
-#include <memory>
 #include <unordered_map>
 #include "sdl_manager.h"
 #include "img_manager.h"

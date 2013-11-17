@@ -18,6 +18,7 @@ public:
   Texture Load(std::string const& filename);
   Texture Text(std::string const& text, Font const& font);
   void Free(std::string const& filename);
+  void Free(void);
   void Clear(void) const;
   void Show(void) const;
   void Destroy(void);
@@ -27,6 +28,9 @@ public:
   SDL_Window* window_;
   SDL_Renderer* renderer_;
   std::unordered_map<std::string, Texture> files_;
+  sdl::Library const sdl_;
+  img::Library const img_;
+  ttf::Library const ttf_;
 };
 
 void WindowImpl::Destroy(void)
@@ -39,18 +43,10 @@ void WindowImpl::Destroy(void)
   {
     SDL_DestroyWindow(window_);
   }
-
-  ttf::Quit();
-  img::Quit(IMG_INIT_PNG);
-  sdl::Quit(SDL_INIT_VIDEO);
 }
 
-WindowImpl::WindowImpl(std::string const& name)
+WindowImpl::WindowImpl(std::string const& name) : sdl_(SDL_INIT_VIDEO), img_(IMG_INIT_PNG), ttf_()
 {
-  sdl::Init(SDL_INIT_VIDEO);
-  img::Init(IMG_INIT_PNG);
-  ttf::Init();
-
   (void)SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
   (void)SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
@@ -161,6 +157,11 @@ void WindowImpl::Free(std::string const& filename)
   }    
 }
 
+void WindowImpl::Free(void)
+{
+  files_.clear();
+}
+
 Window::Window(std::string const& name) : impl_(new WindowImpl(name))
 {
 }
@@ -210,5 +211,10 @@ Texture Window::Text(std::string const& text, Font const& font)
 void Window::Free(std::string const& filename)
 {
   impl_->Free(filename);
+}
+
+void Window::Free(void)
+{
+  impl_->Free();
 }
 }

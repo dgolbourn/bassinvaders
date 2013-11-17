@@ -3,6 +3,11 @@
 
 namespace ffmpeg
 {
-void Init(void);
+class Library
+{
+public:
+  Library(void);
+  ~Library(void);
+};
 }
 #endif

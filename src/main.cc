@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
   int ret = 0;
   try
   {
-  event::Init();
+  event::Event eL;
   event::DefaultKeys();
   display::Window w;
   display::Texture T;
@@ -199,12 +199,11 @@ int main(int argc, char *argv[])
   h.y() = 100;
   while(!quitflag)
   {
-    event::Event();
+    event::Check();
     w.Clear();
     Sc.Render();
     w.Show();
   }
-  event::Quit();
   try
   {
     cstd::Exception();

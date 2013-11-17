@@ -32,6 +32,7 @@ public:
   ffmpeg::Buffer buffer_;
   bool packets_finished_;
   std::thread thread_;
+  ffmpeg::Library const ffmpeg_;
 };
 
 static void FillBufferThread(DecoderImpl* impl)
@@ -42,9 +43,8 @@ static void FillBufferThread(DecoderImpl* impl)
   }
 }
 
-DecoderImpl::DecoderImpl(std::string const& filename, int buffer_size)
+DecoderImpl::DecoderImpl(std::string const& filename, int buffer_size) : ffmpeg_()
 {
-  ffmpeg::Init();
   format_ = ffmpeg::Format(filename);
   codec_ = ffmpeg::Codec(format_);
   resampler_ = ffmpeg::Resampler(codec_);
@@ -173,5 +173,4 @@ Decoder::operator bool(void) const
 {
   return !impl_->Empty();
 }
-
 }

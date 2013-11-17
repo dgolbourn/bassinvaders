@@ -12,6 +12,7 @@ public:
   ChunkImpl(std::string const& filename);
   ~ChunkImpl(void);
   Mix_Chunk* chunk_;
+  mix::Library const mix_;
 };
 
 static std::unordered_map<std::string, std::shared_ptr<ChunkImpl>> chunks;
@@ -30,13 +31,11 @@ void Free(void)
   chunks.clear();
 }
 
-ChunkImpl::ChunkImpl(std::string const& filename)
+ChunkImpl::ChunkImpl(std::string const& filename) : mix_()
 {
-  mix::Init();
   chunk_ = Mix_LoadWAV(filename.c_str());
   if(!chunk_)
   {
-    mix::Quit();
     throw mix::Exception();
   }
 }
@@ -44,7 +43,6 @@ ChunkImpl::ChunkImpl(std::string const& filename)
 ChunkImpl::~ChunkImpl(void)
 {
   Mix_FreeChunk(chunk_);
-  mix::Quit();
 }
 
 Chunk::Chunk(std::string const& filename)

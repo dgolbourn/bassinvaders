@@ -4,6 +4,7 @@
 #include <string>
 #include "SDL_TTF.h"
 #include "SDL_Pixels.h"
+#include "ttf_manager.h"
 
 namespace display
 {
@@ -16,6 +17,7 @@ public:
 
   TTF_Font* font_;
   SDL_Color colour_;
+  ttf::Library const ttf_;
 };
 }
 #endif

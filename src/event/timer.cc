@@ -22,6 +22,7 @@ public:
   Uint32 resume_interval_;
   SDL_TimerID timer_;
   Signal signal_;
+  sdl::Library const sdl_;
 };
 
 static Uint32 TimerCallback(Uint32 interval, void* param)
@@ -47,9 +48,8 @@ static void RemoveTimer(SDL_TimerID id)
   }
 }
 
-TimerImpl::TimerImpl(int interval)
+TimerImpl::TimerImpl(int interval) : sdl_(SDL_INIT_TIMER)
 {
-  sdl::Init(SDL_INIT_TIMER);
   timer_ = AddTimer(interval, TimerCallback, this);
   interval_ = static_cast<Uint32>(interval);
   last_update_ = SDL_GetTicks();
@@ -61,7 +61,6 @@ TimerImpl::~TimerImpl(void)
   {
     RemoveTimer(timer_);
   }
-  sdl::Quit(SDL_INIT_TIMER);
 }
 
 void TimerImpl::Pause(void)

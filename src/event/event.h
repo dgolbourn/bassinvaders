@@ -1,9 +1,10 @@
 #ifndef EVENT_H_
 #define EVENT_H_
 
-#include "signal.h"
 #include "SDL_scancode.h"
 #include <unordered_map>
+#include "signal.h"
+#include "sdl_manager.h"
 
 namespace event
 {
@@ -18,9 +19,16 @@ extern Signal left;
 extern Signal right;
 extern Signal button1;
 
-void Event(void);
-void Init(void);
-void Quit(void);
+void Check(void);
 void DefaultKeys(void);
+
+class Event
+{
+public:
+  Event(void);
+  ~Event(void);
+private:
+  sdl::Library const sdl_;
+};
 }
 #endif

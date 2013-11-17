@@ -1,12 +1,13 @@
-#include "SDL.h"
+#include "sdl_manager.h"
+#include <climits>
 #include "sdl_exception.h"
 
 namespace sdl
 {
 static bool initialised;
-static int reference_count[32];
+static int reference_count[CHAR_BIT * sizeof(Uint32)];
 
-void Init(Uint32 flags)
+Library::Library(Uint32 flags) : flags_(flags)
 {
   if(!initialised)
   {
@@ -38,10 +39,11 @@ void Init(Uint32 flags)
   }
 }
 
-void Quit(Uint32 flags)
+Library::~Library(void)
 {
   int index = 0;
   Uint32 quit_flags = 0x00u;
+  Uint32 flags = flags_;
 
   while(flags)
   {

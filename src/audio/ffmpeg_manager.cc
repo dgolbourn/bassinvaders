@@ -9,12 +9,16 @@ namespace ffmpeg
 { 
 static bool registered;
 
-void Init(void)
+Library::Library(void)
 {
   if(!registered)
   {
     av_register_all();
     registered = true;
   }
+}
+
+Library::~Library(void)
+{
 }
 }

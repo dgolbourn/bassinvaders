@@ -14,15 +14,9 @@ public:
   void Resume(void) const;
   void Volume(int volume) const;
 
-  ~MusicImpl(void);
-
   ffmpeg::Decoder music_;
-};
-
-MusicImpl::~MusicImpl(void)
-{
-  mix::Quit();
-}  
+  mix::Library const mix_;
+};  
 
 void MusicImpl::Pause(void) const
 {
@@ -44,9 +38,8 @@ static void MixCallback(void* music, Uint8* stream, int len)
   static_cast<ffmpeg::Decoder*>(music)->Read(stream, len);
 }
 
-MusicImpl::MusicImpl(std::string const& filename)
+MusicImpl::MusicImpl(std::string const& filename) : mix_()
 {
-  mix::Init();
   int const buffer_size = 1 << 12;
   music_ = ffmpeg::Decoder(filename, buffer_size);
   Mix_HookMusic(MixCallback, static_cast<void*>(&music_));

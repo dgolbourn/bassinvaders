@@ -40,7 +40,7 @@ static void MixCallback(void* music, Uint8* stream, int len)
 
 MusicImpl::MusicImpl(std::string const& filename) : mix_()
 {
-  int const buffer_size = 1 << 12;
+  int const buffer_size = static_cast<int>(1) << 12;
   music_ = ffmpeg::Decoder(filename, buffer_size);
   Mix_HookMusic(MixCallback, static_cast<void*>(&music_));
   Mix_PauseMusic();

@@ -127,7 +127,6 @@ Texture WindowImpl::Text(std::string const& text, Font const& font)
 
   Texture texture;
   texture.impl_ = std::shared_ptr<TextureImpl>(new TextureImpl(sdl_texture, renderer_));
-
   return texture;
 }
 

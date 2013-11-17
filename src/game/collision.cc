@@ -75,9 +75,8 @@ void CollisionImpl::Add(display::BoundingBox const& a, display::BoundingBox cons
   commands_[pair].push_back(c);
 }
 
-Collision::Collision(void)
+Collision::Collision(void) : impl_(new CollisionImpl())
 {
-  impl_ = std::shared_ptr<CollisionImpl>(new CollisionImpl());
 }
 
 void Collision::Add(display::BoundingBox const& a, display::BoundingBox const& b, event::Command const& c)

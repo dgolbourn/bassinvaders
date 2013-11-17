@@ -117,14 +117,12 @@ void AnimationImpl::Restart(void)
   mutex_.unlock();
 }
 
-Animation::Animation(std::string const& filename, display::Window& window)
+Animation::Animation(std::string const& filename, display::Window& window) : impl_(new AnimationImpl(json::JSON(filename), window))
 {
-  impl_ = std::shared_ptr<AnimationImpl>(new AnimationImpl(json::JSON(filename), window));
 }
 
-Animation::Animation(json::JSON const& json, display::Window& window)
+Animation::Animation(json::JSON const& json, display::Window& window) : impl_(new AnimationImpl(json, window))
 {
-  impl_ = std::shared_ptr<AnimationImpl>(new AnimationImpl(json, window));
 }
 
 void Animation::Render(display::BoundingBox const& destination)

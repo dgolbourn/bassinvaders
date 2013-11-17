@@ -53,9 +53,8 @@ BoundingBox::BoundingBox(void)
 {
 }
 
-BoundingBox::BoundingBox(int x, int y, int w, int h)
+BoundingBox::BoundingBox(int x, int y, int w, int h) : impl_(new BoundingBoxImpl(x, y, w, h))
 {
-  impl_ = std::shared_ptr<BoundingBoxImpl>(new BoundingBoxImpl(x, y, w, h));
 }
 
 BoundingBoxImpl::BoundingBoxImpl(int x, int y, int w, int h) : rect_({x, y, w, h})
@@ -67,14 +66,12 @@ BoundingBoxImpl::BoundingBoxImpl(json::JSON const& json)
   json.Unpack("[iiii]", 0, &rect_.x, &rect_.y, &rect_.w, &rect_.h);
 }
 
-BoundingBox::BoundingBox(std::string const& filename)
+BoundingBox::BoundingBox(std::string const& filename) : impl_(new BoundingBoxImpl(json::JSON(filename)))
 {
-  impl_ = std::shared_ptr<BoundingBoxImpl>(new BoundingBoxImpl(json::JSON(filename)));
 }
 
-BoundingBox::BoundingBox(json::JSON const& json)
+BoundingBox::BoundingBox(json::JSON const& json) : impl_(new BoundingBoxImpl(json))
 {
-  impl_ = std::shared_ptr<BoundingBoxImpl>(new BoundingBoxImpl(json));
 }
 
 BoundingBox::BoundingBox(BoundingBox const& other) : impl_(other.impl_)

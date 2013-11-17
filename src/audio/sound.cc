@@ -92,9 +92,8 @@ void SoundImpl::Volume(int volume)
   volume_ = volume;
 }
 
-Sound::Sound(std::string const& filename)
+Sound::Sound(std::string const& filename) : impl_(new SoundImpl(filename))
 {
-  impl_ = std::shared_ptr<SoundImpl>(new SoundImpl(filename));
 }
 
 Sound::Sound(void)

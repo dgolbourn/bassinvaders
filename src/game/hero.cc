@@ -242,14 +242,14 @@ int& Hero::y(void)
   return impl_->y_;
 }
 
-Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause)
+Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause) :
+  impl_(new HeroImpl(json::JSON(filename), window, scene, collision, pause))
 {
-  impl_ = std::shared_ptr<HeroImpl>(new HeroImpl(json::JSON(filename), window, scene, collision, pause));
 }
 
-Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause)
+Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause) :
+  impl_(new HeroImpl(json, window, scene, collision, pause))
 {
-  impl_ = std::shared_ptr<HeroImpl>(new HeroImpl(json, window, scene, collision, pause));
 }
 
 Hero::Hero(Hero const& other) : impl_(other.impl_)

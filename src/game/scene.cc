@@ -36,9 +36,8 @@ void SceneImpl::Add(event::Command const& command, int z)
   commands_.insert(RenderCommandPair(z, command));
 }
 
-Scene::Scene(void)
+Scene::Scene(void) : impl_(new SceneImpl())
 {
-  impl_ = std::shared_ptr<SceneImpl>(new SceneImpl());
 }
 
 void Scene::Render(void)

@@ -12,8 +12,8 @@ public:
   Music(void);  
   Music(std::string const& filename);
   void Pause(void) const;
-  void Resume(void) const;
-  void Volume(int volume) const;
+  void Resume(void);
+  void Volume(int volume);
 
   Music(Music const& other);
   Music(Music&& other);

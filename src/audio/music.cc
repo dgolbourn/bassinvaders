@@ -11,26 +11,25 @@ class MusicImpl
 public:
   MusicImpl(std::string const& filename);
   void Pause(void) const;
-  void Resume(void) const;
-  void Volume(int volume) const;
+  void Resume(void);
+  void Volume(int volume);
 
-  ffmpeg::Decoder music_;
   mix::Library const mix_;
+  ffmpeg::Decoder music_;
+  int volume_;
 };  
+
+static ffmpeg::Decoder* GetCurrentMusic(void)
+{
+  return static_cast<ffmpeg::Decoder*>(Mix_GetMusicHookData());
+}
 
 void MusicImpl::Pause(void) const
 {
-  Mix_PauseMusic();
-}
-
-void MusicImpl::Resume(void) const
-{
-  Mix_ResumeMusic();
-}
-
-void MusicImpl::Volume(int volume) const
-{
-  Mix_VolumeMusic(volume);
+  if(GetCurrentMusic() == &music_)
+  {
+    Mix_PauseMusic();
+  }
 }
 
 static void MixCallback(void* music, Uint8* stream, int len)
@@ -38,12 +37,29 @@ static void MixCallback(void* music, Uint8* stream, int len)
   static_cast<ffmpeg::Decoder*>(music)->Read(stream, len);
 }
 
-MusicImpl::MusicImpl(std::string const& filename) : mix_()
+void MusicImpl::Resume(void)
 {
-  int const buffer_size = static_cast<int>(1) << 12;
-  music_ = ffmpeg::Decoder(filename, buffer_size);
-  Mix_HookMusic(MixCallback, static_cast<void*>(&music_));
-  Mix_PauseMusic();
+  if(GetCurrentMusic() == &music_)
+  {
+    Mix_ResumeMusic();
+  }
+  else
+  {
+    Mix_HookMusic(MixCallback, static_cast<void*>(&music_));
+    (void)Mix_VolumeMusic(volume_);
+  }
+}
+
+void MusicImpl::Volume(int volume)
+{
+  volume_ = volume;
+  (void)Mix_VolumeMusic(volume_);
+}
+
+int const buffer_size = static_cast<int>(1) << 12;
+static int const default_volume = -1;
+MusicImpl::MusicImpl(std::string const& filename) : mix_(), volume_(default_volume), music_(filename, buffer_size)
+{
 }
 
 Music::Music(void)
@@ -77,12 +93,12 @@ void Music::Pause(void) const
   impl_->Pause();
 }
 
-void Music::Resume(void) const
+void Music::Resume(void)
 {
   impl_->Resume();
 }
 
-void Music::Volume(int volume) const
+void Music::Volume(int volume)
 {
   impl_->Volume(volume);
 }

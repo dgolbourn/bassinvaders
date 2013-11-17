@@ -11,8 +11,8 @@ class ChunkImpl
 public:
   ChunkImpl(std::string const& filename);
   ~ChunkImpl(void);
-  Mix_Chunk* chunk_;
   mix::Library const mix_;
+  Mix_Chunk* chunk_;
 };
 
 static std::unordered_map<std::string, std::shared_ptr<ChunkImpl>> chunks;

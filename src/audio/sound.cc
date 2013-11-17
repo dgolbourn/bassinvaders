@@ -22,8 +22,9 @@ public:
   int channel_;
 };
 
-static bool initialised;
 static int const no_channel = -1;
+static int const default_volume = -1;
+
 static std::unordered_map<int, SoundPtr> active_channels;
 
 static void ChannelFinishedCallback(int channel)
@@ -33,25 +34,21 @@ static void ChannelFinishedCallback(int channel)
   {
     if(auto sound = sound_iter->second.lock())
     {
+      Mix_Volume(sound->channel_, default_volume);
       sound->channel_ = no_channel;
       active_channels.erase(sound_iter);
     }
   }
 }
 
-static void Init(void)
+SoundImpl::SoundImpl(std::string const& filename) : chunk_(filename), volume_(default_volume), channel_(no_channel)
 {
+  static bool initialised;
   if(!initialised)
   {
     Mix_ChannelFinished(ChannelFinishedCallback);
     initialised = true;
   }
-}
-
-static int const default_volume = -1;
-SoundImpl::SoundImpl(std::string const& filename) : chunk_(filename), volume_(default_volume), channel_(no_channel)
-{
-  Init();
 }
 
 void SoundImpl::Play(int repeats, SoundPtr const& impl)
@@ -90,6 +87,7 @@ void SoundImpl::Stop(void) const
 void SoundImpl::Volume(int volume)
 {
   volume_ = volume;
+  (void)Mix_Volume(channel_, volume_);
 }
 
 Sound::Sound(std::string const& filename) : impl_(new SoundImpl(filename))

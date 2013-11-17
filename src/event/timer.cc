@@ -17,12 +17,12 @@ public:
 
   ~TimerImpl(void);
 
+  sdl::Library const sdl_;
   Uint32 interval_;
   Uint32 last_update_;
   Uint32 resume_interval_;
   SDL_TimerID timer_;
   Signal signal_;
-  sdl::Library const sdl_;
 };
 
 static Uint32 TimerCallback(Uint32 interval, void* param)

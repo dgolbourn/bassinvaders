@@ -25,12 +25,12 @@ public:
 
   ~WindowImpl(void);
 
-  SDL_Window* window_;
-  SDL_Renderer* renderer_;
-  std::unordered_map<std::string, Texture> files_;
   sdl::Library const sdl_;
   img::Library const img_;
   ttf::Library const ttf_;
+  SDL_Window* window_;
+  SDL_Renderer* renderer_;
+  std::unordered_map<std::string, Texture> files_;
 };
 
 void WindowImpl::Destroy(void)

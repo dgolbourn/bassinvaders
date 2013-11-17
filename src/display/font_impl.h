@@ -15,9 +15,9 @@ public:
   
   ~FontImpl(void);
 
+  ttf::Library const ttf_;
   TTF_Font* font_;
   SDL_Color colour_;
-  ttf::Library const ttf_;
 };
 }
 #endif

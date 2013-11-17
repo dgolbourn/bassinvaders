@@ -2,7 +2,7 @@
 #include "SDL_mixer.h"
 #include <unordered_map>
 #include "mix_exception.h"
-#include "mix_manager.h"
+#include "mix_library.h"
 
 namespace mix
 {

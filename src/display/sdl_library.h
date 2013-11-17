@@ -1,5 +1,5 @@
-#ifndef SDL_MANAGER_H_
-#define SDL_MANAGER_H_
+#ifndef SDL_LIBRARY_H_
+#define SDL_LIBRARY_H_
 
 #include "SDL_stdinc.h"
 

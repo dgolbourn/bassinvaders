@@ -1,7 +1,7 @@
 #include <map>
 #include "music.h"
 #include "SDL_mixer.h"
-#include "mix_manager.h"
+#include "mix_library.h"
 #include "decoder.h"
 
 namespace audio

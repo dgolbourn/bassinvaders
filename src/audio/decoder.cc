@@ -1,5 +1,5 @@
 #include "decoder.h"
-#include "ffmpeg_manager.h"
+#include "ffmpeg_library.h"
 #include "buffer.h"
 #include "packet.h"
 #include "format.h"

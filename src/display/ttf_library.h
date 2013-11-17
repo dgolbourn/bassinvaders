@@ -1,5 +1,5 @@
-#ifndef TTF_MANAGER_H_
-#define TTF_MANAGER_H_
+#ifndef TTF_LIBRARY_H_
+#define TTF_LIBRARY_H_
 
 namespace ttf
 {

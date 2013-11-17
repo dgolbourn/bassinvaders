@@ -1,4 +1,4 @@
-#include "img_manager.h"
+#include "img_library.h"
 #include "img_exception.h"
 #include <climits>
 

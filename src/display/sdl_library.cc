@@ -1,4 +1,4 @@
-#include "sdl_manager.h"
+#include "sdl_library.h"
 #include <climits>
 #include "sdl_exception.h"
 

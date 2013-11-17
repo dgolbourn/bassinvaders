@@ -1,5 +1,5 @@
-#ifndef FFMPEG_MANAGER_H_
-#define FFMPEG_MANAGER_H_
+#ifndef FFMPEG_LIBRARY_H_
+#define FFMPEG_LIBRARY_H_
 
 namespace ffmpeg
 {

@@ -1,7 +1,7 @@
-#ifndef MIX_MANAGER_H_
-#define MIX_MANAGER_H_
+#ifndef MIX_LIBRARY_H_
+#define MIX_LIBRARY_H_
 
-#include "sdl_manager.h"
+#include "sdl_library.h"
 
 namespace mix
 {

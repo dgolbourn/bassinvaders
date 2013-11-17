@@ -1,4 +1,4 @@
-#include "ffmpeg_manager.h"
+#include "ffmpeg_library.h"
 
 extern "C"
 {

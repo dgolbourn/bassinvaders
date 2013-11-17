@@ -1,4 +1,4 @@
-#include "ttf_manager.h"
+#include "ttf_library.h"
 #include "SDL_ttf.h"
 #include "ttf_exception.h"
 

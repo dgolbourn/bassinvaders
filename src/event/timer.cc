@@ -1,6 +1,6 @@
 #include "timer.h"
 #include "SDL_timer.h"
-#include "sdl_manager.h"
+#include "sdl_library.h"
 #include "sdl_exception.h"
 #include "signal.h"
 

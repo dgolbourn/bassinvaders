@@ -4,7 +4,7 @@
 #include <string>
 #include "SDL_TTF.h"
 #include "SDL_Pixels.h"
-#include "ttf_manager.h"
+#include "ttf_library.h"
 
 namespace display
 {

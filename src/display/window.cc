@@ -1,8 +1,8 @@
 #include "window.h"
 #include <unordered_map>
-#include "sdl_manager.h"
-#include "img_manager.h"
-#include "ttf_manager.h"
+#include "sdl_library.h"
+#include "img_library.h"
+#include "ttf_library.h"
 #include "sdl_exception.h"
 #include "img_exception.h"
 #include "ttf_exception.h"

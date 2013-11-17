@@ -1,9 +1,9 @@
 #include <map>
 #include <string>
 #include "SDL.h"
-#include "mix_manager.h"
-#include "mix_manager.h"
-#include "sdl_manager.h"
+#include "mix_library.h"
+#include "mix_library.h"
+#include "sdl_library.h"
 #include "mix_exception.h"
 #include "audio_format.h"
 

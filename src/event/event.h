@@ -4,7 +4,7 @@
 #include "SDL_scancode.h"
 #include <unordered_map>
 #include "signal.h"
-#include "sdl_manager.h"
+#include "sdl_library.h"
 
 namespace event
 {

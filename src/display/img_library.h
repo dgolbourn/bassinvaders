@@ -1,5 +1,5 @@
-#ifndef IMG_MANAGER_H_
-#define IMG_MANAGER_H_
+#ifndef IMG_LIBRARY_H_
+#define IMG_LIBRARY_H_
 
 namespace img
 {

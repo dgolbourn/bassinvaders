@@ -3,7 +3,6 @@
 
 namespace event
 {
-typedef std::weak_ptr<CommandImpl> CommandPtr;
 typedef std::owner_less<CommandPtr> CommandLess;
 typedef std::set<CommandPtr, CommandLess> CommandSet;
 

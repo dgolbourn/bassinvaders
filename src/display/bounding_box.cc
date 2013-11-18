@@ -4,29 +4,14 @@
 
 namespace display
 {
-void BoundingBox::Reset(void)
-{
-  impl_.reset();
-}
-
-bool BoundingBox::operator==(BoundingBox const& other) const
-{
-  return impl_ == other.impl_;
-}
-
 bool BoundingBox::operator&&(BoundingBox const& other) const
 {
   return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_) != SDL_FALSE;
 }
 
-bool BoundingBox::operator<(BoundingBox const& other) const
-{
-  return impl_ < other.impl_;
-}
-
 BoundingBox::operator bool(void) const
 {
-  return impl_ && (SDL_RectEmpty(&impl_->rect_) == SDL_FALSE);
+  return bool(impl_);
 }
 
 int& BoundingBox::x(void) const

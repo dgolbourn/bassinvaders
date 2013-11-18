@@ -18,6 +18,7 @@
 #include "scene.h"
 #include "command.h"
 #include "hero.h"
+#include "collision.h"
 
 class TestCallback : public event::CommandImpl
 {
@@ -193,10 +194,12 @@ int main(int argc, char *argv[])
   timer.Resume();
 
   event::Signal pau;
-  game::Hero h("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json", w, Sc, game::Collision(), pau);
+  game::Collision col;
+  game::Hero h("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json", w, Sc, col, pau);
   pau.Notify();
   h.x() = 100;
   h.y() = 100;
+
   while(!quitflag)
   {
     event::Check();

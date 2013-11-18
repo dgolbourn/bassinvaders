@@ -9,5 +9,6 @@ public:
   virtual void operator()(void) = 0;
 };
 typedef std::shared_ptr<CommandImpl> Command;
+typedef std::weak_ptr<CommandImpl> CommandPtr;
 }
 #endif

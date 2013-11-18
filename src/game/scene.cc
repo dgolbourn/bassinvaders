@@ -3,16 +3,15 @@
 
 namespace game
 {
-typedef std::weak_ptr<event::CommandImpl> RenderCommandPtr;
-typedef std::multimap<int, RenderCommandPtr> RenderCommandMap;
-typedef std::pair<int, RenderCommandPtr> RenderCommandPair;
+typedef std::multimap<int, event::CommandPtr> CommandMap;
+typedef std::pair<int, event::CommandPtr> CommandPair;
 
 class SceneImpl
 {
 public:
   void Add(event::Command const& render, int z);
   void Render(void);
-  RenderCommandMap commands_;
+  CommandMap commands_;
 };
 
 void SceneImpl::Render(void)
@@ -33,7 +32,7 @@ void SceneImpl::Render(void)
 
 void SceneImpl::Add(event::Command const& command, int z)
 {
-  commands_.insert(RenderCommandPair(z, command));
+  commands_.insert(CommandPair(z, command));
 }
 
 Scene::Scene(void) : impl_(new SceneImpl())

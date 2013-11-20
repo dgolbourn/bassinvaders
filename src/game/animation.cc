@@ -111,7 +111,8 @@ void AnimationImpl::Resume(void)
 void AnimationImpl::Play(int loops)
 {
   mutex_.lock();
-  timer_.Play(loops);
+  int const frames = (loops + 1) * frames_.size() - 1;
+  timer_.Play(frames);
   frame_ = frames_.begin(); 
   mutex_.unlock();
 }

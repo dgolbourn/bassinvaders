@@ -31,6 +31,8 @@ public:
   bool paused_;
 };
 
+static SDL_TimerID const timer_null = static_cast<SDL_TimerID>(NULL);
+
 static Uint32 TimerCallback(Uint32 interval, void* param)
 {
   return static_cast<TimerImpl*>(param)->Update();
@@ -56,7 +58,7 @@ static void RemoveTimer(SDL_TimerID id)
 
 TimerImpl::TimerImpl(int interval) : sdl_(SDL_INIT_TIMER), interval_(static_cast<Uint32>(interval))
 {
-  timer_ = static_cast<SDL_TimerID>(NULL);
+  timer_ = timer_null;
   paused_ = false;
 }
 
@@ -73,7 +75,7 @@ void TimerImpl::Pause(void)
   if(timer_)
   {
     RemoveTimer(timer_);
-    timer_ = static_cast<SDL_TimerID>(NULL);
+    timer_ = timer_null;
     resume_interval_ = interval_ - SDL_GetTicks() + last_update_;
     paused_ = true;
   }
@@ -124,6 +126,7 @@ Uint32 TimerImpl::Update(void)
     {
       end_.Notify();
       interval = 0;
+      timer_ = timer_null;
     }
     ++loops_;
   }

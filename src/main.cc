@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
   play->sound_ = audio::Sound("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav");
   event::Command L6(play); event::button1.Add(L6);
   game::Animation anim("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/file.json", w);
-  anim.Play(-1);
+  anim.Play(10);
 
   Show* Sh = new Show;
   Sh->anim_ = anim;

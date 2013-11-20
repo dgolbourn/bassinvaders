@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include "command.h"
 
 namespace audio
 {
@@ -16,6 +17,7 @@ public:
   void Resume(void) const;
   void Stop(void) const;
   void Volume(int volume);
+  void End(event::Command const& command);
 
   Sound(Sound const& other);
   Sound(Sound&& other);

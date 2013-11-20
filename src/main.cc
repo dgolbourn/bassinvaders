@@ -36,7 +36,7 @@ class QuitCallback : public event::CommandImpl
 public:
   void operator()(void) final
   {
-    printf("who!\n");
+    quitflag = true;
   }
 };
 
@@ -167,7 +167,6 @@ int main(int argc, char *argv[])
   E.Notify();
 
   event::Command L0(new QuitCallback); event::quit.Add(L0);
-  event::Command L1(new QuitCallback); event::button1.Add(L1);
   event::Command L2(new UpCallback); event::up.Add(L2);
   event::Command L3(new DownCallback); event::down.Add(L3);
   event::Command L4(new LeftCallback); event::left.Add(L4);
@@ -180,7 +179,7 @@ int main(int argc, char *argv[])
   play->sound_ = audio::Sound("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/high.wav");
   event::Command L6(play); event::button1.Add(L6);
   game::Animation anim("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/file.json", w);
-  anim.Resume();
+  anim.Play(-1);
 
   Show* Sh = new Show;
   Sh->anim_ = anim;

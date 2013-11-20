@@ -9,6 +9,11 @@ bool BoundingBox::operator&&(BoundingBox const& other) const
   return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_) != SDL_FALSE;
 }
 
+bool BoundingBox::operator<(BoundingBox const& other) const
+{
+  return impl_.owner_before(other.impl_);
+}
+
 BoundingBox::operator bool(void) const
 {
   return bool(impl_);

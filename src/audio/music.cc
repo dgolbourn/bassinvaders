@@ -10,6 +10,7 @@ class MusicImpl
 {  
 public:
   MusicImpl(std::string const& filename);
+  ~MusicImpl(void);
   void Pause(void) const;
   void Resume(void);
   void Volume(int volume);
@@ -22,6 +23,11 @@ public:
 static ffmpeg::Decoder* GetCurrentMusic(void)
 {
   return static_cast<ffmpeg::Decoder*>(Mix_GetMusicHookData());
+}
+
+MusicImpl::~MusicImpl(void)
+{
+  Mix_HookMusic(nullptr, nullptr);
 }
 
 void MusicImpl::Pause(void) const

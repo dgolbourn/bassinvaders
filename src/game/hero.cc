@@ -9,7 +9,7 @@ namespace game
 class HeroImpl
 {
 public:
-  HeroImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause);
+  HeroImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause);
   Animation moving_animation_;
   display::BoundingBox moving_render_box_;
   audio::Sound moving_sound_effect_;
@@ -30,9 +30,13 @@ public:
   event::Command right_;
   int x_;
   int y_;
+  event::Command enemy_collision_;
+
+  class RenderCommand;
+  class PauseCommand;
 };
 
-class RenderCommand : public event::CommandImpl
+class HeroImpl::RenderCommand : public event::CommandImpl
 {
 public:
   RenderCommand(HeroImpl& impl);
@@ -40,11 +44,11 @@ public:
   HeroImpl& impl_;
 };
 
-RenderCommand::RenderCommand(HeroImpl& impl) : impl_(impl)
+HeroImpl::RenderCommand::RenderCommand(HeroImpl& impl) : impl_(impl)
 {
 }
 
-void RenderCommand::operator()(void)
+void HeroImpl::RenderCommand::operator()(void)
 {
   display::BoundingBox destination(
     impl_.render_box_.x() + impl_.x_, 
@@ -54,7 +58,7 @@ void RenderCommand::operator()(void)
   impl_.animation_.Render(destination);
 }
 
-class PauseCommand : public event::CommandImpl
+class HeroImpl::PauseCommand : public event::CommandImpl
 {
 public:
   PauseCommand(HeroImpl& impl);
@@ -62,11 +66,11 @@ public:
   HeroImpl& impl_;
 };
 
-PauseCommand::PauseCommand(HeroImpl& impl) : impl_(impl)
+HeroImpl::PauseCommand::PauseCommand(HeroImpl& impl) : impl_(impl)
 {
 }
 
-void PauseCommand::operator()(void)
+void HeroImpl::PauseCommand::operator()(void)
 {
   if(impl_.paused_)
   {
@@ -152,6 +156,7 @@ LeftCommand::LeftCommand(HeroImpl& impl) : impl_(impl)
 
 void LeftCommand::operator()(void)
 {
+
   if(!impl_.paused_)
   {
     impl_.x_--;
@@ -178,7 +183,34 @@ void RightCommand::operator()(void)
   }
 }
 
-HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause)
+class EnemyCollisionCommand : public event::CommandImpl
+{
+public:
+  EnemyCollisionCommand(HeroImpl& impl);
+  void operator()(void) final;
+  HeroImpl& impl_;
+};
+
+EnemyCollisionCommand::EnemyCollisionCommand(HeroImpl& impl) : impl_(impl)
+{
+}
+
+void EnemyCollisionCommand::operator()(void)
+{
+  impl_.sound_effect_.Stop();
+  impl_.animation_ = impl_.destroyed_animation_;
+  impl_.render_box_ = impl_.destroyed_render_box_;
+  impl_.sound_effect_ = impl_.destroyed_sound_effect_;
+  impl_.sound_effect_.Play();
+  impl_.animation_.Play();
+  if(impl_.paused_)
+  {
+    impl_.animation_.Pause();
+    impl_.sound_effect_.Pause();
+  }
+}
+
+HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause)
 {
   json_t* moving_animation;
   json_t* moving_render_box;
@@ -215,6 +247,8 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene
   pause.Add(pause_);
 
   animation_ = moving_animation_;
+  animation_.Play(-1);
+  animation_.Pause();
   render_box_ = moving_render_box_;
   sound_effect_ = moving_sound_effect_;
   sound_effect_.Play(-1);
@@ -230,6 +264,9 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene
   event::left.Add(left_);
   right_ = event::Command(new RightCommand(*this)); 
   event::right.Add(right_);
+
+  enemy_collision_ = event::Command(new EnemyCollisionCommand(*this));
+  collision.Add(0, 1, collision_box_, enemy_collision_);
 }
 
 int& Hero::x(void)
@@ -242,12 +279,12 @@ int& Hero::y(void)
   return impl_->y_;
 }
 
-Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause) :
+Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
   impl_(new HeroImpl(json::JSON(filename), window, scene, collision, pause))
 {
 }
 
-Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause) :
+Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
   impl_(new HeroImpl(json, window, scene, collision, pause))
 {
 }

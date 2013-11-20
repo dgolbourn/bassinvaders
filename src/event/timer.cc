@@ -10,19 +10,25 @@ class TimerImpl
 {
 public:
   TimerImpl(int interval);
+  void Play(int loops);
   void Pause(void);
   void Resume(void);
   void Add(Command const& command);
+  void End(Command const& command);
   Uint32 Update(void);
 
   ~TimerImpl(void);
 
   sdl::Library const sdl_;
-  Uint32 interval_;
+  Uint32 const interval_;
   Uint32 last_update_;
   Uint32 resume_interval_;
   SDL_TimerID timer_;
   Signal signal_;
+  Signal end_;
+  int loops_;
+  int max_loops_;
+  bool paused_;
 };
 
 static Uint32 TimerCallback(Uint32 interval, void* param)
@@ -48,11 +54,10 @@ static void RemoveTimer(SDL_TimerID id)
   }
 }
 
-TimerImpl::TimerImpl(int interval) : sdl_(SDL_INIT_TIMER)
+TimerImpl::TimerImpl(int interval) : sdl_(SDL_INIT_TIMER), interval_(static_cast<Uint32>(interval))
 {
-  timer_ = AddTimer(interval, TimerCallback, this);
-  interval_ = static_cast<Uint32>(interval);
-  last_update_ = SDL_GetTicks();
+  timer_ = static_cast<SDL_TimerID>(NULL);
+  paused_ = false;
 }
 
 TimerImpl::~TimerImpl(void)
@@ -70,24 +75,31 @@ void TimerImpl::Pause(void)
     RemoveTimer(timer_);
     timer_ = static_cast<SDL_TimerID>(NULL);
     resume_interval_ = interval_ - SDL_GetTicks() + last_update_;
+    paused_ = true;
   }
+}
+
+void TimerImpl::Play(int loops)
+{
+  if(timer_)
+  {
+    RemoveTimer(timer_);
+  }
+  max_loops_ = loops;
+  loops_ = 0;
+  timer_ = AddTimer(interval_, TimerCallback, this);
+  last_update_ = SDL_GetTicks();
+  paused_ = false;
 }
 
 void TimerImpl::Resume(void)
 {
-  Uint32 interval;
-  if(!timer_)
+  if(paused_)
   {
-    interval = resume_interval_;
     last_update_ = SDL_GetTicks() - interval_ + resume_interval_;
+    timer_ = AddTimer(resume_interval_, TimerCallback, this);
+    paused_ = false;
   }
-  else
-  {
-    RemoveTimer(timer_);
-    interval = interval_;
-    last_update_ = SDL_GetTicks();
-  }
-  timer_ = AddTimer(interval, TimerCallback, this);
 }
 
 void TimerImpl::Add(event::Command const& command)
@@ -95,11 +107,27 @@ void TimerImpl::Add(event::Command const& command)
   return signal_.Add(command);
 }
 
+void TimerImpl::End(event::Command const& command)
+{
+  return end_.Add(command);
+}
+
 Uint32 TimerImpl::Update(void)
 {
   signal_.Notify();
   last_update_ = SDL_GetTicks();
-  return interval_;
+  
+  int interval = interval_;
+  if(max_loops_ >= 0)
+  {
+    if(loops_ == max_loops_)
+    {
+      end_.Notify();
+      interval = 0;
+    }
+    ++loops_;
+  }
+  return interval;
 }
 
 Timer::Timer(void)
@@ -141,5 +169,15 @@ void Timer::Resume(void)
 void Timer::Add(event::Command const& command)
 {
   return impl_->Add(command);
+}
+
+void Timer::End(event::Command const& command)
+{
+  impl_->End(command);
+}
+
+void Timer::Play(int loops)
+{
+  impl_->Play(loops);
 }
 }

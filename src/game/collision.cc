@@ -6,12 +6,12 @@ namespace game
 {
 typedef std::pair<display::BoundingBoxPtr, display::BoundingBoxPtr> BoundingBoxPair;
 typedef std::list<event::CommandPtr> CommandList;
-typedef std::map<BoundingBoxPair, CommandList> CollisionMap;
-
 typedef std::list<display::BoundingBoxPtr> MemberList;
-typedef std::map<int, MemberList> MemberMap;
 typedef std::pair<display::BoundingBoxPtr, event::CommandPtr> CollisionPair;
 typedef std::list<CollisionPair> CollisionPairList;
+
+typedef std::map<BoundingBoxPair, CommandList> CollisionMap;
+typedef std::map<int, MemberList> MemberMap;
 typedef std::map<int, CollisionPairList> TargetMap;
 
 class CollisionImpl
@@ -110,17 +110,15 @@ void CollisionImpl::Check(void)
 void CollisionImpl::Add(display::BoundingBox const& a, display::BoundingBox const& b, event::Command const& c)
 {
   BoundingBoxPair pair;
-  auto a_ptr = display::BoundingBoxPtr(a);
-  auto b_ptr = display::BoundingBoxPtr(b);
-  if(a_ptr < b_ptr)
+  if(a < b)
   {
-    pair.first = a_ptr;
-    pair.second = b_ptr;
+    pair.first = a;
+    pair.second = b;
   }
   else
   {
-    pair.first = b_ptr;
-    pair.second = a_ptr;
+    pair.first = b;
+    pair.second = a;
   }
   collisions_[pair].push_back(c);
 }

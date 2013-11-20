@@ -14,8 +14,8 @@ namespace game
 class Hero
 {
 public:
-  Hero(std::string const& filename, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause);
-  Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision const& collision, event::Signal& pause);
+  Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause);
+  Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause);
   Hero(void);
   int& x(void);
   int& y(void);

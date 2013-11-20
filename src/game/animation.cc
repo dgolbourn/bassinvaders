@@ -18,7 +18,7 @@ public:
   void Render(display::BoundingBox const& destination);
   void Pause(void);
   void Resume(void);
-  void Restart(void);
+  void Play(int loops);
 
   display::Texture texture_;
   event::Command command_;
@@ -63,7 +63,6 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
   texture_ = window.Load(std::string(sprite_sheet));
   command_ = event::Command(new AnimationCommand(*this));
   timer_ = event::Timer(interval);
-  timer_.Pause();
   timer_.Add(command_);
   frames_ = std::vector<display::BoundingBox>(json_array_size(frames));
   frame_ = frames_.begin();
@@ -109,10 +108,10 @@ void AnimationImpl::Resume(void)
   timer_.Resume();
 }
 
-void AnimationImpl::Restart(void)
+void AnimationImpl::Play(int loops)
 {
   mutex_.lock();
-  timer_.Resume();
+  timer_.Play(loops);
   frame_ = frames_.begin(); 
   mutex_.unlock();
 }
@@ -140,9 +139,9 @@ void Animation::Resume(void)
   impl_->Resume();
 }
 
-void Animation::Restart(void)
+void Animation::Play(int loops)
 {
-  impl_->Restart();
+  impl_->Play(loops);
 }
 
 Animation::Animation(void)

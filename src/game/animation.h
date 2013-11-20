@@ -5,6 +5,7 @@
 #include <string>
 #include "window.h"
 #include "json.h"
+#include "command.h"
 
 namespace game
 {
@@ -17,7 +18,8 @@ public:
   void Render(display::BoundingBox const& destination);
   void Pause(void);
   void Resume(void);
-  void Restart(void);
+  void Play(int loops = 0);
+  void End(event::Command const& command);
 
   ~Animation(void);
   Animation::Animation(Animation const& other);

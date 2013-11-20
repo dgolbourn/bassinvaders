@@ -20,6 +20,7 @@ public:
   BoundingBox(std::string const& filename);
   BoundingBox(json::JSON const& json);
   bool operator&&(BoundingBox const& other) const;
+  bool operator<(BoundingBox const& other) const;
   explicit operator bool(void) const;
   int& x(void) const;
   int& y(void) const;

@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include "SDL_mixer.h"
 #include "chunk.h"
+#include "signal.h"
 
 namespace audio
 {
@@ -16,10 +17,12 @@ public:
   void Resume(void) const;
   void Stop(void) const;
   void Volume(int volume);
+  void End(event::Command const& command);
 
   mix::Chunk chunk_;
   int volume_;
   int channel_;
+  event::Signal signal_;
 };
 
 static int const no_channel = -1;
@@ -34,9 +37,10 @@ static void ChannelFinishedCallback(int channel)
   {
     if(auto sound = sound_iter->second.lock())
     {
+      sound->signal_.Notify();
       Mix_Volume(sound->channel_, default_volume);
       sound->channel_ = no_channel;
-      active_channels.erase(sound_iter);
+      (void)active_channels.erase(sound_iter);
     }
   }
 }
@@ -90,6 +94,11 @@ void SoundImpl::Volume(int volume)
   (void)Mix_Volume(channel_, volume_);
 }
 
+void SoundImpl::End(event::Command const& command)
+{
+  signal_.Add(command);
+}
+
 Sound::Sound(std::string const& filename) : impl_(new SoundImpl(filename))
 {
 }
@@ -139,5 +148,10 @@ void Sound::Stop(void) const
 void Sound::Volume(int volume)
 {
   impl_->Volume(volume);
+}
+
+void Sound::End(event::Command const& command)
+{
+  impl_->End(command);
 }
 }

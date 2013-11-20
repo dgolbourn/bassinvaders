@@ -10,9 +10,11 @@ class Timer
 public:
   Timer(void);
   Timer(int interval);
+  void Play(int loops = 0);
   void Pause(void);
   void Resume(void);
   void Add(Command const& command);
+  void End(Command const& command);
 
   ~Timer(void);
   Timer(Timer const& other);

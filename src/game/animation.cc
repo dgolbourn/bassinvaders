@@ -19,6 +19,7 @@ public:
   void Pause(void);
   void Resume(void);
   void Play(int loops);
+  void End(event::Command const& command);
 
   display::Texture texture_;
   event::Command command_;
@@ -83,7 +84,7 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
 void AnimationImpl::Next(void)
 {
   mutex_.lock();
-  frame_++;
+  ++frame_;
   if(frame_ == frames_.end())
   {
     frame_ = frames_.begin();
@@ -117,6 +118,11 @@ void AnimationImpl::Play(int loops)
   mutex_.unlock();
 }
 
+void AnimationImpl::End(event::Command const& command)
+{
+  timer_.End(command);
+}
+
 Animation::Animation(std::string const& filename, display::Window& window) : impl_(new AnimationImpl(json::JSON(filename), window))
 {
 }
@@ -143,6 +149,11 @@ void Animation::Resume(void)
 void Animation::Play(int loops)
 {
   impl_->Play(loops);
+}
+
+void Animation::End(event::Command const& command)
+{
+  impl_->End(command);
 }
 
 Animation::Animation(void)

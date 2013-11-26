@@ -2,7 +2,6 @@
 #include "texture_impl.h"
 #include "SDL_render.h"
 #include "bounding_box.h"
-#include "bounding_box_impl.h"
 #include "sdl_exception.h"
 
 namespace display
@@ -43,21 +42,9 @@ void TextureImpl::Render(void) const
   RenderCopy(renderer_, texture_, nullptr, nullptr);
 }
 
-void TextureImpl::Render(BoundingBox const& source, BoundingBox const& destination) const
+void TextureImpl::Render(SDL_Rect const* source, SDL_Rect const* destination) const
 {
-  SDL_Rect* source_rect = nullptr;
-  if(source)
-  {
-    source_rect = &source.impl_->rect_;
-  }
-
-  SDL_Rect* destination_rect = nullptr;
-  if(destination)
-  {
-    destination_rect = &destination.impl_->rect_;
-  }
-
-  RenderCopy(renderer_, texture_, source_rect, destination_rect);
+  RenderCopy(renderer_, texture_, source, destination);
 }
 
 Texture::Texture(void)

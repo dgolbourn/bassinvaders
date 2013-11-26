@@ -19,9 +19,10 @@ public:
   Enemy(void);
   int& x(void);
   int& y(void);
+  void End(event::Command const& command);
 
   ~Enemy(void);
-  Enemy::Enemy(Enemy const& other);
+  Enemy(Enemy const& other);
   Enemy(Enemy&& other);
   Enemy& operator=(Enemy other);
 private:

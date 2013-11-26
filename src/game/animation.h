@@ -22,7 +22,7 @@ public:
   void End(event::Command const& command);
 
   ~Animation(void);
-  Animation::Animation(Animation const& other);
+  Animation(Animation const& other);
   Animation(Animation&& other);
   Animation& operator=(Animation other);
 private:

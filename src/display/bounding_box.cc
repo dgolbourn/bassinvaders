@@ -1,9 +1,16 @@
 #include "bounding_box.h"
-#include "bounding_box_impl.h"
 #include "SDL_rect.h"
 
 namespace display
 {
+class BoundingBoxImpl
+{
+public:
+  BoundingBoxImpl(int x, int y, int w, int h);
+  BoundingBoxImpl(json::JSON const& json);
+  SDL_Rect rect_;
+};
+
 bool BoundingBox::operator&&(BoundingBox const& other) const
 {
   return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_) != SDL_FALSE;
@@ -17,6 +24,16 @@ bool BoundingBox::operator<(BoundingBox const& other) const
 BoundingBox::operator bool(void) const
 {
   return bool(impl_);
+}
+
+BoundingBox::operator SDL_Rect*(void) const
+{
+  SDL_Rect* rect = nullptr;
+  if(impl_)
+  {
+    rect = &impl_->rect_;
+  }
+  return rect;
 }
 
 int& BoundingBox::x(void) const

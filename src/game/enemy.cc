@@ -10,6 +10,7 @@ class EnemyImpl
 {
 public:
   EnemyImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause);
+  void End(event::Command const& command);
   Animation moving_animation_;
   display::BoundingBox moving_render_box_;
   audio::Sound moving_sound_effect_;
@@ -28,6 +29,7 @@ public:
   event::Command hero_collision_;
   class RenderCommand;
   class PauseCommand;
+  event::Signal end_;
 };
 
 class EnemyImpl::RenderCommand : public event::CommandImpl
@@ -155,6 +157,11 @@ EnemyImpl::EnemyImpl(json::JSON const& json, display::Window& window, Scene& sce
   collision.Add(1, 0, collision_box_, hero_collision_);
 }
 
+void EnemyImpl::End(event::Command const& command)
+{
+  end_.Add(command);
+}
+
 int& Enemy::x(void)
 {
   return impl_->x_;
@@ -163,6 +170,11 @@ int& Enemy::x(void)
 int& Enemy::y(void)
 {
   return impl_->y_;
+}
+
+void Enemy::End(event::Command const& command)
+{
+  impl_->End(command);
 }
 
 Enemy::Enemy(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :

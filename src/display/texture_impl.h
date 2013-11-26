@@ -13,7 +13,7 @@ class TextureImpl
 public:
   TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer);
   void Render(void) const;
-  void Render(BoundingBox const& source, BoundingBox const& destination) const;
+  void Render(SDL_Rect const* source, SDL_Rect const* destination) const;
   void Render(int x, int y) const;
   
   ~TextureImpl(void);

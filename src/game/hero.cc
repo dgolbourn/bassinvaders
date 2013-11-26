@@ -10,6 +10,7 @@ class HeroImpl
 {
 public:
   HeroImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause);
+  void End(event::Command const& command);
   Animation moving_animation_;
   display::BoundingBox moving_render_box_;
   audio::Sound moving_sound_effect_;
@@ -34,7 +35,13 @@ public:
 
   class RenderCommand;
   class PauseCommand;
+  event::Signal end_;
 };
+
+void HeroImpl::End(event::Command const& command)
+{
+  end_.Add(command);
+}
 
 class HeroImpl::RenderCommand : public event::CommandImpl
 {
@@ -277,6 +284,11 @@ int& Hero::x(void)
 int& Hero::y(void)
 {
   return impl_->y_;
+}
+
+void Hero::End(event::Command const& command)
+{
+  impl_->End(command);
 }
 
 Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :

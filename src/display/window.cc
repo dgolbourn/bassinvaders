@@ -22,6 +22,7 @@ public:
   void Clear(void) const;
   void Show(void) const;
   void Destroy(void);
+  void View(BoundingBox const& bounding_box) const;
 
   ~WindowImpl(void);
 
@@ -159,6 +160,11 @@ void WindowImpl::Free(std::string const& filename)
 void WindowImpl::Free(void)
 {
   files_.clear();
+}
+
+void WindowImpl::View(BoundingBox const& bounding_box) const
+{
+  SDL_RenderSetViewport(renderer_, bounding_box);
 }
 
 Window::Window(std::string const& name) : impl_(new WindowImpl(name))

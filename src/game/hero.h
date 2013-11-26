@@ -19,9 +19,10 @@ public:
   Hero(void);
   int& x(void);
   int& y(void);
+  void End(event::Command const& command);
 
   ~Hero(void);
-  Hero::Hero(Hero const& other);
+  Hero(Hero const& other);
   Hero(Hero&& other);
   Hero& operator=(Hero other);
 private:

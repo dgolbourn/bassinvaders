@@ -19,6 +19,7 @@
 #include "command.h"
 #include "hero.h"
 #include "collision.h"
+#include "enemy.h"
 
 class TestCallback : public event::CommandImpl
 {
@@ -111,6 +112,16 @@ public:
 class SpawnBaddie : public event::CommandImpl
 {
 public:
+  std::list<game::Enemy> enemies;
+  event::Timer timer_;
+  event::Command move_;
+  
+  SpawnBaddie(void) : timer_(100)
+  {
+    timer_.Play(-1);
+    timer_.Add(move_);
+  }
+
   void operator()(void) final
   {
   }

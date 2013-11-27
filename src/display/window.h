@@ -20,7 +20,6 @@ public:
   void Free(void);
   void Clear(void) const;
   void Show(void) const;
-  void View(BoundingBox const& bounding_box) const;
 
   ~Window(void);
   Window(Window const& other);

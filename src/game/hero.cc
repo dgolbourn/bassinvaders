@@ -3,6 +3,7 @@
 #include "bounding_box.h"
 #include "sound.h"
 #include "event.h"
+#include "dynamics.h"
 
 namespace game
 {
@@ -29,13 +30,11 @@ public:
   event::Command down_;
   event::Command left_;
   event::Command right_;
-  int x_;
-  int y_;
   event::Command enemy_collision_;
-
   class RenderCommand;
   class PauseCommand;
   event::Signal end_;
+  Dynamics dynamics_;
 };
 
 void HeroImpl::End(event::Command const& command)
@@ -58,8 +57,8 @@ HeroImpl::RenderCommand::RenderCommand(HeroImpl& impl) : impl_(impl)
 void HeroImpl::RenderCommand::operator()(void)
 {
   display::BoundingBox destination(
-    impl_.render_box_.x() + impl_.x_, 
-    impl_.render_box_.y() + impl_.y_,
+    impl_.render_box_.x() + static_cast<int>(impl_.dynamics_.x()), 
+    impl_.render_box_.y() + static_cast<int>(impl_.dynamics_.y()),
     impl_.render_box_.w(),
     impl_.render_box_.h());
   impl_.animation_.Render(destination);
@@ -84,12 +83,14 @@ void HeroImpl::PauseCommand::operator()(void)
     impl_.paused_ = false;
     impl_.animation_.Resume();
     impl_.sound_effect_.Resume();
+    impl_.dynamics_.Resume();
   }
   else
   {
     impl_.paused_ = true;
     impl_.animation_.Pause();
     impl_.sound_effect_.Pause();
+    impl_.dynamics_.Pause();
   }
 }
 
@@ -109,23 +110,32 @@ void AttackCommand::operator()(void)
 {
 }
 
+static float const dv = 0.1f;
+
 class UpCommand : public event::CommandImpl
 {
 public:
   UpCommand(HeroImpl& impl);
   void operator()(void) final;
   HeroImpl& impl_;
+  bool enabled_;
 };
 
-UpCommand::UpCommand(HeroImpl& impl) : impl_(impl)
+UpCommand::UpCommand(HeroImpl& impl) : impl_(impl), enabled_(true)
 {
 }
 
 void UpCommand::operator()(void)
 {
-  if(!impl_.paused_)
+  if(enabled_)
   {
-    impl_.y_--;
+    impl_.dynamics_.v() -= dv;
+    enabled_ = false;
+  }
+  else
+  {
+    impl_.dynamics_.v() += dv;
+    enabled_ = true;
   }
 }
 
@@ -135,17 +145,24 @@ public:
   DownCommand(HeroImpl& impl);
   void operator()(void) final;
   HeroImpl& impl_;
+  bool enabled_;
 };
 
-DownCommand::DownCommand(HeroImpl& impl) : impl_(impl)
+DownCommand::DownCommand(HeroImpl& impl) : impl_(impl), enabled_(true)
 {
 }
 
 void DownCommand::operator()(void)
 {
-  if(!impl_.paused_)
+  if(enabled_)
   {
-    impl_.y_++;
+    impl_.dynamics_.v() += dv;
+    enabled_ = false;
+  }
+  else
+  {
+    impl_.dynamics_.v() -= dv;
+    enabled_ = true;
   }
 }
 
@@ -155,18 +172,24 @@ public:
   LeftCommand(HeroImpl& impl);
   void operator()(void) final;
   HeroImpl& impl_;
+  bool enabled_;
 };
 
-LeftCommand::LeftCommand(HeroImpl& impl) : impl_(impl)
+LeftCommand::LeftCommand(HeroImpl& impl) : impl_(impl), enabled_(true)
 {
 }
 
 void LeftCommand::operator()(void)
 {
-
-  if(!impl_.paused_)
+  if(enabled_)
   {
-    impl_.x_--;
+    impl_.dynamics_.u() -= dv;
+    enabled_ = false;
+  }
+  else
+  {
+    impl_.dynamics_.u() += dv;
+    enabled_ = true;
   }
 }
 
@@ -176,17 +199,24 @@ public:
   RightCommand(HeroImpl& impl);
   void operator()(void) final;
   HeroImpl& impl_;
+  bool enabled_;
 };
 
-RightCommand::RightCommand(HeroImpl& impl) : impl_(impl)
+RightCommand::RightCommand(HeroImpl& impl) : impl_(impl), enabled_(true)
 {
 }
 
 void RightCommand::operator()(void)
 {
-  if(!impl_.paused_)
+  if(enabled_)
   {
-    impl_.x_++;
+    impl_.dynamics_.u() += dv;
+    enabled_ = false;
+  }
+  else
+  {
+    impl_.dynamics_.u() -= dv;
+    enabled_ = true;
   }
 }
 
@@ -274,16 +304,19 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene
 
   enemy_collision_ = event::Command(new EnemyCollisionCommand(*this));
   collision.Add(0, 1, collision_box_, enemy_collision_);
+  dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f);
+  dynamics_.Play();
+  dynamics_.Pause();
 }
 
-int& Hero::x(void)
+float& Hero::x(void)
 {
-  return impl_->x_;
+  return impl_->dynamics_.x();
 }
 
-int& Hero::y(void)
+float& Hero::y(void)
 {
-  return impl_->y_;
+  return impl_->dynamics_.y();
 }
 
 void Hero::End(event::Command const& command)

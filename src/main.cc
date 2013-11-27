@@ -99,6 +99,7 @@ class Show : public event::CommandImpl
 {
 public:
   game::Animation anim_;
+  display::Window win_;
 
   void operator()(void) final
   {
@@ -106,6 +107,9 @@ public:
     box.x() -= 10 * x;
     box.y() -= 10 * y;
     anim_.Render(box);
+    display::BoundingBox dox(0, 0, 250, 250);
+    dox.x() -= 10 * x;
+    dox.y() -= 10 * y;
   }
 };
 
@@ -194,6 +198,7 @@ int main(int argc, char *argv[])
 
   Show* Sh = new Show;
   Sh->anim_ = anim;
+  Sh->win_ = w;
   auto sr = event::Command(Sh);
   game::Scene Sc;
   Sc.Add(sr, 1);

@@ -15,10 +15,13 @@ KeyMap key_map;
 
 static void KeydownEvent(SDL_KeyboardEvent const& keyboard_event)
 {
-  auto iter = key_map.find(keyboard_event.keysym.scancode);
-  if(iter != key_map.end())
+  if(keyboard_event.repeat == 0)
   {
-    iter->second.Notify();
+    auto iter = key_map.find(keyboard_event.keysym.scancode);
+    if (iter != key_map.end())
+    {
+      iter->second.Notify();
+    }
   }
 }
 
@@ -54,6 +57,7 @@ void Check(void)
       quit.Notify();
       break;
     case SDL_KEYDOWN:
+    case SDL_KEYUP:
       KeydownEvent(event.key);
       break;
     default:

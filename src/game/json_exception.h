@@ -6,8 +6,6 @@
 
 namespace json
 {
-/**json error exception.  You can throw this if a json function returns an 
-error.*/
 class Exception : public std::runtime_error 
 {
 public:

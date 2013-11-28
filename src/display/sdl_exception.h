@@ -6,8 +6,6 @@
 
 namespace sdl
 {
-/**SDL Error exception.  You can throw this if an SDL function returns an error
-code.*/
 class Exception : public std::runtime_error 
 {
 public:

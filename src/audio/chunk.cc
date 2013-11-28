@@ -54,7 +54,7 @@ Chunk::Chunk(std::string const& filename)
   }
   else
   {
-    impl_ = std::shared_ptr<ChunkImpl>(new ChunkImpl(filename));
+    impl_ = std::make_shared<ChunkImpl>(filename);
     chunks[filename] = impl_;
   }
 }

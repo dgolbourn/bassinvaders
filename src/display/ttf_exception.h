@@ -6,8 +6,6 @@
 
 namespace ttf
 {
-/**TTF Error exception.  You can throw this if a TTF function returns an error
-code.*/
 class Exception : public std::runtime_error 
 {
 public:

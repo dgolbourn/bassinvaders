@@ -170,8 +170,8 @@ int main(int argc, char *argv[])
   S3.Render();
   S2.Render(display::BoundingBox(), display::BoundingBox(20,20,20,20));
   S4.Render();
-  S4.Render(15, 25);
   w.Show();
+  w.View(0,0,2.f);
 
   event::Signal E;
   event::Command L(new TestCallback);
@@ -212,8 +212,8 @@ int main(int argc, char *argv[])
   game::Collision col;
   game::Hero h("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json", w, Sc, col, pau);
   pau.Notify();
-  h.x() = 100;
-  h.y() = 100;
+  h.x() = 320;
+  h.y() = 240;
 
   while(!quitflag)
   {

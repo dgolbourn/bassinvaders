@@ -8,18 +8,29 @@
 
 namespace display
 {
+class View
+{
+public:
+  float x_;
+  float y_;
+  float half_width_;
+  float half_height_;
+  float zoom_;
+};
+
 class TextureImpl
 {
 public:
-  TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer);
+  TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer, View& view, float parallax);
   void Render(void) const;
   void Render(SDL_Rect const* source, SDL_Rect const* destination) const;
-  void Render(int x, int y) const;
   
   ~TextureImpl(void);
 
   SDL_Texture* texture_;
   SDL_Renderer* renderer_;
+  View& view_;
+  float parallax_;
 };
 }
 #endif

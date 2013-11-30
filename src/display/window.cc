@@ -22,6 +22,7 @@ public:
   void Clear(void) const;
   void Show(void) const;
   void Destroy(void);
+  void View(int x, int y, float zoom);
 
   ~WindowImpl(void);
 
@@ -31,6 +32,7 @@ public:
   SDL_Window* window_;
   SDL_Renderer* renderer_;
   std::unordered_map<std::string, Texture> files_;
+  display::View view_;
 };
 
 void WindowImpl::Destroy(void)
@@ -45,7 +47,7 @@ void WindowImpl::Destroy(void)
   }
 }
 
-WindowImpl::WindowImpl(std::string const& name) : sdl_(SDL_INIT_VIDEO), img_(IMG_INIT_PNG), ttf_()
+WindowImpl::WindowImpl(std::string const& name) : sdl_(SDL_INIT_VIDEO), img_(IMG_INIT_PNG), ttf_(), view_({0.f,0.f,320.f,240.f,1.f})
 {
   (void)SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
   (void)SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
@@ -102,7 +104,7 @@ Texture WindowImpl::Load(std::string const& filename)
       throw sdl::Exception();
     }
 
-    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_);
+    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_, 1.f);
     files_[filename] = texture;
   }
 
@@ -126,7 +128,7 @@ Texture WindowImpl::Text(std::string const& text, Font const& font)
   }
 
   Texture texture;
-  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_);
+  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_, 0.f);
   return texture;
 }
 
@@ -159,6 +161,13 @@ void WindowImpl::Free(std::string const& filename)
 void WindowImpl::Free(void)
 {
   files_.clear();
+}
+
+void WindowImpl::View(int x, int y, float zoom)
+{
+  view_.x_ = float(x);
+  view_.y_ = float(y);
+  view_.zoom_ = zoom;
 }
 
 Window::Window(std::string const& name) : impl_(new WindowImpl(name))
@@ -215,5 +224,10 @@ void Window::Free(std::string const& filename)
 void Window::Free(void)
 {
   impl_->Free();
+}
+
+void Window::View(int x, int y, float zoom)
+{
+  impl_->View(x, y, zoom);
 }
 }

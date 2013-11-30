@@ -13,7 +13,7 @@ public:
   Texture(void);
   void Render(void) const;
   void Render(BoundingBox const& source, BoundingBox const& destination) const;
-  void Render(int x, int y) const;
+  float& Parallax(void);
 
   Texture(Texture const& other);
   Texture(Texture&& other);

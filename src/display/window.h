@@ -6,13 +6,15 @@
 #include "texture.h"
 #include "font.h"
 #include "bounding_box.h"
+#include "json.h"
 
 namespace display
 {
 class Window
 {
 public:
-  Window(std::string const& name);
+  Window(std::string const& filename);
+  Window(json::JSON const& json);
   Window(void);
   Texture Load(std::string const& filename);
   Texture Text(std::string const& text, Font const& font);

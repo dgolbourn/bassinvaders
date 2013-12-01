@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
   display::Window w;
   display::Texture T;
 
-  w = display::Window("Bass Invaders");
+  w = display::Window("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/window.json");
   display::Texture S = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
   T = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
   T = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
   S2.Render(display::BoundingBox(), display::BoundingBox(20,20,20,20));
   S4.Render();
   w.Show();
-  w.View(0,0,2.f);
+  w.View(0,0,1.f);
 
   event::Signal E;
   event::Command L(new TestCallback);

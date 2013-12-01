@@ -14,7 +14,7 @@ namespace display
 class WindowImpl
 {
 public:
-  WindowImpl(std::string const& name);
+  WindowImpl(json::JSON const& json);
   Texture Load(std::string const& filename);
   Texture Text(std::string const& text, Font const& font);
   void Free(std::string const& filename);
@@ -47,13 +47,33 @@ void WindowImpl::Destroy(void)
   }
 }
 
-WindowImpl::WindowImpl(std::string const& name) : sdl_(SDL_INIT_VIDEO), img_(IMG_INIT_PNG), ttf_(), view_({0.f,0.f,320.f,240.f,1.f})
+WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_INIT_PNG), ttf_()
 {
   (void)SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
   (void)SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-  window_ = SDL_CreateWindow(name.c_str(), SDL_WINDOWPOS_UNDEFINED, 
-    SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
+  char const* name;
+  int width;
+  int height;
+  char const* mode;
+
+  json.Unpack("{sssisiss}", 0,
+    "name", &name,
+    "width", &width,
+    "height", &height,
+    "mode", &mode);
+
+  Uint32 flags = 0;
+  if(!strcmp(mode, "Fullscreen"))
+  {
+    flags |= SDL_WINDOW_FULLSCREEN;
+  }
+  else if(!strcmp(mode, "Borderless"))
+  {
+    flags |= SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED;
+  }
+
+  window_ = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
   if(!window_)
   {
     Destroy();
@@ -72,6 +92,8 @@ WindowImpl::WindowImpl(std::string const& name) : sdl_(SDL_INIT_VIDEO), img_(IMG
     Destroy();
     throw sdl::Exception();
   }
+
+  view_ = {0.f, 0.f, 0.5f*float(width), 0.5f*float(height), 1.f};
 }
 
 WindowImpl::~WindowImpl(void)
@@ -170,7 +192,11 @@ void WindowImpl::View(int x, int y, float zoom)
   view_.zoom_ = zoom;
 }
 
-Window::Window(std::string const& name) : impl_(new WindowImpl(name))
+Window::Window(std::string const& filename) : impl_(new WindowImpl(json::JSON(filename)))
+{
+}
+
+Window::Window(json::JSON const& json) : impl_(new WindowImpl(json))
 {
 }
 

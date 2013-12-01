@@ -93,7 +93,7 @@ WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_
     throw sdl::Exception();
   }
 
-  view_ = {0.f, 0.f, 0.5f*float(width), 0.5f*float(height), 1.f};
+  view_ = {0.f, 0.f, 0.5f*float(width), 0.5f*float(height), 1.f, width, height};
 }
 
 WindowImpl::~WindowImpl(void)
@@ -126,7 +126,7 @@ Texture WindowImpl::Load(std::string const& filename)
       throw sdl::Exception();
     }
 
-    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_, 1.f);
+    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_, 1.f, false);
     files_[filename] = texture;
   }
 
@@ -150,7 +150,7 @@ Texture WindowImpl::Text(std::string const& text, Font const& font)
   }
 
   Texture texture;
-  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_, 0.f);
+  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_, 0.f, false);
   return texture;
 }
 

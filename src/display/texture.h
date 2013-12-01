@@ -14,6 +14,7 @@ public:
   void Render(void) const;
   void Render(BoundingBox const& source, BoundingBox const& destination) const;
   float& Parallax(void);
+  bool& Tile(void);
 
   Texture(Texture const& other);
   Texture(Texture&& other);

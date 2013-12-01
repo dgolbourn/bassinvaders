@@ -23,17 +23,15 @@ public:
 class TextureImpl
 {
 public:
-  TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer, View& view, float parallax, bool tile);
+  TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer, View& view);
   void Render(void) const;
-  void Render(SDL_Rect const* source, SDL_Rect const* destination) const;
+  void Render(SDL_Rect const* source, SDL_Rect const* destination, float parallax, bool tile) const;
   
   ~TextureImpl(void);
 
   SDL_Texture* texture_;
   SDL_Renderer* renderer_;
   View& view_;
-  float parallax_;
-  bool tile_;
 };
 }
 #endif

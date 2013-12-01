@@ -126,7 +126,7 @@ Texture WindowImpl::Load(std::string const& filename)
       throw sdl::Exception();
     }
 
-    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_, 1.f, false);
+    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_);
     files_[filename] = texture;
   }
 
@@ -150,7 +150,7 @@ Texture WindowImpl::Text(std::string const& text, Font const& font)
   }
 
   Texture texture;
-  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_, 0.f, false);
+  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_);
   return texture;
 }
 

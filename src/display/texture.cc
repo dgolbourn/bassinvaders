@@ -6,7 +6,7 @@
 
 namespace display
 {
-TextureImpl::TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer, View& view, float parallax, bool tile) : texture_(texture), renderer_(renderer), view_(view), parallax_(parallax), tile_(tile)
+TextureImpl::TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer, View& view) : texture_(texture), renderer_(renderer), view_(view)
 {
 }
 
@@ -35,13 +35,20 @@ static void RenderCopyEx(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect 
 
 static void RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, View const& view, float parallax, bool tile)
 {
-  if(destination && (parallax > 0.f))
+  if(destination)
   {
     SDL_Rect adjusted;
-    adjusted.x = transform(destination->x, view.x_, view.half_width_, view.zoom_, parallax);
-    adjusted.y = transform(destination->y, view.y_, view.half_height_, view.zoom_, parallax);
-    adjusted.w = transform(destination->w, 0.f, 0.f, view.zoom_, 0.f);
-    adjusted.h = transform(destination->h, 0.f, 0.f, view.zoom_, 0.f);
+    if(parallax > 0.f)
+    {
+      adjusted.x = transform(destination->x, view.x_, view.half_width_, view.zoom_, parallax);
+      adjusted.y = transform(destination->y, view.y_, view.half_height_, view.zoom_, parallax);
+      adjusted.w = transform(destination->w, 0.f, 0.f, view.zoom_, 0.f);
+      adjusted.h = transform(destination->h, 0.f, 0.f, view.zoom_, 0.f);
+    }
+    else
+    { 
+      adjusted = *destination;
+    }
     if(tile)
     {
       adjusted.x %= adjusted.w;
@@ -49,10 +56,10 @@ static void RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect co
       adjusted.y %= adjusted.h;
       adjusted.y -= adjusted.h;
       int const ystart = adjusted.y;
-      while(adjusted.x <= view.width_)
+      while(adjusted.x < view.width_)
       {
         adjusted.y = ystart;
-        while(adjusted.y <= view.height_)
+        while(adjusted.y < view.height_)
         {
           RenderCopyEx(renderer, texture, source, &adjusted);
           adjusted.y += adjusted.h;
@@ -76,9 +83,9 @@ void TextureImpl::Render(void) const
   RenderCopy(renderer_, texture_, nullptr, nullptr, View(), 0.f, false);
 }
 
-void TextureImpl::Render(SDL_Rect const* source, SDL_Rect const* destination) const
+void TextureImpl::Render(SDL_Rect const* source, SDL_Rect const* destination, float parallax, bool tile) const
 {
-  RenderCopy(renderer_, texture_, source, destination, view_, parallax_, tile_);
+  RenderCopy(renderer_, texture_, source, destination, view_, parallax, tile);
 }
 
 Texture::Texture(void)
@@ -108,18 +115,8 @@ void Texture::Render(void) const
   impl_->Render();
 }
 
-void Texture::Render(BoundingBox const& source, BoundingBox const& destination) const
+void Texture::Render(BoundingBox const& source, BoundingBox const& destination, float parallax, bool tile) const
 {
-  impl_->Render(source, destination);
-}
-
-float& Texture::Parallax(void)
-{
-  return impl_->parallax_;
-}
-
-bool& Texture::Tile(void)
-{
-  return impl_->tile_;
+  impl_->Render(source, destination, parallax, tile);
 }
 }

@@ -12,7 +12,7 @@ class Texture
 public:
   Texture(void);
   void Render(void) const;
-  void Render(BoundingBox const& source, BoundingBox const& destination) const;
+  void Render(BoundingBox const& source, BoundingBox const& destination, float parallax = 0.f, bool tile = false) const;
   float& Parallax(void);
   bool& Tile(void);
 

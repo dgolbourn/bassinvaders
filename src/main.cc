@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
   Sh->anim_ = anim;
   Sh->win_ = w;
   auto sr = event::Command(Sh);
-  game::Scene Sc;
+  game::Scene Sc("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/scene.json", w);
   Sc.Add(sr, 1);
 
   event::Timer timer(5000);

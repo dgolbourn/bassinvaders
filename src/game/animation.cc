@@ -15,7 +15,7 @@ class AnimationImpl
 public:
   AnimationImpl(json::JSON const& json, display::Window& window);
   void Next(void);
-  void Render(display::BoundingBox const& destination);
+  void Render(display::BoundingBox const& destination, float parallax, bool tile);
   void Pause(void);
   void Resume(void);
   void Play(int loops);
@@ -92,10 +92,10 @@ void AnimationImpl::Next(void)
   mutex_.unlock();
 }
 
-void AnimationImpl::Render(display::BoundingBox const& destination)
+void AnimationImpl::Render(display::BoundingBox const& destination, float parallax, bool tile)
 {
   mutex_.lock();
-  texture_.Render(*frame_, destination);
+  texture_.Render(*frame_, destination, parallax, tile);
   mutex_.unlock();
 }
 
@@ -131,9 +131,9 @@ Animation::Animation(json::JSON const& json, display::Window& window) : impl_(ne
 {
 }
 
-void Animation::Render(display::BoundingBox const& destination)
+void Animation::Render(display::BoundingBox const& destination, float parallax, bool tile)
 {
-  impl_->Render(destination);
+  impl_->Render(destination, parallax, tile);
 }
 
 void Animation::Pause(void)

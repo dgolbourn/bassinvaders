@@ -27,7 +27,7 @@ static inline int transform(int x, float new_origin, float half_width, float zoo
 
 static void RenderCopyEx(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination)
 {
-  if(SDL_RenderCopy(renderer, texture, source, destination))
+  if(SDL_RenderCopyEx(renderer, texture, source, destination, 0., nullptr, SDL_FLIP_NONE))
   {
     throw sdl::Exception();
   }
@@ -51,10 +51,12 @@ static void RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect co
     }
     if(tile)
     {
-      adjusted.x %= adjusted.w;
-      adjusted.x -= adjusted.w;
-      adjusted.y %= adjusted.h;
-      adjusted.y -= adjusted.h;
+      int const width = abs(adjusted.w);
+      int const height = abs(adjusted.h);
+      adjusted.x %= width;
+      adjusted.x -= width;
+      adjusted.y %= height;
+      adjusted.y -= height;
       int const ystart = adjusted.y;
       while(adjusted.x < view.width_)
       {
@@ -62,9 +64,9 @@ static void RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect co
         while(adjusted.y < view.height_)
         {
           RenderCopyEx(renderer, texture, source, &adjusted);
-          adjusted.y += adjusted.h;
+          adjusted.y += height;
         }
-        adjusted.x += adjusted.w;
+        adjusted.x += width;
       }
     }
     else

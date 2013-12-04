@@ -67,12 +67,12 @@ SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
   json_t* layer;
   json_array_foreach(layers, index, layer)
   {
-    char const* filename = nullptr;
+    char const* filename;
     int plane;
     double parallax;
     json_t* render_box;
     json::JSON(layer).Unpack("{sssisfso}", 0, 
-      "filename", filename,
+      "image", &filename,
       "z", &plane,
       "parallax", &parallax,
       "render box", &render_box);

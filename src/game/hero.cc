@@ -61,7 +61,7 @@ void HeroImpl::RenderCommand::operator()(void)
     impl_.render_box_.y() + static_cast<int>(impl_.dynamics_.y()),
     impl_.render_box_.w(),
     impl_.render_box_.h());
-  impl_.animation_.Render(destination);
+  impl_.animation_.Render(destination, 1.f);
 }
 
 class HeroImpl::PauseCommand : public event::CommandImpl

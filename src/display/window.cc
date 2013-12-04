@@ -8,6 +8,7 @@
 #include "ttf_exception.h"
 #include "texture_impl.h"
 #include "font_impl.h"
+#include "canvas.h"
 
 namespace display
 {
@@ -49,6 +50,9 @@ void WindowImpl::Destroy(void)
 
 WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_INIT_PNG), ttf_()
 {
+  renderer_ = nullptr;
+  window_ = nullptr;
+
   (void)SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
   (void)SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
@@ -80,7 +84,7 @@ WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_
     throw sdl::Exception();
   }
 
-  renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
+  renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
   if(!renderer_)
   {
     Destroy();
@@ -126,7 +130,7 @@ Texture WindowImpl::Load(std::string const& filename)
       throw sdl::Exception();
     }
 
-    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_);
+    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, window_, view_);
     files_[filename] = texture;
   }
 
@@ -150,13 +154,13 @@ Texture WindowImpl::Text(std::string const& text, Font const& font)
   }
 
   Texture texture;
-  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_);
+  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, window_, view_);
   return texture;
 }
 
 void WindowImpl::Clear(void) const
 {
-  if(SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF))
+  if(SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, SDL_ALPHA_TRANSPARENT))
   {
     throw sdl::Exception();
   }

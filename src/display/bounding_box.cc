@@ -13,7 +13,7 @@ public:
 
 bool BoundingBox::operator&&(BoundingBox const& other) const
 {
-  return SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_) != SDL_FALSE;
+  return SDL_TRUE == SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_);
 }
 
 bool BoundingBox::operator<(BoundingBox const& other) const

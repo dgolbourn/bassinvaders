@@ -33,7 +33,7 @@ public:
   SDL_Window* window_;
   SDL_Renderer* renderer_;
   std::unordered_map<std::string, Texture> files_;
-  display::View view_;
+  sdl::View view_;
 };
 
 void WindowImpl::Destroy(void)
@@ -130,7 +130,7 @@ Texture WindowImpl::Load(std::string const& filename)
       throw sdl::Exception();
     }
 
-    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, window_, view_);
+    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_);
     files_[filename] = texture;
   }
 
@@ -154,7 +154,7 @@ Texture WindowImpl::Text(std::string const& text, Font const& font)
   }
 
   Texture texture;
-  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, window_, view_);
+  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_);
   return texture;
 }
 

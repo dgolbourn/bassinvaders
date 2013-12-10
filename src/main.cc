@@ -167,9 +167,9 @@ int main(int argc, char *argv[])
 
   display::Texture S4 = w.Text("the quick brown fox...", display::Font("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/lazy.ttf", 32, 0, 0, 0));
   w.Clear();
-  S3.Render();
+  S3.Render(display::BoundingBox(), display::BoundingBox());
   S2.Render(display::BoundingBox(), display::BoundingBox(20,20,20,20));
-  S4.Render();
+  S4.Render(display::BoundingBox(), display::BoundingBox());
   w.Show();
   w.View(0,0,1.f);
 
@@ -214,6 +214,7 @@ int main(int argc, char *argv[])
   pau.Notify();
   h.x() = 320;
   h.y() = 240;
+  w.View(-250, -250, 1.5f);
 
   while(!quitflag)
   {

@@ -11,7 +11,6 @@ class Texture
   friend class WindowImpl;
 public:
   Texture(void);
-  void Render(void) const;
   void Render(BoundingBox const& source, BoundingBox const& destination, float parallax = 0.f, bool tile = false, double angle = 0.) const;
  
   Texture(Texture const& other);

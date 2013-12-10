@@ -33,7 +33,8 @@ public:
   SDL_Window* window_;
   SDL_Renderer* renderer_;
   std::unordered_map<std::string, Texture> files_;
-  sdl::View view_;
+  SDL_Rect view_;
+  float zoom_;
 };
 
 void WindowImpl::Destroy(void)
@@ -53,51 +54,57 @@ WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_
   renderer_ = nullptr;
   window_ = nullptr;
 
-  (void)SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
-  (void)SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-
-  char const* name;
-  int width;
-  int height;
-  char const* mode;
-
-  json.Unpack("{sssisiss}", 0,
-    "name", &name,
-    "width", &width,
-    "height", &height,
-    "mode", &mode);
-
-  Uint32 flags = 0;
-  if(!strcmp(mode, "Fullscreen"))
+  try
   {
-    flags |= SDL_WINDOW_FULLSCREEN;
-  }
-  else if(!strcmp(mode, "Borderless"))
-  {
-    flags |= SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED;
-  }
+    (void)SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
+    (void)SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-  window_ = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
-  if(!window_)
+    char const* name;
+    int width;
+    int height;
+    char const* mode;
+
+    json.Unpack("{sssisiss}", 0,
+      "name", &name,
+      "width", &width,
+      "height", &height,
+      "mode", &mode);
+
+    Uint32 flags = 0;
+    if (!strcmp(mode, "Fullscreen"))
+    {
+      flags |= SDL_WINDOW_FULLSCREEN;
+    }
+    else if (!strcmp(mode, "Borderless"))
+    {
+      flags |= SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED;
+    }
+
+    window_ = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
+    if(!window_)
+    {
+      throw sdl::Exception();
+    }
+
+    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+    if(!renderer_)
+    {
+      throw sdl::Exception();
+    }
+
+    if(SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF))
+    {
+      throw sdl::Exception();
+    }
+
+    view_ = { 0, 0, width, height };
+    zoom_ = 1.f;
+  }
+  catch(...)
   {
     Destroy();
-    throw sdl::Exception();
+    throw;
   }
-
-  renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
-  if(!renderer_)
-  {
-    Destroy();
-    throw sdl::Exception();
-  }
-
-  if(SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF))
-  {
-    Destroy();
-    throw sdl::Exception();
-  }
-
-  view_ = {0.f, 0.f, 0.5f*float(width), 0.5f*float(height), 1.f, width, height};
 }
 
 WindowImpl::~WindowImpl(void)
@@ -130,7 +137,7 @@ Texture WindowImpl::Load(std::string const& filename)
       throw sdl::Exception();
     }
 
-    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_);
+    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, &view_, &zoom_);
     files_[filename] = texture;
   }
 
@@ -154,7 +161,7 @@ Texture WindowImpl::Text(std::string const& text, Font const& font)
   }
 
   Texture texture;
-  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, view_);
+  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, &view_, &zoom_);
   return texture;
 }
 
@@ -191,9 +198,9 @@ void WindowImpl::Free(void)
 
 void WindowImpl::View(int x, int y, float zoom)
 {
-  view_.x_ = float(x);
-  view_.y_ = float(y);
-  view_.zoom_ = zoom;
+  view_.x = x;
+  view_.y = y;
+  zoom_ = zoom;
 }
 
 Window::Window(std::string const& filename) : impl_(new WindowImpl(json::JSON(filename)))

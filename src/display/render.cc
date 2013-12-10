@@ -16,7 +16,7 @@ static void RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect co
 class Painter
 {
 public:
-  Painter(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, View const& view, double angle);
+  Painter(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Rect const* view, double angle);
   bool Fill(algorithm::NodeCoordinates const& coords);
   void MovementVectors(void);
   void EnclosingRect(void);
@@ -24,7 +24,7 @@ public:
   
   float north_[2];
   float east_[2];
-  SDL_Rect clip_;
+  SDL_Rect const* clip_;
   SDL_Rect collision_box_;
   SDL_Renderer* renderer_;
   SDL_Texture* texture_;
@@ -39,8 +39,8 @@ public:
 
 void Painter::EnclosingRect(void)
 {
-  float w = .5f * float(destination_.w);
-  float h = .5f * float(destination_.h);
+  float w = .5f * w_;
+  float h = .5f * h_;
   float cw = c_ * w;
   float ch = c_ * h;
   float sw = s_ * w;
@@ -63,26 +63,26 @@ void Painter::EnclosingRect(void)
 
 void Painter::StartingRect(void)
 {
-  float fx = float(destination_.x);
-  float fy = float(destination_.y);
-  float a = std::round((c_ * fx + s_ * fy) / w_);
-  float b = std::round((-s_ * fx + c_ * fy) / h_);
+  float x = float(destination_.x);
+  float y = float(destination_.y);
+  float a = std::round((c_ * x + s_ * y) / w_);
+  float b = std::round((-s_ * x + c_ * y) / h_);
 
-  float idx[] = { 1, 0, -1 };
-  for(float const& fi : idx)
+  float sign[] = { 1.f, 0.f, -1.f };
+  for(float const& i : sign)
   {
     bool break_flag = false;
-    for(float const& fj : idx)
+    for(float const& j : sign)
     {
       SDL_Point adjust;
-      adjust.x = int((a + fi) * east_[0] + (b + fj) * north_[0]);
-      adjust.y = int((a + fi) * east_[1] + (b + fj) * north_[1]);
+      adjust.x = int((a + i) * east_[0] + (b + j) * north_[0]);
+      adjust.y = int((a + i) * east_[1] + (b + j) * north_[1]);
 
       SDL_Rect temp = collision_box_;
       temp.x -= adjust.x;
       temp.y -= adjust.y;
 
-      if(SDL_TRUE == SDL_HasIntersection(&temp, &clip_))
+      if(SDL_TRUE == SDL_HasIntersection(&temp, clip_))
       {
         collision_box_ = temp;
         destination_.x -= adjust.x;
@@ -111,14 +111,14 @@ void Painter::MovementVectors(void)
   north_[1] = c_ * h_;
 }
 
-Painter::Painter(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, View const& view, double angle)
+Painter::Painter(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Rect const* view, double angle)
 {
   renderer_ = renderer;
   texture_ = texture;
   source_ = source;
   destination_ = *destination;
   angle_ = angle;
-  clip_ = { 0, 0, view.width_, view.height_ };
+  clip_ = view;
  
   MovementVectors();
   EnclosingRect();
@@ -135,7 +135,7 @@ bool Painter::Fill(algorithm::NodeCoordinates const& coords)
   move.y = int(east_[1] * east + north_[1] * north);
   collision_box_.x += move.x;
   collision_box_.y += move.y;
-  if(SDL_TRUE == SDL_HasIntersection(&collision_box_, &clip_))
+  if(SDL_TRUE == SDL_HasIntersection(&collision_box_, clip_))
   {
     destination_.x += move.x;
     destination_.y += move.y;
@@ -149,52 +149,47 @@ bool Painter::Fill(algorithm::NodeCoordinates const& coords)
   return filled;
 }
 
-static void RenderTile(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect* destination, View const& view, double angle)
+static void RenderTile(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Rect const* view, double angle)
 {
   algorithm::FloodFill<Painter>(Painter(renderer, texture, source, destination, view, angle));
 }
 
-static int Transform(int x, float new_origin, float half_width, float zoom, float parallax)
+static int Transform(int x, int new_origin, int width, float zoom, float parallax)
 {
   float x0 = float(x);
-  x0 -= parallax * new_origin;
-  x0 -= half_width;
+  float w = 0.5f * float(width);
+  x0 -= parallax * float(new_origin);
+  x0 -= w;
   x0 *= zoom;
-  x0 += half_width;
+  x0 += w;
   return int(x0);
 }
 
-void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, View const& view, float parallax, bool tile, double angle)
+void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Rect const* view, float zoom, float parallax, bool tile, double angle)
 {
   if(destination)
   {
+    SDL_Rect adjusted;
     if(parallax > 0.f)
     {
-      SDL_Rect adjusted;
-      adjusted.x = Transform(destination->x, view.x_, view.half_width_, view.zoom_, parallax);
-      adjusted.y = Transform(destination->y, view.y_, view.half_height_, view.zoom_, parallax);
-      adjusted.w = Transform(destination->w, 0.f, 0.f, view.zoom_, 0.f);
-      adjusted.h = Transform(destination->h, 0.f, 0.f, view.zoom_, 0.f);
-      if(tile)
-      {
-        RenderTile(renderer, texture, source, &adjusted, view, angle);
-      }
-      else
-      {
-        RenderCopy(renderer, texture, source, &adjusted, angle);
-      }
+      adjusted.x = Transform(destination->x, view->x, view->w, zoom, parallax);
+      adjusted.y = Transform(destination->y, view->y, view->h, zoom, parallax);
+      adjusted.w = int(zoom * float(destination->w));
+      adjusted.h = int(zoom * float(destination->h));
     }
     else
-    { 
-      if(tile)
-      {
-        SDL_Rect adjusted = *destination;
-        RenderTile(renderer, texture, source, &adjusted, view, angle);
-      }
-      else
-      {
-        RenderCopy(renderer, texture, source, destination, angle);
-      }
+    {
+      adjusted = *destination;
+    }
+   
+    if(tile)
+    {
+      SDL_Rect tile_view = {0, 0, view->w, view->h};
+      RenderTile(renderer, texture, source, &adjusted, &tile_view, angle);
+    }
+    else
+    {
+      RenderCopy(renderer, texture, source, &adjusted, angle);
     }
   }
   else

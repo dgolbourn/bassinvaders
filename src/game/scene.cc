@@ -60,7 +60,7 @@ public:
 SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
 {
   json_t* layers;
-  json.Unpack("{so}", 0, "layers", &layers);
+  json.Unpack("{so}", "layers", &layers);
 
   layers_ = std::vector<event::Command>(json_array_size(layers));
   size_t index;
@@ -71,7 +71,7 @@ SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
     int plane;
     double parallax;
     json_t* render_box;
-    json::JSON(layer).Unpack("{sssisfso}", 0, 
+    json::JSON(layer).Unpack("{sssisfso}", 
       "image", &filename,
       "z", &plane,
       "parallax", &parallax,

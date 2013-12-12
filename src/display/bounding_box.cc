@@ -70,7 +70,7 @@ BoundingBoxImpl::BoundingBoxImpl(int x, int y, int w, int h) : rect_({x, y, w, h
 
 BoundingBoxImpl::BoundingBoxImpl(json::JSON const& json)
 {
-  json.Unpack("[iiii]", 0, &rect_.x, &rect_.y, &rect_.w, &rect_.h);
+  json.Unpack("[iiii]", &rect_.x, &rect_.y, &rect_.w, &rect_.h);
 }
 
 BoundingBox::BoundingBox(std::string const& filename) : impl_(new BoundingBoxImpl(json::JSON(filename)))

@@ -121,7 +121,7 @@ EnemyImpl::EnemyImpl(json::JSON const& json, display::Window& window, Scene& sce
 
   json_t* collision_box;
 
-  json.Unpack("{s{sososs}s{sososs}so}", 0,
+  json.Unpack("{s{sososs}s{sososs}so}",
     "moving", "animation", &moving_animation, 
     "render box", &moving_render_box, 
     "sound effect", &moving_sound_effect,

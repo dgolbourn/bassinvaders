@@ -54,7 +54,7 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
   int height;
   json_t* frames;
 
-  json.Unpack("{sssisisiso}", 0, 
+  json.Unpack("{sssisisiso}", 
     "sprite sheet", &sprite_sheet,
     "interval", &interval,
     "width", &width,
@@ -74,7 +74,7 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
   {
     int x;
     int y;
-    json::JSON(value).Unpack("[ii]", 0, &x, &y);
+    json::JSON(value).Unpack("[ii]", &x, &y);
     *frame_ = display::BoundingBox(x, y, width, height);
     ++frame_;
   }

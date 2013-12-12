@@ -8,7 +8,8 @@
 #include "ttf_exception.h"
 #include "texture_impl.h"
 #include "font_impl.h"
-#include "canvas.h"
+#include "surface.h"
+#include "hash.h"
 
 namespace display
 {
@@ -32,8 +33,11 @@ public:
   ttf::Library const ttf_;
   SDL_Window* window_;
   SDL_Renderer* renderer_;
-  std::unordered_map<std::string, Texture> files_;
-  SDL_Rect view_;
+  std::unordered_map<std::string, std::shared_ptr<TextureImpl>> textures_;
+  typedef std::pair<std::string, std::shared_ptr<FontImpl>> TextPair;
+  typedef algorithm::Hash<std::string, std::shared_ptr<FontImpl>> TextHash;
+  std::unordered_map<TextPair, std::shared_ptr<TextureImpl>, TextHash> text_;
+  SDL_Point view_;
   float zoom_;
 };
 
@@ -53,7 +57,6 @@ WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_
 {
   renderer_ = nullptr;
   window_ = nullptr;
-
   try
   {
     (void)SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
@@ -64,18 +67,18 @@ WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_
     int height;
     char const* mode;
 
-    json.Unpack("{sssisiss}", 0,
+    json.Unpack("{sssisiss}",
       "name", &name,
       "width", &width,
       "height", &height,
       "mode", &mode);
 
     Uint32 flags = 0;
-    if (!strcmp(mode, "Fullscreen"))
+    if(!strcmp(mode, "Fullscreen"))
     {
       flags |= SDL_WINDOW_FULLSCREEN;
     }
-    else if (!strcmp(mode, "Borderless"))
+    else if(!strcmp(mode, "Borderless"))
     {
       flags |= SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED;
     }
@@ -86,18 +89,18 @@ WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_
       throw sdl::Exception();
     }
 
-    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
     if(!renderer_)
     {
       throw sdl::Exception();
     }
 
-    if(SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, 0xFF))
+    if(SDL_SetRenderDrawColor(renderer_, 0, 0, 0, SDL_ALPHA_OPAQUE))
     {
       throw sdl::Exception();
     }
 
-    view_ = { 0, 0, width, height };
+    view_ = { 0, 0 };
     zoom_ = 1.f;
   }
   catch(...)
@@ -116,61 +119,47 @@ Texture WindowImpl::Load(std::string const& filename)
 {
   Texture texture;
 
-  auto fileiter = files_.find(filename);
-  if(fileiter != files_.end())
+  auto fileiter = textures_.find(filename);
+  if(fileiter != textures_.end())
   {
-    texture = fileiter->second;
+    texture.impl_ = fileiter->second;
   }
   else
   {
-    SDL_Surface* surface = IMG_Load(filename.c_str());
-    if(!surface)
-    {
-      throw img::Exception();
-    }
-    (void)SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 255, 0));
-
-    SDL_Texture* sdl_texture = SDL_CreateTextureFromSurface(renderer_, surface);
-    SDL_FreeSurface(surface);
-    if(!sdl_texture)
-    { 
-      throw sdl::Exception();
-    }
-
-    texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, &view_, &zoom_);
-    files_[filename] = texture;
+    sdl::Surface surface(filename.c_str());
+    //(void)SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 255, 0));
+    sdl::Texture sdl_texture(renderer_, surface);
+    auto impl = std::make_shared<TextureImpl>(sdl_texture, window_, renderer_, &view_, &zoom_);
+    texture.impl_ = impl;
+    textures_[filename] = impl;
   }
-
   return texture;
 }
 
 Texture WindowImpl::Text(std::string const& text, Font const& font)
 {
-  SDL_Surface* surface = TTF_RenderText_Solid(font.impl_->font_, text.c_str(),
-    font.impl_->colour_);
-  if(!surface)
-  {
-    throw ttf::Exception();
-  }
-
-  SDL_Texture* sdl_texture = SDL_CreateTextureFromSurface(renderer_, surface);
-  SDL_FreeSurface(surface);
-  if(!sdl_texture)
-  {
-    throw sdl::Exception();
-  }
-
   Texture texture;
-  texture.impl_ = std::make_shared<TextureImpl>(sdl_texture, renderer_, &view_, &zoom_);
+
+  auto textpair = TextPair(text, font.impl_);
+  auto fileiter = text_.find(textpair);
+  if(fileiter != text_.end())
+  {
+    texture.impl_ = fileiter->second;
+  }
+  else
+  {
+    sdl::Surface surface(font.impl_->font_, text.c_str(), font.impl_->colour_);
+    sdl::Texture sdl_texture(renderer_, surface);
+
+    auto impl = std::make_shared<TextureImpl>(sdl_texture, window_, renderer_, &view_, &zoom_);
+    texture.impl_ = impl;
+    text_[textpair] = impl;
+  }
   return texture;
 }
 
 void WindowImpl::Clear(void) const
 {
-  if(SDL_SetRenderDrawColor(renderer_, 0xFF, 0xFF, 0xFF, SDL_ALPHA_TRANSPARENT))
-  {
-    throw sdl::Exception();
-  }
   if(SDL_RenderClear(renderer_))
   {
     throw sdl::Exception();
@@ -184,16 +173,16 @@ void WindowImpl::Show(void) const
 
 void WindowImpl::Free(std::string const& filename)
 {
-  auto fileiter = files_.find(filename);
-  if(fileiter != files_.end())
+  auto fileiter = textures_.find(filename);
+  if(fileiter != textures_.end())
   {
-    files_.erase(fileiter);
+    textures_.erase(fileiter);
   }    
 }
 
 void WindowImpl::Free(void)
 {
-  files_.clear();
+  textures_.clear();
 }
 
 void WindowImpl::View(int x, int y, float zoom)
@@ -235,6 +224,31 @@ Window& Window::operator=(Window other)
 
 Texture Window::Load(std::string const& filename)
 {
+  //typedef std::function<bool(display::BoundingBox const&, display::BoundingBox const&, float, bool, double)> TextureFunc;
+  //std::weak_ptr<WindowImpl> impl = impl_;
+  //TextureFunc texture;
+  //texture = [impl](display::BoundingBox const& source, display::BoundingBox const& destination, float parallax, bool tile, double angle)
+  //{
+  //  auto iter = impl.lock();
+  //  if(iter)
+  //  {
+  //    sdl::Render(iter->renderer_, iter->texture, source, destination, &iter->view_, iter->zoom_, parallax, tile, angle);
+  //  }
+  //  return bool(iter);
+  //};
+  //void TextureImpl::Render(SDL_Rect const* source, SDL_Rect const* destination, float parallax, bool tile, double angle) const
+  //{
+  //  sdl::Render(window_, renderer_, texture_, source, destination, view_, *zoom_, parallax, tile, angle);
+  //}
+
+  //void Texture::Render(BoundingBox const& source, BoundingBox const& destination, float parallax, bool tile, double angle) const
+  //{
+  //  if (auto impl = impl_.lock())
+  //  {
+  //    impl->Render(source, destination, parallax, tile, angle);
+  //  }
+  //}
+
   return impl_->Load(filename);
 }
 

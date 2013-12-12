@@ -62,5 +62,4 @@ Codec::operator AVCodecContext*(void) const
 {
   return codec_.get();
 }
-
 }

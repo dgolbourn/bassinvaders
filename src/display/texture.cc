@@ -6,14 +6,14 @@ namespace display
 {
 void TextureImpl::Render(SDL_Rect const* source, SDL_Rect const* destination, float parallax, bool tile, double angle) const
 {
-  sdl::Render(renderer_, texture_, source, destination, view_, *zoom_, parallax, tile, angle);
+  sdl::Render(window_, renderer_, texture_, source, destination, view_, *zoom_, parallax, tile, angle);
 }
 
 Texture::Texture(void)
 {
 }
 
-TextureImpl::TextureImpl(SDL_Texture* texture, SDL_Renderer* renderer, SDL_Rect* view, float* zoom) : texture_(texture), renderer_(renderer), view_(view), zoom_(zoom)
+TextureImpl::TextureImpl(sdl::Texture const& texture, SDL_Window* window, SDL_Renderer* renderer, SDL_Point* view, float* zoom) : texture_(texture), window_(window), renderer_(renderer), view_(view), zoom_(zoom)
 {
 }
 
@@ -42,6 +42,9 @@ Texture& Texture::operator=(Texture other)
 
 void Texture::Render(BoundingBox const& source, BoundingBox const& destination, float parallax, bool tile, double angle) const
 {
-  impl_->Render(source, destination, parallax, tile, angle);
+  if(auto impl = impl_.lock())
+  {
+    impl->Render(source, destination, parallax, tile, angle);
+  }
 }
 }

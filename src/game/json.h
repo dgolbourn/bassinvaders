@@ -13,13 +13,17 @@ public:
   JSON(void);
   JSON(json_t* json);
   JSON(std::string const& filename);
-  void Unpack(std::string const& format, int dummy, ...) const;
+  template<typename... Args> void Unpack(std::string const& format, Args... args) const
+  {
+    pUnpack(format, 0, args...);
+  }
 
   ~JSON(void);
   JSON(JSON const& other);
   JSON(JSON&& other);
   JSON& operator=(JSON other);
 private:
+  void pUnpack(std::string const& format, int dummy, ...) const;
   json_t* json_;
 };
 }

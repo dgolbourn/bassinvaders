@@ -1,7 +1,7 @@
 #ifndef FLOOD_FILL_H_
 #define FLOOD_FILL_H_
 #include <unordered_set>
-#include <iostream>
+#include "hash.h"
 
 namespace algorithm
 {
@@ -10,17 +10,7 @@ typedef std::pair<int, int> NodeCoordinates;
 template<class Node> class FloodFill
 {
 private:
-  class NodeHash 
-  {
-  public:
-    std::size_t operator()(NodeCoordinates const& node) const 
-    {
-      static const int nice_prime = 257;
-      return node.first + nice_prime * node.second;
-    }
-  };
-
-  typedef std::unordered_set<NodeCoordinates, NodeHash> NodeSet;
+  typedef std::unordered_set<NodeCoordinates, Hash<int, int>> NodeSet;
 
   NodeSet set_;
   NodeCoordinates coords_;
@@ -42,8 +32,9 @@ private:
   }
 
 public:
-  FloodFill(Node& node) : coords_(0, 0)
+  void operator()(Node& node)
   {
+    coords_ = NodeCoordinates(0, 0);
     Fill(node);
   }
 };

@@ -16,7 +16,7 @@ static void RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect co
 class Painter
 {
 public:
-  Painter(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Rect const* view, double angle);
+  Painter(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, double angle);
   bool Fill(algorithm::NodeCoordinates const& coords);
   void MovementVectors(void);
   void EnclosingRect(void);
@@ -24,7 +24,7 @@ public:
   
   float north_[2];
   float east_[2];
-  SDL_Rect const* clip_;
+  SDL_Rect clip_;
   SDL_Rect collision_box_;
   SDL_Renderer* renderer_;
   SDL_Texture* texture_;
@@ -82,7 +82,7 @@ void Painter::StartingRect(void)
       temp.x -= adjust.x;
       temp.y -= adjust.y;
 
-      if(SDL_TRUE == SDL_HasIntersection(&temp, clip_))
+      if(SDL_TRUE == SDL_HasIntersection(&temp, &clip_))
       {
         collision_box_ = temp;
         destination_.x -= adjust.x;
@@ -111,14 +111,16 @@ void Painter::MovementVectors(void)
   north_[1] = c_ * h_;
 }
 
-Painter::Painter(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Rect const* view, double angle)
+Painter::Painter(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, double angle)
 {
   renderer_ = renderer;
   texture_ = texture;
   source_ = source;
   destination_ = *destination;
   angle_ = angle;
-  clip_ = view;
+  clip_.x = view->x;
+  clip_.y = view->y;
+  SDL_GetWindowSize(window, &clip_.w, &clip_.h);
  
   MovementVectors();
   EnclosingRect();
@@ -133,31 +135,29 @@ bool Painter::Fill(algorithm::NodeCoordinates const& coords)
   SDL_Point move;
   move.x = int(east_[0] * east + north_[0] * north);
   move.y = int(east_[1] * east + north_[1] * north);
-  collision_box_.x += move.x;
-  collision_box_.y += move.y;
-  if(SDL_TRUE == SDL_HasIntersection(&collision_box_, clip_))
+  SDL_Rect collision_box = collision_box_;
+  collision_box.x += move.x;
+  collision_box.y += move.y;
+  if(SDL_TRUE == SDL_HasIntersection(&collision_box, &clip_))
   {
-    destination_.x += move.x;
-    destination_.y += move.y;
-    RenderCopy(renderer_, texture_, source_, &destination_, angle_);
-    destination_.x -= move.x;
-    destination_.y -= move.y;
+    SDL_Rect destination = destination_;
+    destination.x += move.x;
+    destination.y += move.y;
+    RenderCopy(renderer_, texture_, source_, &destination, angle_);
     filled = true;
   }
-  collision_box_.x -= move.x;
-  collision_box_.y -= move.y;
   return filled;
 }
 
-static void RenderTile(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Rect const* view, double angle)
+static void RenderTile(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, double angle)
 {
-  algorithm::FloodFill<Painter>(Painter(renderer, texture, source, destination, view, angle));
+  algorithm::FloodFill<Painter>()(Painter(window, renderer, texture, source, destination, view, angle));
 }
 
 static int Transform(int x, int new_origin, int width, float zoom, float parallax)
 {
   float x0 = float(x);
-  float w = 0.5f * float(width);
+  float w = .5f * float(width);
   x0 -= parallax * float(new_origin);
   x0 -= w;
   x0 *= zoom;
@@ -165,15 +165,17 @@ static int Transform(int x, int new_origin, int width, float zoom, float paralla
   return int(x0);
 }
 
-void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Rect const* view, float zoom, float parallax, bool tile, double angle)
+void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, float zoom, float parallax, bool tile, double angle)
 {
   if(destination)
   {
     SDL_Rect adjusted;
     if(parallax > 0.f)
     {
-      adjusted.x = Transform(destination->x, view->x, view->w, zoom, parallax);
-      adjusted.y = Transform(destination->y, view->y, view->h, zoom, parallax);
+      int w, h;
+      SDL_GetWindowSize(window, &w, &h);
+      adjusted.x = Transform(destination->x, view->x, w, zoom, parallax);
+      adjusted.y = Transform(destination->y, view->y, h, zoom, parallax);
       adjusted.w = int(zoom * float(destination->w));
       adjusted.h = int(zoom * float(destination->h));
     }
@@ -184,8 +186,8 @@ void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source
    
     if(tile)
     {
-      SDL_Rect tile_view = {0, 0, view->w, view->h};
-      RenderTile(renderer, texture, source, &adjusted, &tile_view, angle);
+      SDL_Point tile_view = {0, 0};
+      RenderTile(window, renderer, texture, source, &adjusted, &tile_view, angle);
     }
     else
     {

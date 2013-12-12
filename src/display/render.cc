@@ -149,11 +149,6 @@ bool Painter::Fill(algorithm::NodeCoordinates const& coords)
   return filled;
 }
 
-static void RenderTile(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, double angle)
-{
-  algorithm::FloodFill<Painter>()(Painter(window, renderer, texture, source, destination, view, angle));
-}
-
 static int Transform(int x, int new_origin, int width, float zoom, float parallax)
 {
   float x0 = float(x);
@@ -172,7 +167,8 @@ void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SD
     SDL_Rect adjusted;
     if(parallax > 0.f)
     {
-      int w, h;
+      int w;
+      int h;
       SDL_GetWindowSize(window, &w, &h);
       adjusted.x = Transform(destination->x, view->x, w, zoom, parallax);
       adjusted.y = Transform(destination->y, view->y, h, zoom, parallax);
@@ -187,7 +183,7 @@ void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SD
     if(tile)
     {
       SDL_Point tile_view = {0, 0};
-      RenderTile(window, renderer, texture, source, &adjusted, &tile_view, angle);
+      algorithm::FloodFill<Painter>()(Painter(window, renderer, texture, source, &adjusted, &tile_view, angle));
     }
     else
     {

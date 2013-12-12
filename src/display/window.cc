@@ -3,23 +3,25 @@
 #include "sdl_library.h"
 #include "img_library.h"
 #include "ttf_library.h"
+#include "SDL_image.h"
 #include "sdl_exception.h"
-#include "img_exception.h"
-#include "ttf_exception.h"
-#include "texture_impl.h"
+#include "texture.h"
 #include "font_impl.h"
 #include "surface.h"
 #include "hash.h"
+#include "render.h"
 
 namespace display
 {
+typedef std::pair<std::string, std::shared_ptr<FontImpl>> TextPair;
+typedef algorithm::Hash<std::string, std::shared_ptr<FontImpl>> TextHash;
+
 class WindowImpl
 {
 public:
   WindowImpl(json::JSON const& json);
-  Texture Load(std::string const& filename);
-  Texture Text(std::string const& text, Font const& font);
-  void Free(std::string const& filename);
+  sdl::TexturePtr Load(std::string const& filename);
+  sdl::TexturePtr Text(std::string const& text, Font const& font);
   void Free(void);
   void Clear(void) const;
   void Show(void) const;
@@ -33,10 +35,8 @@ public:
   ttf::Library const ttf_;
   SDL_Window* window_;
   SDL_Renderer* renderer_;
-  std::unordered_map<std::string, std::shared_ptr<TextureImpl>> textures_;
-  typedef std::pair<std::string, std::shared_ptr<FontImpl>> TextPair;
-  typedef algorithm::Hash<std::string, std::shared_ptr<FontImpl>> TextHash;
-  std::unordered_map<TextPair, std::shared_ptr<TextureImpl>, TextHash> text_;
+  std::unordered_map<std::string, sdl::Texture> textures_;
+  std::unordered_map<TextPair, sdl::Texture, TextHash> text_;
   SDL_Point view_;
   float zoom_;
 };
@@ -115,47 +115,42 @@ WindowImpl::~WindowImpl(void)
   Destroy();
 }
 
-Texture WindowImpl::Load(std::string const& filename)
+sdl::TexturePtr WindowImpl::Load(std::string const& filename)
 {
-  Texture texture;
+  sdl::TexturePtr texture_ptr;
 
   auto fileiter = textures_.find(filename);
   if(fileiter != textures_.end())
   {
-    texture.impl_ = fileiter->second;
+    texture_ptr = fileiter->second;
   }
   else
   {
     sdl::Surface surface(filename.c_str());
-    //(void)SDL_SetColorKey(surface, SDL_TRUE, SDL_MapRGB(surface->format, 0, 255, 0));
-    sdl::Texture sdl_texture(renderer_, surface);
-    auto impl = std::make_shared<TextureImpl>(sdl_texture, window_, renderer_, &view_, &zoom_);
-    texture.impl_ = impl;
-    textures_[filename] = impl;
+    sdl::Texture texture(renderer_, surface);
+    textures_[filename] = texture;
+    texture_ptr = texture;
   }
-  return texture;
+  return texture_ptr;
 }
 
-Texture WindowImpl::Text(std::string const& text, Font const& font)
+sdl::TexturePtr WindowImpl::Text(std::string const& text, Font const& font)
 {
-  Texture texture;
-
+  sdl::TexturePtr texture_ptr;
   auto textpair = TextPair(text, font.impl_);
   auto fileiter = text_.find(textpair);
   if(fileiter != text_.end())
   {
-    texture.impl_ = fileiter->second;
+    texture_ptr = fileiter->second;
   }
   else
   {
     sdl::Surface surface(font.impl_->font_, text.c_str(), font.impl_->colour_);
-    sdl::Texture sdl_texture(renderer_, surface);
-
-    auto impl = std::make_shared<TextureImpl>(sdl_texture, window_, renderer_, &view_, &zoom_);
-    texture.impl_ = impl;
-    text_[textpair] = impl;
+    sdl::Texture texture(renderer_, surface);
+    text_[textpair] = texture;
+    texture_ptr = texture;
   }
-  return texture;
+  return texture_ptr;
 }
 
 void WindowImpl::Clear(void) const
@@ -169,15 +164,6 @@ void WindowImpl::Clear(void) const
 void WindowImpl::Show(void) const
 {
   SDL_RenderPresent(renderer_);
-}
-
-void WindowImpl::Free(std::string const& filename)
-{
-  auto fileiter = textures_.find(filename);
-  if(fileiter != textures_.end())
-  {
-    textures_.erase(fileiter);
-  }    
 }
 
 void WindowImpl::Free(void)
@@ -222,34 +208,31 @@ Window& Window::operator=(Window other)
   return *this;
 }
 
+static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::TexturePtr texture_ptr)
+{
+  return [window_ptr, texture_ptr](display::BoundingBox const& source, display::BoundingBox const& destination, float parallax, bool tile, double angle)
+  {
+    bool locked = false;
+    if(auto window = window_ptr.lock())
+    {
+      if(auto texture = texture_ptr.Lock())
+      {
+        sdl::Render(window->window_, window->renderer_, texture, source, destination, &window->view_, window->zoom_, parallax, tile, angle);
+        locked = true;
+      }
+    }
+    return locked;
+  };
+}
+
 Texture Window::Load(std::string const& filename)
 {
-  //typedef std::function<bool(display::BoundingBox const&, display::BoundingBox const&, float, bool, double)> TextureFunc;
-  //std::weak_ptr<WindowImpl> impl = impl_;
-  //TextureFunc texture;
-  //texture = [impl](display::BoundingBox const& source, display::BoundingBox const& destination, float parallax, bool tile, double angle)
-  //{
-  //  auto iter = impl.lock();
-  //  if(iter)
-  //  {
-  //    sdl::Render(iter->renderer_, iter->texture, source, destination, &iter->view_, iter->zoom_, parallax, tile, angle);
-  //  }
-  //  return bool(iter);
-  //};
-  //void TextureImpl::Render(SDL_Rect const* source, SDL_Rect const* destination, float parallax, bool tile, double angle) const
-  //{
-  //  sdl::Render(window_, renderer_, texture_, source, destination, view_, *zoom_, parallax, tile, angle);
-  //}
+  return Bind(impl_, impl_->Load(filename));
+}
 
-  //void Texture::Render(BoundingBox const& source, BoundingBox const& destination, float parallax, bool tile, double angle) const
-  //{
-  //  if (auto impl = impl_.lock())
-  //  {
-  //    impl->Render(source, destination, parallax, tile, angle);
-  //  }
-  //}
-
-  return impl_->Load(filename);
+Texture Window::Text(std::string const& text, Font const& font)
+{
+  return Bind(impl_, impl_->Text(text, font));
 }
 
 void Window::Clear(void) const
@@ -260,16 +243,6 @@ void Window::Clear(void) const
 void Window::Show(void) const
 {
   return impl_->Show();
-}
-
-Texture Window::Text(std::string const& text, Font const& font)
-{
-  return impl_->Text(text, font);
-}
-
-void Window::Free(std::string const& filename)
-{
-  impl_->Free(filename);
 }
 
 void Window::Free(void)

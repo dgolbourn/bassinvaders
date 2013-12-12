@@ -61,7 +61,7 @@ void HeroImpl::RenderCommand::operator()(void)
     impl_.render_box_.y() + static_cast<int>(impl_.dynamics_.y()),
     impl_.render_box_.w(),
     impl_.render_box_.h());
-  impl_.animation_.Render(destination, 1.f, true, 35.);
+  impl_.animation_.Render(destination, 1.f, false, 0.);
 }
 
 class HeroImpl::PauseCommand : public event::CommandImpl
@@ -284,7 +284,7 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene
   pause.Add(pause_);
 
   animation_ = moving_animation_;
-  animation_.Play(1);
+  animation_.Play(-1);
   animation_.Pause();
   render_box_ = moving_render_box_;
   sound_effect_ = moving_sound_effect_;

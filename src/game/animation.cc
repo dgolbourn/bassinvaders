@@ -1,5 +1,4 @@
 #include "animation.h"
-#include "texture.h"
 #include "timer.h"
 #include "jansson.h"
 #include "json_exception.h"
@@ -95,7 +94,7 @@ void AnimationImpl::Next(void)
 void AnimationImpl::Render(display::BoundingBox const& destination, float parallax, bool tile, double angle)
 {
   mutex_.lock();
-  texture_.Render(*frame_, destination, parallax, tile, angle);
+  texture_(*frame_, destination, parallax, tile, angle);
   mutex_.unlock();
 }
 

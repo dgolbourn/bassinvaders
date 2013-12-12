@@ -1,25 +1,63 @@
 #include "texture.h"
-#include "texture_impl.h"
-#include "render.h"
+#include "sdl_exception.h"
 
-namespace display
+namespace sdl
 {
-void TextureImpl::Render(SDL_Rect const* source, SDL_Rect const* destination, float parallax, bool tile, double angle) const
+class Deleter
 {
-  sdl::Render(window_, renderer_, texture_, source, destination, view_, *zoom_, parallax, tile, angle);
-}
+public:
+  void operator()(SDL_Texture* impl)
+  {
+    if(impl)
+    {
+      SDL_DestroyTexture(impl);
+    }
+  }
+};
 
 Texture::Texture(void)
 {
 }
 
-TextureImpl::TextureImpl(sdl::Texture const& texture, SDL_Window* window, SDL_Renderer* renderer, SDL_Point* view, float* zoom) : texture_(texture), window_(window), renderer_(renderer), view_(view), zoom_(zoom)
+Texture::Texture(SDL_Renderer* renderer, SDL_Surface* surface)
 {
+  SDL_Texture* impl = nullptr;
+  try
+  {
+    impl = SDL_CreateTextureFromSurface(renderer, surface);
+    if(!impl)
+    {
+      throw Exception();
+    }
+    impl_ = std::shared_ptr<SDL_Texture>(impl, Deleter());
+  }
+  catch(...)
+  {
+    if(!impl_)
+    {
+      Deleter().operator()(impl);
+    }
+    throw;
+  }
 }
 
-TextureImpl::~TextureImpl(void)
+Texture::operator SDL_Texture*(void) const
 {
-  SDL_DestroyTexture(texture_);
+  return impl_.get();
+}
+
+SDL_Texture* Texture::operator->(void) const
+{
+  return impl_.get();
+}
+
+Texture::operator bool(void) const
+{
+  return bool(impl_);
+}
+
+Texture::~Texture(void)
+{
 }
 
 Texture::Texture(Texture const& other) : impl_(other.impl_)
@@ -30,21 +68,9 @@ Texture::Texture(Texture&& other) : impl_(std::move(other.impl_))
 {
 }
 
-Texture::~Texture(void)
-{
-}
-
 Texture& Texture::operator=(Texture other)
 {
   std::swap(impl_, other.impl_);
   return *this;
-}
-
-void Texture::Render(BoundingBox const& source, BoundingBox const& destination, float parallax, bool tile, double angle) const
-{
-  if(auto impl = impl_.lock())
-  {
-    impl->Render(source, destination, parallax, tile, angle);
-  }
 }
 }

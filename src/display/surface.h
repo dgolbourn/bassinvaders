@@ -24,38 +24,4 @@ private:
   std::shared_ptr<SDL_Surface> impl_;
 };
 }
-//class Texture
-//{
-//public:
-//  Texture(void)
-//  {
-//    impl_ = nullptr;
-//  }
-//  Texture(SDL_Renderer* renderer, SDL_Surface* surface)
-//  {
-//    impl_ = SDL_CreateTextureFromSurface(renderer, surface);
-//    if(!impl_)
-//    {
-//      throw Exception();
-//    }
-//  }
-//  ~Texture(void)
-//  {
-//    if(impl_)
-//    {
-//      SDL_DestroyTexture(impl_);
-//    }
-//  }
-//  operator SDL_Texture*(void) const
-//  {
-//    return impl_;
-//  }
-//  SDL_Texture* operator->(void) const
-//  {
-//    return impl_;
-//  }
-//private:
-//  SDL_Texture* impl_;
-//};
-//}
 #endif

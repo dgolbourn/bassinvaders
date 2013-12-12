@@ -1,24 +1,30 @@
-#ifndef TEXTURE_H_
-#define TEXTURE_H_
+#ifndef SDL_TEXTURE_H_
+#define SDL_TEXTURE_H_
 
+#include "SDL_render.h"
 #include <memory>
-#include "bounding_box.h"
+#include "weak_ptr.h"
 
-namespace display
+namespace sdl
 {
+typedef memory::WeakPtr<class Texture, SDL_Texture> TexturePtr;
+
 class Texture
 {
-  friend class WindowImpl;
+  friend TexturePtr;
 public:
   Texture(void);
-  void Render(BoundingBox const& source, BoundingBox const& destination, float parallax = 0.f, bool tile = false, double angle = 0.) const;
- 
+  Texture(SDL_Renderer* renderer, SDL_Surface* surface);
+  operator SDL_Texture*(void) const;
+  SDL_Texture* operator->(void) const;
+  explicit operator bool(void) const;
+
+  ~Texture(void);
   Texture(Texture const& other);
   Texture(Texture&& other);
-  ~Texture(void);
   Texture& operator=(Texture other);
 private:
-  std::weak_ptr<class TextureImpl> impl_;
+  std::shared_ptr<SDL_Texture> impl_;
 };
 }
 #endif

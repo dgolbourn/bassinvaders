@@ -53,7 +53,7 @@ public:
   }
   void operator()(void) final
   {
-    texture_.Render(display::BoundingBox(), render_box_, parallax_, true);
+    texture_(display::BoundingBox(), render_box_, parallax_, true, 0.);
   }
 };
 

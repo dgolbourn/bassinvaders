@@ -4,13 +4,14 @@
 #include "sound.h"
 #include "event.h"
 #include "dynamics.h"
+#include <iostream>
 
 namespace game
 {
 class HeroImpl
 {
 public:
-  HeroImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause);
+  HeroImpl(json::JSON const& json, display::Window& window, Collision& collision, event::Signal& pause);
   void End(event::Command const& command);
   Animation moving_animation_;
   display::BoundingBox moving_render_box_;
@@ -19,7 +20,6 @@ public:
   display::BoundingBox destroyed_render_box_;
   audio::Sound destroyed_sound_effect_;
   display::BoundingBox collision_box_;
-  event::Command render_;
   event::Command pause_;
   bool paused_;
   Animation animation_;
@@ -35,33 +35,12 @@ public:
   class PauseCommand;
   event::Signal end_;
   Dynamics dynamics_;
+  void Render(void);
 };
 
 void HeroImpl::End(event::Command const& command)
 {
   end_.Add(command);
-}
-
-class HeroImpl::RenderCommand : public event::CommandImpl
-{
-public:
-  RenderCommand(HeroImpl& impl);
-  void operator()(void) final;
-  HeroImpl& impl_;
-};
-
-HeroImpl::RenderCommand::RenderCommand(HeroImpl& impl) : impl_(impl)
-{
-}
-
-void HeroImpl::RenderCommand::operator()(void)
-{
-  display::BoundingBox destination(
-    impl_.render_box_.x() + static_cast<int>(impl_.dynamics_.x()), 
-    impl_.render_box_.y() + static_cast<int>(impl_.dynamics_.y()),
-    impl_.render_box_.w(),
-    impl_.render_box_.h());
-  impl_.animation_.Render(destination, 1.f, false, 0.);
 }
 
 class HeroImpl::PauseCommand : public event::CommandImpl
@@ -247,7 +226,17 @@ void EnemyCollisionCommand::operator()(void)
   }
 }
 
-HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause)
+void HeroImpl::Render(void)
+{
+  display::BoundingBox destination(
+    render_box_.x() + int(dynamics_.x()),
+    render_box_.y() + int(dynamics_.y()),
+    render_box_.w(),
+    render_box_.h());
+  animation_.Render(destination, 1.f, false, 0.);
+}
+
+HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Collision& collision, event::Signal& pause)
 {
   json_t* moving_animation;
   json_t* moving_render_box;
@@ -277,8 +266,6 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Scene& scene
   destroyed_sound_effect_ = audio::Sound(destroyed_sound_effect);
   
   collision_box_ = display::BoundingBox(collision_box);
-  render_ = event::Command(new RenderCommand(*this));
-  scene.Add(render_, 0);
   paused_ = true;
   pause_ = event::Command(new PauseCommand(*this));
   pause.Add(pause_);
@@ -325,13 +312,29 @@ void Hero::End(event::Command const& command)
 }
 
 Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
-  impl_(new HeroImpl(json::JSON(filename), window, scene, collision, pause))
+  Hero(json::JSON(filename), window, scene, collision, pause)
 {
 }
 
-Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
-  impl_(new HeroImpl(json, window, scene, collision, pause))
+static Layer Render(std::shared_ptr<HeroImpl> impl)
 {
+  std::weak_ptr<HeroImpl> hero_ptr = impl;
+  return [hero_ptr](void)
+  {
+    bool locked = false;
+    if(auto hero = hero_ptr.lock())
+    {
+      hero->Render();
+      locked = true;
+    }
+    return locked;
+  };
+}
+
+Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
+  impl_(new HeroImpl(json, window, collision, pause))
+{
+  scene.Add(Render(impl_), 0);
 }
 
 Hero::Hero(Hero const& other) : impl_(other.impl_)

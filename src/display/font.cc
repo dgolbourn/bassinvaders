@@ -18,6 +18,11 @@ FontImpl::~FontImpl(void)
   TTF_CloseFont(font_);
 }
 
+bool Font::operator==(Font const& other) const
+{
+  return impl_ == other.impl_;
+}
+
 Font::Font(std::string const& filename, int point, int r, int g, int b) : impl_(new FontImpl(filename, point, r, g, b))
 {
 }

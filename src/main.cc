@@ -195,10 +195,17 @@ int main(int argc, char *argv[])
   game::Animation anim("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/file.json", w);
   anim.Play(10);
 
-  Show* Sh = new Show;
-  Sh->anim_ = anim;
-  Sh->win_ = w;
-  auto sr = event::Command(Sh);
+  std::function<bool(void)> sr([&anim](void)
+  {
+    display::BoundingBox box(50, 50, 250, 250);
+    box.x() -= 10 * x;
+    box.y() -= 10 * y;
+    anim.Render(box);
+    display::BoundingBox dox(0, 0, 250, 250);
+    dox.x() -= 10 * x;
+    dox.y() -= 10 * y;
+    return true;
+  });
   game::Scene Sc("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/scene.json", w);
   Sc.Add(sr, -5);
 

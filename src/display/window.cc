@@ -1,9 +1,9 @@
 #include "window.h"
 #include <unordered_map>
+#include "SDL_image.h"
 #include "sdl_library.h"
 #include "img_library.h"
 #include "ttf_library.h"
-#include "SDL_image.h"
 #include "sdl_exception.h"
 #include "texture.h"
 #include "font_impl.h"
@@ -13,9 +13,6 @@
 
 namespace display
 {
-typedef std::pair<std::string, std::shared_ptr<FontImpl>> TextPair;
-typedef algorithm::Hash<std::string, std::shared_ptr<FontImpl>> TextHash;
-
 class WindowImpl
 {
 public:
@@ -36,6 +33,8 @@ public:
   SDL_Window* window_;
   SDL_Renderer* renderer_;
   std::unordered_map<std::string, sdl::Texture> textures_;
+  typedef std::pair<std::string, Font> TextPair;
+  typedef algorithm::Hash<std::string, Font> TextHash;
   std::unordered_map<TextPair, sdl::Texture, TextHash> text_;
   SDL_Point view_;
   float zoom_;
@@ -118,7 +117,6 @@ WindowImpl::~WindowImpl(void)
 sdl::TexturePtr WindowImpl::Load(std::string const& filename)
 {
   sdl::TexturePtr texture_ptr;
-
   auto fileiter = textures_.find(filename);
   if(fileiter != textures_.end())
   {
@@ -126,8 +124,7 @@ sdl::TexturePtr WindowImpl::Load(std::string const& filename)
   }
   else
   {
-    sdl::Surface surface(filename.c_str());
-    sdl::Texture texture(renderer_, surface);
+    sdl::Texture texture(renderer_, sdl::Surface(filename.c_str()));
     textures_[filename] = texture;
     texture_ptr = texture;
   }
@@ -137,7 +134,7 @@ sdl::TexturePtr WindowImpl::Load(std::string const& filename)
 sdl::TexturePtr WindowImpl::Text(std::string const& text, Font const& font)
 {
   sdl::TexturePtr texture_ptr;
-  auto textpair = TextPair(text, font.impl_);
+  auto textpair = TextPair(text, font);
   auto fileiter = text_.find(textpair);
   if(fileiter != text_.end())
   {
@@ -145,8 +142,7 @@ sdl::TexturePtr WindowImpl::Text(std::string const& text, Font const& font)
   }
   else
   {
-    sdl::Surface surface(font.impl_->font_, text.c_str(), font.impl_->colour_);
-    sdl::Texture texture(renderer_, surface);
+    sdl::Texture texture(renderer_, sdl::Surface(font.impl_->font_, text.c_str(), font.impl_->colour_));
     text_[textpair] = texture;
     texture_ptr = texture;
   }

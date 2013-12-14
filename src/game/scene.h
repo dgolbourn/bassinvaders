@@ -2,19 +2,21 @@
 #define SCENE_H_
 #include <memory>
 #include <string>
-#include "command.h"
+#include <functional>
 #include "json.h"
 #include "window.h"
 
 namespace game
 {
+typedef std::function<bool(void)> Layer;
+
 class Scene
 {
 public:
   Scene(void);
   Scene(std::string const& filename, display::Window& window);
   Scene(json::JSON const& json, display::Window& window);
-  void Add(event::Command const& command, int z);
+  void Add(Layer const& layer, int z);
   void Render(void);
 
   ~Scene(void);

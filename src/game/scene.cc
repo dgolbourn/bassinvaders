@@ -1,68 +1,53 @@
 #include "scene.h"
 #include <map>
-#include <vector>
 #include "jansson.h"
 
 namespace game
 {
-typedef std::multimap<int, event::CommandPtr> CommandMap;
-typedef std::pair<int, event::CommandPtr> CommandPair;
+typedef std::multimap<int, Layer> LayerMap;
+typedef std::pair<int, Layer> LayerPair;
 
 class SceneImpl
 {
 public:
   SceneImpl(json::JSON const& json, display::Window& window);
-  void Add(event::Command const& render, int z);
+  void Add(Layer const& layer, int z);
   void Render(void);
-  CommandMap commands_;
-  std::vector<event::Command> layers_;
+  LayerMap layers_;
 };
 
 void SceneImpl::Render(void)
 {
-  for(auto iter = commands_.begin(); iter != commands_.end();)
+  for(auto iter = layers_.begin(); iter != layers_.end();)
   {
-    if(auto command = iter->second.lock())
+    if(iter->second())
     {
-      command->operator()();
       ++iter;
     }
     else
     {
-      iter = commands_.erase(iter);
+      iter = layers_.erase(iter);
     }
   }
 }
 
-void SceneImpl::Add(event::Command const& command, int z)
+void SceneImpl::Add(Layer const& layer, int z)
 {
-  commands_.insert(CommandPair(z, command));
+  layers_.insert(LayerPair(z, layer));
 }
 
-class Layer : public event::CommandImpl
+static Layer Bind(display::Texture texture, display::BoundingBox bounding_box, float parallax)
 {
-public:
-  display::Texture texture_;
-  display::BoundingBox render_box_;
-  float parallax_;
-  Layer(std::string const& filename, double parallax, display::Window& window, json::JSON const& render_box)
+  return [texture, bounding_box, parallax](void)
   {
-    texture_ = window.Load(filename);
-    parallax_ = float(parallax);
-    render_box_ = display::BoundingBox(render_box);
-  }
-  void operator()(void) final
-  {
-    texture_(display::BoundingBox(), render_box_, parallax_, true, 0.);
-  }
-};
+    return texture(display::BoundingBox(), bounding_box, parallax, true, 0.);
+  };
+}
 
 SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
 {
   json_t* layers;
   json.Unpack("{so}", "layers", &layers);
-
-  layers_ = std::vector<event::Command>(json_array_size(layers));
   size_t index;
   json_t* layer;
   json_array_foreach(layers, index, layer)
@@ -77,9 +62,7 @@ SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
       "parallax", &parallax,
       "render box", &render_box);
 
-    event::Command command(new Layer(filename, parallax, window, render_box));
-    layers_.push_back(command);
-    Add(command, plane);
+    Add(Bind(window.Load(filename), display::BoundingBox(render_box), float(parallax)), plane);
   }
 }
 
@@ -92,7 +75,7 @@ void Scene::Render(void)
   impl_->Render();
 }
 
-void Scene::Add(event::Command const& command, int z)
+void Scene::Add(Layer const& command, int z)
 {
   impl_->Add(command, z);
 }

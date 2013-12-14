@@ -1,26 +1,24 @@
 #include "signal.h"
-#include <set>
+#include <list>
 
 namespace event
 {
-typedef std::owner_less<CommandPtr> CommandLess;
-typedef std::set<CommandPtr, CommandLess> CommandSet;
+typedef std::list<Command> CommandList;
 
 class SignalImpl
 {
 public:
   void Notify(void);
   void Add(Command const& comand);
-  CommandSet commands_;
+  CommandList commands_;
 };
 
 void SignalImpl::Notify(void)
 {
   for(auto iter = commands_.begin(); iter != commands_.end();)
   {
-    if(auto command = iter->lock())
+    if((*iter)())
     {
-      command->operator()();
       ++iter;
     }
     else
@@ -32,7 +30,7 @@ void SignalImpl::Notify(void)
 
 void SignalImpl::Add(Command const& comand)
 {
-  commands_.insert(comand);
+  commands_.push_back(comand);
 }
 
 void Signal::Notify(void)

@@ -22,29 +22,18 @@ class DynamicsImpl
 public:
   Model model_[2];
   event::Timer timer_;
-  event::Command update_;
   DynamicsImpl(float x, float y, float u, float v);
   void Play(void);
   void Pause(void);
   void Resume(void);
+  bool Step(void);
 };
 
-class DynamicsCommand : public event::CommandImpl
+bool DynamicsImpl::Step(void)
 {
-public:
-  DynamicsImpl& impl_;
-  DynamicsCommand(DynamicsImpl& impl);
-  void operator()(void) final;
-};
-
-void DynamicsCommand::operator()(void)
-{
-  impl_.model_[0].Step(float(dt));
-  impl_.model_[1].Step(float(dt));
-}
-
-DynamicsCommand::DynamicsCommand(DynamicsImpl& impl) : impl_(impl)
-{
+  model_[0].Step(float(dt));
+  model_[1].Step(float(dt));
+  return true;
 }
 
 DynamicsImpl::DynamicsImpl(float x, float y, float u, float v) : timer_(dt)
@@ -53,8 +42,7 @@ DynamicsImpl::DynamicsImpl(float x, float y, float u, float v) : timer_(dt)
   model_[0].v_ = u;
   model_[1].x_ = y;
   model_[1].v_ = v;
-  update_ = event::Command(new DynamicsCommand(*this));
-  timer_.Add(update_);
+  timer_.Add(std::bind(&DynamicsImpl::Step, this));
 }
 
 void DynamicsImpl::Play(void)

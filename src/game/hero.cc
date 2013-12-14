@@ -4,14 +4,13 @@
 #include "sound.h"
 #include "event.h"
 #include "dynamics.h"
-#include <iostream>
 
 namespace game
 {
 class HeroImpl
 {
 public:
-  HeroImpl(json::JSON const& json, display::Window& window, Collision& collision, event::Signal& pause);
+  HeroImpl(json::JSON const& json, display::Window& window);
   void End(event::Command const& command);
   Animation moving_animation_;
   display::BoundingBox moving_render_box_;
@@ -20,22 +19,26 @@ public:
   display::BoundingBox destroyed_render_box_;
   audio::Sound destroyed_sound_effect_;
   display::BoundingBox collision_box_;
-  event::Command pause_;
   bool paused_;
   Animation animation_;
   display::BoundingBox render_box_;
   audio::Sound sound_effect_;
   event::Command attack_;
-  event::Command up_;
-  event::Command down_;
-  event::Command left_;
-  event::Command right_;
   event::Command enemy_collision_;
-  class RenderCommand;
-  class PauseCommand;
   event::Signal end_;
   Dynamics dynamics_;
   void Render(void);
+  void Pause(void);
+  bool up_;
+  bool down_;
+  bool left_;
+  bool right_;
+  void Up(void);
+  void Down(void);
+  void Left(void);
+  void Right(void);
+  void Attack(void);
+  void EnemyCollision(void);
 };
 
 void HeroImpl::End(event::Command const& command)
@@ -43,186 +46,98 @@ void HeroImpl::End(event::Command const& command)
   end_.Add(command);
 }
 
-class HeroImpl::PauseCommand : public event::CommandImpl
+void HeroImpl::Pause(void)
 {
-public:
-  PauseCommand(HeroImpl& impl);
-  void operator()(void) final;
-  HeroImpl& impl_;
-};
-
-HeroImpl::PauseCommand::PauseCommand(HeroImpl& impl) : impl_(impl)
-{
-}
-
-void HeroImpl::PauseCommand::operator()(void)
-{
-  if(impl_.paused_)
+  if(paused_)
   {
-    impl_.paused_ = false;
-    impl_.animation_.Resume();
-    impl_.sound_effect_.Resume();
-    impl_.dynamics_.Resume();
+    paused_ = false;
+    animation_.Resume();
+    sound_effect_.Resume();
+    dynamics_.Resume();
   }
   else
   {
-    impl_.paused_ = true;
-    impl_.animation_.Pause();
-    impl_.sound_effect_.Pause();
-    impl_.dynamics_.Pause();
+    paused_ = true;
+    animation_.Pause();
+    sound_effect_.Pause();
+    dynamics_.Pause();
   }
 }
 
-class AttackCommand : public event::CommandImpl
-{
-public:
-  AttackCommand(HeroImpl& impl);
-  void operator()(void) final;
-  HeroImpl& impl_;
-};
-
-AttackCommand::AttackCommand(HeroImpl& impl) : impl_(impl)
-{
-}
-
-void AttackCommand::operator()(void)
+void HeroImpl::Attack(void)
 {
 }
 
 static float const dv = 0.1f;
 
-class UpCommand : public event::CommandImpl
+void HeroImpl::Up(void)
 {
-public:
-  UpCommand(HeroImpl& impl);
-  void operator()(void) final;
-  HeroImpl& impl_;
-  bool enabled_;
-};
-
-UpCommand::UpCommand(HeroImpl& impl) : impl_(impl), enabled_(true)
-{
-}
-
-void UpCommand::operator()(void)
-{
-  if(enabled_)
+  if(up_)
   {
-    impl_.dynamics_.v() -= dv;
-    enabled_ = false;
+    dynamics_.v() -= dv;
+    up_ = false;
   }
   else
   {
-    impl_.dynamics_.v() += dv;
-    enabled_ = true;
+    dynamics_.v() += dv;
+    up_ = true;
   }
 }
 
-class DownCommand : public event::CommandImpl
+void HeroImpl::Down(void)
 {
-public:
-  DownCommand(HeroImpl& impl);
-  void operator()(void) final;
-  HeroImpl& impl_;
-  bool enabled_;
-};
-
-DownCommand::DownCommand(HeroImpl& impl) : impl_(impl), enabled_(true)
-{
-}
-
-void DownCommand::operator()(void)
-{
-  if(enabled_)
+  if(down_)
   {
-    impl_.dynamics_.v() += dv;
-    enabled_ = false;
+    dynamics_.v() += dv;
+    down_ = false;
   }
   else
   {
-    impl_.dynamics_.v() -= dv;
-    enabled_ = true;
+    dynamics_.v() -= dv;
+    down_ = true;
   }
 }
 
-class LeftCommand : public event::CommandImpl
+void HeroImpl::Left(void)
 {
-public:
-  LeftCommand(HeroImpl& impl);
-  void operator()(void) final;
-  HeroImpl& impl_;
-  bool enabled_;
-};
-
-LeftCommand::LeftCommand(HeroImpl& impl) : impl_(impl), enabled_(true)
-{
-}
-
-void LeftCommand::operator()(void)
-{
-  if(enabled_)
+  if(left_)
   {
-    impl_.dynamics_.u() -= dv;
-    enabled_ = false;
+    dynamics_.u() -= dv;
+    left_ = false;
   }
   else
   {
-    impl_.dynamics_.u() += dv;
-    enabled_ = true;
+    dynamics_.u() += dv;
+    left_ = true;
   }
 }
 
-class RightCommand : public event::CommandImpl
+void HeroImpl::Right(void)
 {
-public:
-  RightCommand(HeroImpl& impl);
-  void operator()(void) final;
-  HeroImpl& impl_;
-  bool enabled_;
-};
-
-RightCommand::RightCommand(HeroImpl& impl) : impl_(impl), enabled_(true)
-{
-}
-
-void RightCommand::operator()(void)
-{
-  if(enabled_)
+  if(right_)
   {
-    impl_.dynamics_.u() += dv;
-    enabled_ = false;
+    dynamics_.u() += dv;
+    right_ = false;
   }
   else
   {
-    impl_.dynamics_.u() -= dv;
-    enabled_ = true;
+    dynamics_.u() -= dv;
+    right_ = true;
   }
 }
 
-class EnemyCollisionCommand : public event::CommandImpl
+void HeroImpl::EnemyCollision(void)
 {
-public:
-  EnemyCollisionCommand(HeroImpl& impl);
-  void operator()(void) final;
-  HeroImpl& impl_;
-};
-
-EnemyCollisionCommand::EnemyCollisionCommand(HeroImpl& impl) : impl_(impl)
-{
-}
-
-void EnemyCollisionCommand::operator()(void)
-{
-  impl_.sound_effect_.Stop();
-  impl_.animation_ = impl_.destroyed_animation_;
-  impl_.render_box_ = impl_.destroyed_render_box_;
-  impl_.sound_effect_ = impl_.destroyed_sound_effect_;
-  impl_.sound_effect_.Play();
-  impl_.animation_.Play();
-  if(impl_.paused_)
+  sound_effect_.Stop();
+  animation_ = destroyed_animation_;
+  render_box_ = destroyed_render_box_;
+  sound_effect_ = destroyed_sound_effect_;
+  sound_effect_.Play();
+  animation_.Play();
+  if(paused_)
   {
-    impl_.animation_.Pause();
-    impl_.sound_effect_.Pause();
+    animation_.Pause();
+    sound_effect_.Pause();
   }
 }
 
@@ -236,7 +151,7 @@ void HeroImpl::Render(void)
   animation_.Render(destination, 1.f, false, 0.);
 }
 
-HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Collision& collision, event::Signal& pause)
+HeroImpl::HeroImpl(json::JSON const& json, display::Window& window)
 {
   json_t* moving_animation;
   json_t* moving_render_box;
@@ -267,8 +182,6 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Collision& c
   
   collision_box_ = display::BoundingBox(collision_box);
   paused_ = true;
-  pause_ = event::Command(new PauseCommand(*this));
-  pause.Add(pause_);
 
   animation_ = moving_animation_;
   animation_.Play(-1);
@@ -277,20 +190,10 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Collision& c
   sound_effect_ = moving_sound_effect_;
   sound_effect_.Play(1);
   sound_effect_.Pause();
-
-  attack_ = event::Command(new AttackCommand(*this)); 
-  event::button1.Add(attack_);
-  up_ = event::Command(new UpCommand(*this)); 
-  event::up.Add(up_);
-  down_ = event::Command(new DownCommand(*this)); 
-  event::down.Add(down_);
-  left_ = event::Command(new LeftCommand(*this)); 
-  event::left.Add(left_);
-  right_ = event::Command(new RightCommand(*this)); 
-  event::right.Add(right_);
-
-  enemy_collision_ = event::Command(new EnemyCollisionCommand(*this));
-  collision.Add(0, 1, collision_box_, enemy_collision_);
+  up_ = true;
+  down_ = true;
+  left_ = true;
+  right_ = true;
   dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f);
   dynamics_.Play();
   dynamics_.Pause();
@@ -329,9 +232,16 @@ static Layer Bind(std::shared_ptr<HeroImpl>& impl, HeroImplMethod method)
 }
 
 Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
-  impl_(new HeroImpl(json, window, collision, pause))
+  impl_(new HeroImpl(json, window))
 {
   scene.Add(Bind(impl_, &HeroImpl::Render), 0);
+  pause.Add(Bind(impl_, &HeroImpl::Pause));
+  event::up.Add(Bind(impl_, &HeroImpl::Up));
+  event::down.Add(Bind(impl_, &HeroImpl::Down));
+  event::left.Add(Bind(impl_, &HeroImpl::Left));
+  event::right.Add(Bind(impl_, &HeroImpl::Right));
+  event::button1.Add(Bind(impl_, &HeroImpl::Attack));
+ // collision.Add(0, 1, impl_->collision_box_, Bind(impl_, &HeroImpl::EnemyCollision));
 }
 
 Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :

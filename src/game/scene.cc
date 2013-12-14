@@ -36,14 +36,6 @@ void SceneImpl::Add(Layer const& layer, int z)
   layers_.insert(LayerPair(z, layer));
 }
 
-static Layer Bind(display::Texture texture, display::BoundingBox bounding_box, float parallax)
-{
-  return [=](void)
-  {
-    return texture(display::BoundingBox(), bounding_box, parallax, true, 0.);
-  };
-}
-
 SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
 {
   json_t* layers;
@@ -62,7 +54,15 @@ SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
       "parallax", &parallax,
       "render box", &render_box);
 
-    Add(Bind(window.Load(filename), display::BoundingBox(render_box), float(parallax)), plane);
+    Layer bind_layer = std::bind(
+      window.Load(filename),
+      display::BoundingBox(),
+      display::BoundingBox(render_box),
+      float(parallax),
+      true,
+      0);
+    
+    Add(bind_layer, plane);
   }
 }
 

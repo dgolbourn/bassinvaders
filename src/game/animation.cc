@@ -13,7 +13,7 @@ class AnimationImpl
 {
 public:
   AnimationImpl(json::JSON const& json, display::Window& window);
-  void Next(void);
+  bool Next(void);
   void Render(display::BoundingBox const& destination, float parallax, bool tile, double angle);
   void Pause(void);
   void Resume(void);
@@ -21,29 +21,11 @@ public:
   void End(event::Command const& command);
 
   display::Texture texture_;
-  event::Command command_;
   event::Timer timer_;
   std::vector<display::BoundingBox> frames_;
   std::vector<display::BoundingBox>::iterator frame_;
   std::mutex mutex_;
 };
-
-class AnimationCommand : public event::CommandImpl
-{
-public:
-  AnimationCommand(AnimationImpl& impl);
-  void operator()(void) final;
-  AnimationImpl& impl_;
-};
-
-AnimationCommand::AnimationCommand(AnimationImpl& impl) : impl_(impl)
-{
-}
-
-void AnimationCommand::operator()(void)
-{
-  impl_.Next();
-}
 
 AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
 {
@@ -61,9 +43,8 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
     "frames", &frames);
 
   texture_ = window.Load(std::string(sprite_sheet));
-  command_ = event::Command(new AnimationCommand(*this));
   timer_ = event::Timer(interval);
-  timer_.Add(command_);
+  timer_.Add(std::bind(&game::AnimationImpl::Next, this));
   frames_ = std::vector<display::BoundingBox>(json_array_size(frames));
   frame_ = frames_.begin();
 
@@ -80,7 +61,7 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
   frame_ = frames_.begin(); 
 }
 
-void AnimationImpl::Next(void)
+bool AnimationImpl::Next(void)
 {
   mutex_.lock();
   ++frame_;
@@ -89,6 +70,7 @@ void AnimationImpl::Next(void)
     frame_ = frames_.begin();
   }
   mutex_.unlock();
+  return true;
 }
 
 void AnimationImpl::Render(display::BoundingBox const& destination, float parallax, bool tile, double angle)

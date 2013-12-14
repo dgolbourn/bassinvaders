@@ -38,7 +38,7 @@ void SceneImpl::Add(Layer const& layer, int z)
 
 static Layer Bind(display::Texture texture, display::BoundingBox bounding_box, float parallax)
 {
-  return [texture, bounding_box, parallax](void)
+  return [=](void)
   {
     return texture(display::BoundingBox(), bounding_box, parallax, true, 0.);
   };

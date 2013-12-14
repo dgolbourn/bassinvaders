@@ -35,6 +35,7 @@ public:
   class PauseCommand;
   event::Signal end_;
   Dynamics dynamics_;
+  void Render(void);
 };
 
 void HeroImpl::End(event::Command const& command)
@@ -225,14 +226,14 @@ void EnemyCollisionCommand::operator()(void)
   }
 }
 
-static void Render(std::shared_ptr<HeroImpl> const& impl)
+void HeroImpl::Render(void)
 {
   display::BoundingBox destination(
-    impl->render_box_.x() + int(impl->dynamics_.x()),
-    impl->render_box_.y() + int(impl->dynamics_.y()),
-    impl->render_box_.w(),
-    impl->render_box_.h());
-  impl->animation_.Render(destination, 1.f, false, 0.);
+    render_box_.x() + int(dynamics_.x()),
+    render_box_.y() + int(dynamics_.y()),
+    render_box_.w(),
+    render_box_.h());
+  animation_.Render(destination, 1.f, false, 0.);
 }
 
 HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, Collision& collision, event::Signal& pause)
@@ -310,12 +311,8 @@ void Hero::End(event::Command const& command)
   impl_->End(command);
 }
 
-Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
-  Hero(json::JSON(filename), window, scene, collision, pause)
-{
-}
-
-template<class Function> static Layer Bind(std::shared_ptr<HeroImpl>& impl, Function&& function)
+typedef void (HeroImpl::*HeroImplMethod)(void);
+static Layer Bind(std::shared_ptr<HeroImpl>& impl, HeroImplMethod method)
 {
   std::weak_ptr<HeroImpl> hero_ptr = impl;
   return [=](void)
@@ -323,7 +320,8 @@ template<class Function> static Layer Bind(std::shared_ptr<HeroImpl>& impl, Func
     bool locked = false;
     if(auto hero = hero_ptr.lock())
     {
-      function(hero);
+      HeroImpl* ptr = hero.get();
+      (ptr->*method)();
       locked = true;
     }
     return locked;
@@ -333,7 +331,12 @@ template<class Function> static Layer Bind(std::shared_ptr<HeroImpl>& impl, Func
 Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
   impl_(new HeroImpl(json, window, collision, pause))
 {
-  scene.Add(Bind(impl_, &Render), 0);
+  scene.Add(Bind(impl_, &HeroImpl::Render), 0);
+}
+
+Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
+Hero(json::JSON(filename), window, scene, collision, pause)
+{
 }
 
 Hero::Hero(Hero const& other) : impl_(other.impl_)

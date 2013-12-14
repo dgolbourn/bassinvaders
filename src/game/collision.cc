@@ -5,9 +5,9 @@
 namespace game
 {
 typedef std::pair<display::BoundingBoxPtr, display::BoundingBoxPtr> BoundingBoxPair;
-typedef std::list<event::CommandPtr> CommandList;
+typedef std::list<event::Command> CommandList;
 typedef std::list<display::BoundingBoxPtr> MemberList;
-typedef std::pair<display::BoundingBoxPtr, event::CommandPtr> CollisionPair;
+typedef std::pair<display::BoundingBoxPtr, event::Command> CollisionPair;
 typedef std::list<CollisionPair> CollisionPairList;
 
 typedef std::map<BoundingBoxPair, CommandList> CollisionMap;
@@ -29,22 +29,14 @@ void CollisionImpl::Add(int this_group, int other_group, display::BoundingBox co
 {
   for(auto iter = targets_[this_group].begin(); iter != targets_[this_group].end();)
   {
-    bool erase_flag = true;
     if(display::BoundingBox other_box = iter->first.Lock())
     {
-      if(event::Command other_command = iter->second.lock())
-      {
-        erase_flag = false;
-        Add(bounding_box, other_box, other_command);
-      }
-    }
-    if(erase_flag)
-    {
-      iter = targets_[this_group].erase(iter);
+      Add(bounding_box, other_box, iter->second);
+      ++iter;
     }
     else
     {
-      ++iter;
+      iter = targets_[this_group].erase(iter);
     }
   }
 
@@ -79,9 +71,8 @@ void CollisionImpl::Check(void)
         {
           for(auto command_iter = iter->second.begin(); command_iter != iter->second.end();)
           {
-            if(event::Command command = command_iter->lock())
+            if((*command_iter)())
             {
-              command->operator()();
               ++command_iter;
             }
             else

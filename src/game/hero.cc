@@ -241,7 +241,7 @@ Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collis
   event::left.Add(Bind(impl_, &HeroImpl::Left));
   event::right.Add(Bind(impl_, &HeroImpl::Right));
   event::button1.Add(Bind(impl_, &HeroImpl::Attack));
- // collision.Add(0, 1, impl_->collision_box_, Bind(impl_, &HeroImpl::EnemyCollision));
+  collision.Add(0, 1, impl_->collision_box_, Bind(impl_, &HeroImpl::EnemyCollision));
 }
 
 Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :

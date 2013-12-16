@@ -5,22 +5,32 @@
 namespace event
 {
 Signal quit;
-Signal up;
-Signal down;
-Signal left;
-Signal right;
-Signal button1;
+Switch up;
+Switch down;
+Switch left;
+Switch right;
+Switch button1;
+Switch pause;
 
 KeyMap key_map;
 
-static void KeydownEvent(SDL_KeyboardEvent const& keyboard_event)
+static void KeydownEvent(SDL_KeyboardEvent const& keyboard_event, Uint32 const& type)
 {
   if(keyboard_event.repeat == 0)
   {
     auto iter = key_map.find(keyboard_event.keysym.scancode);
     if (iter != key_map.end())
     {
-      iter->second.Notify();
+      switch (type)
+      {
+      case SDL_KEYDOWN:
+        iter->second.first.Notify();
+        break;
+      case SDL_KEYUP:
+        iter->second.second.Notify();
+        break;
+      }
+      
     }
   }
 }
@@ -58,7 +68,7 @@ void Check(void)
       break;
     case SDL_KEYDOWN:
     case SDL_KEYUP:
-      KeydownEvent(event.key);
+      KeydownEvent(event.key , event.type);
       break;
     default:
       break;

@@ -19,6 +19,7 @@
 #include "hero.h"
 #include "collision.h"
 #include "enemy.h"
+#include "bind.h"
 
 bool quitflag = false;
 
@@ -65,24 +66,24 @@ int main(int argc, char *argv[])
   event::quit.Add(QuitCallback);
   audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
 //  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
-  mixer.Resume();
-
+  event::pause.first.Add(event::Bind(&audio::Music::Pause, mixer));
+  event::pause.second.Add(event::Bind(&audio::Music::Resume, mixer));
   game::Scene Sc("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/scene.json", w);
-
-  event::Timer timer(5000);
-  timer.Pause();
-  timer.Resume();
-
-  event::Signal pau;
   game::Collision col;
-  game::Hero h("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json", w, Sc, col, pau);
-  pau.Notify();
-  h.x() = 320;
-  h.y() = 240;
-  w.View(0, 0, 1.f);
+  game::Hero h("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json", w, Sc, col);
+  h.Position(0, 0);
+  w.View(0, 0, 5.f);
+  float wx = 0;
+  float wy = 0;
+  float wa = 1.f;
 
+  event::pause.second.Notify();
   while(!quitflag)
   {
+    game::Position p = h.Position();
+    wx = wx * (1.f - wa) + wa * float(p.first);
+    wy = wy * (1.f - wa) + wa * float(p.second);
+    w.View(int(wx), int(wy), 1.f);
     event::Check();
     w.Clear();
     Sc.Render();

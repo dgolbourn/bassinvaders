@@ -13,7 +13,7 @@ public:
   JSON(void);
   JSON(json_t* json);
   JSON(std::string const& filename);
-  template<typename... Args> void Unpack(std::string const& format, Args... args) const
+  template<class... Args> void Unpack(std::string const& format, Args... args) const
   {
     pUnpack(format, 0, args...);
   }

@@ -4,10 +4,10 @@
 
 namespace game
 {
-typedef std::pair<display::BoundingBoxPtr, display::BoundingBoxPtr> BoundingBoxPair;
+typedef std::pair<display::BoundingBox::WeakPtr, display::BoundingBox::WeakPtr> BoundingBoxPair;
 typedef std::list<event::Command> CommandList;
-typedef std::list<display::BoundingBoxPtr> MemberList;
-typedef std::pair<display::BoundingBoxPtr, event::Command> CollisionPair;
+typedef std::list<display::BoundingBox::WeakPtr> MemberList;
+typedef std::pair<display::BoundingBox::WeakPtr, event::Command> CollisionPair;
 typedef std::list<CollisionPair> CollisionPairList;
 
 typedef std::map<BoundingBoxPair, CommandList> CollisionMap;

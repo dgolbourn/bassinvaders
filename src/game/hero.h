@@ -8,17 +8,18 @@
 #include "scene.h"
 #include "signal.h"
 #include "collision.h"
+#include "position.h"
 
 namespace game
 {
 class Hero
 {
 public:
-  Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause);
-  Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause);
+  Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision);
+  Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision);
   Hero(void);
-  float& x(void);
-  float& y(void);
+  void Position(int x, int y);
+  game::Position Position(void);
   void End(event::Command const& command);
 
   ~Hero(void);

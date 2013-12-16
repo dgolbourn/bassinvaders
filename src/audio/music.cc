@@ -88,6 +88,11 @@ Music::~Music(void)
 {
 }
 
+Music::operator bool(void) const
+{
+  return bool(impl_);
+}
+
 Music& Music::operator=(Music other)
 {
   std::swap(impl_, other.impl_);

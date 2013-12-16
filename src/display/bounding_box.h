@@ -10,11 +10,8 @@ struct SDL_Rect;
 
 namespace display
 {
-typedef memory::WeakPtr<class BoundingBox, class BoundingBoxImpl> BoundingBoxPtr;
-
 class BoundingBox
 {
-  friend BoundingBoxPtr;
 public:
   BoundingBox(void);
   BoundingBox(int x, int y, int w, int h);
@@ -33,8 +30,11 @@ public:
   BoundingBox(BoundingBox&& other);
   ~BoundingBox(void);
   BoundingBox& operator=(BoundingBox other);
+
+  typedef memory::WeakPtr<class BoundingBox, class BoundingBoxImpl> WeakPtr;
 private:
   std::shared_ptr<class BoundingBoxImpl> impl_;
+  friend WeakPtr;
 };
 }
 #endif

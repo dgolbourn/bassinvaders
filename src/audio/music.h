@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include "weak_ptr.h"
 
 namespace audio
 {
@@ -14,13 +15,17 @@ public:
   void Pause(void) const;
   void Resume(void);
   void Volume(int volume);
+  explicit operator bool(void) const;
 
   Music(Music const& other);
   Music(Music&& other);
   Music& operator=(Music other);
   ~Music(void);
+
+  typedef memory::WeakPtr<Music, class MusicImpl> WeakPtr;
 private:
   std::shared_ptr<class MusicImpl> impl_;
+  friend WeakPtr;
 };
 }
 #endif

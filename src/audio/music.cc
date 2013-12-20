@@ -72,8 +72,9 @@ Music::Music(void)
 {
 }
 
-Music::Music(std::string const& filename) : impl_(new MusicImpl(filename))
+Music::Music(std::string const& filename)
 {
+  impl_ = std::make_shared<MusicImpl>(filename);
 }
 
 Music::Music(Music const& other) : impl_(other.impl_)

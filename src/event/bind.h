@@ -3,7 +3,7 @@
 #include "command.h"
 namespace event
 {
-template<class SharedMethod, class Shared, class... Args> event::Command Bind(SharedMethod&& method, Shared const& shared, Args... args)
+template<class Method, class Shared, class... Args> event::Command Bind(Method&& method, Shared const& shared, Args... args)
 {
   Shared::WeakPtr weak(shared);
   return [=](void)
@@ -12,6 +12,22 @@ template<class SharedMethod, class Shared, class... Args> event::Command Bind(Sh
     if(auto shared_locked = weak.Lock())
     {
       (shared_locked.*method)(args...);
+      locked = true;
+    }
+    return locked;
+  };
+}
+
+template<class Method, class Impl, class... Args> event::Command Bind(Method&& method, std::shared_ptr<Impl> const& shared, Args... args)
+{
+  std::weak_ptr<Impl> weak = shared;
+  return [=](void)
+  {
+    bool locked = false;
+    if(auto shared_locked = weak.lock())
+    {
+      Impl* ptr = shared_locked.get();
+      (ptr->*method)(args...);
       locked = true;
     }
     return locked;

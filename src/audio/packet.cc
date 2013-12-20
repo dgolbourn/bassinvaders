@@ -1,32 +1,11 @@
 #include "packet.h"
-#include "ffmpeg_exception.h"
-#include "cstd_exception.h"
 
 namespace ffmpeg
 {
-class Deleter
+Packet::Packet(void)
 {
-public:
-  void operator()(AVPacket* packet)
-  {
-    av_free_packet(packet);
-    delete packet;
-  }
-};
-
-static AVPacket* InitAVPacket(void)
-{
-  AVPacket* packet = new AVPacket;
-  if(!packet)
-  {
-    throw cstd::Exception();
-  }
-  av_init_packet(packet);
-  return packet;
-}
-
-Packet::Packet(void) : packet_(InitAVPacket(), Deleter())
-{
+  packet_ = std::make_shared<AVPacket>();
+  av_init_packet(packet_.get());
 }
 
 Packet::Packet(Packet const& other) : packet_(other.packet_)
@@ -45,6 +24,7 @@ Packet& Packet::operator=(Packet other)
 
 Packet::~Packet(void)
 {
+  av_free_packet(packet_.get());
 }
 
 AVPacket* Packet::operator->(void) const

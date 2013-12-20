@@ -2,7 +2,6 @@
 #include <exception>
 #include <iostream>
 #include "window.h"
-#include "cstd_exception.h"
 #include "bounding_box.h"
 #include "signal.h"
 #include "event.h"
@@ -21,12 +20,11 @@
 #include "enemy.h"
 #include "bind.h"
 
-bool quitflag = false;
-
-bool QuitCallback(void)
+bool quit = false;
+static bool Quit(void)
 {
-  quitflag = true;
-  return true;
+  quit = true;
+  return false;
 }
 
 int main(int argc, char *argv[]) 
@@ -63,7 +61,7 @@ int main(int argc, char *argv[])
   w.Show();
   w.View(0,0,1.f);
 
-  event::quit.Add(QuitCallback);
+  event::quit.Add(Quit);
   audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
 //  mixer.Music("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
   event::pause.first.Add(event::Bind(&audio::Music::Pause, mixer));
@@ -71,14 +69,23 @@ int main(int argc, char *argv[])
   game::Scene Sc("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/scene.json", w);
   game::Collision col;
   game::Hero h("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json", w, Sc, col);
-  h.Position(0, 0);
-  w.View(0, 0, 5.f);
+  w.View(0, 0, 1.f);
   float wx = 0;
   float wy = 0;
-  float wa = 1.f;
+  float wa = 0.01f;
 
+  std::vector<display::BoundingBox> boxes(100);
+
+  for(auto& box : boxes)
+  {
+    box = display::BoundingBox(-1500 + rand() & 3000, -1500 + rand() % 3000, 50, 50);
+    event::Command c = std::bind(S, display::BoundingBox(), box, 1.f, false, 0.);
+    Sc.Add(c, 1);
+    col.Add(1, 0, box, [=](void){std::cout << "hit!" << std::endl; return true;});
+  }
+  h.End(Quit);
   event::pause.second.Notify();
-  while(!quitflag)
+  while(!quit)
   {
     game::Position p = h.Position();
     wx = wx * (1.f - wa) + wa * float(p.first);
@@ -88,13 +95,7 @@ int main(int argc, char *argv[])
     w.Clear();
     Sc.Render();
     w.Show();
-  }
-  try
-  {
-    cstd::Exception();
-  }
-  catch(...)
-  {
+    col.Check();
   }
 
   }

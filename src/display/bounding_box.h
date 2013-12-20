@@ -21,17 +21,23 @@ public:
   bool operator<(BoundingBox const& other) const;
   explicit operator bool(void) const;
   operator SDL_Rect*(void) const;
-  int& x(void) const;
-  int& y(void) const;
-  int& w(void) const;
-  int& h(void) const;
+  void x(int x);
+  void y(int y);
+  void w(int w);
+  void h(int h);
+  int x(void) const;
+  int y(void) const;
+  int w(void) const;
+  int h(void) const;
+  BoundingBox Copy(void) const;
+  void Copy(BoundingBox const& other);
  
   BoundingBox(BoundingBox const& other);
   BoundingBox(BoundingBox&& other);
   ~BoundingBox(void);
   BoundingBox& operator=(BoundingBox other);
 
-  typedef memory::WeakPtr<class BoundingBox, class BoundingBoxImpl> WeakPtr;
+  typedef memory::WeakPtr<BoundingBox, class BoundingBoxImpl> WeakPtr;
 private:
   std::shared_ptr<class BoundingBoxImpl> impl_;
   friend WeakPtr;

@@ -18,7 +18,7 @@ public:
   void Render(display::BoundingBox const& destination, float parallax = 0.f, bool tile = false, double angle = 0.);
   void Pause(void);
   void Resume(void);
-  void Play(int loops = 0);
+  void Play(int loops = 0, bool end_on_first = false);
   void End(event::Command const& command);
 
   ~Animation(void);

@@ -8,10 +8,8 @@ namespace display
 {
 class Font
 {
-  friend class WindowImpl;
-  friend struct std::hash<display::Font>;
 public:
-  Font(std::string const& filename, int point, int r, int g, int b);
+  Font(std::string const& filename, int point, int r, int g, int b, int a = 255);
   Font(void);
   bool operator==(Font const& other) const;
 
@@ -21,6 +19,8 @@ public:
   Font& operator=(Font other);
 private:
   std::shared_ptr<class FontImpl> impl_;
+  friend class WindowImpl;
+  friend struct std::hash<display::Font>;
 };
 }
 

@@ -4,27 +4,35 @@
 #include "sound.h"
 #include "event.h"
 #include "dynamics.h"
+#include "bind.h"
 
 namespace game
 {
+class State
+{
+public:
+  Animation animation_;
+  display::BoundingBox render_box_;
+  audio::Sound sound_effect_;
+  display::BoundingBox collision_box_;
+};
+
 class HeroImpl
 {
 public:
   HeroImpl(json::JSON const& json, display::Window& window);
   void End(event::Command const& command);
-  Animation moving_animation_;
-  display::BoundingBox moving_render_box_;
-  audio::Sound moving_sound_effect_;
-  Animation destroyed_animation_;
-  display::BoundingBox destroyed_render_box_;
-  audio::Sound destroyed_sound_effect_;
+  State Moving;
+  State Destroyed;
+  State Current;
+  display::BoundingBox render_box_;
   display::BoundingBox collision_box_;
   bool paused_;
-  Animation animation_;
-  display::BoundingBox render_box_;
-  audio::Sound sound_effect_;
   event::Signal end_;
+  game::Position position_;
   Dynamics dynamics_;
+  int x_sign_;
+  int y_sign_;
   void Render(void);
   void Pause(void);
   void Resume(void);
@@ -32,8 +40,10 @@ public:
   void Down(void);
   void Left(void);
   void Right(void);
+  void Velocity(void);
   void Attack(void);
   void EnemyCollision(void);
+  bool Position(Dynamics::Position const& position);
 };
 
 void HeroImpl::End(event::Command const& command)
@@ -44,16 +54,16 @@ void HeroImpl::End(event::Command const& command)
 void HeroImpl::Pause(void)
 {
   paused_ = true;
-  animation_.Pause();
-  sound_effect_.Pause();
+  Current.animation_.Pause();
+  Current.sound_effect_.Pause();
   dynamics_.Pause();
 }
 
 void HeroImpl::Resume(void)
 {
   paused_ = false;
-  animation_.Resume();
-  sound_effect_.Resume();
+  Current.animation_.Resume();
+  Current.sound_effect_.Resume();
   dynamics_.Resume();
 }
 
@@ -62,50 +72,84 @@ void HeroImpl::Attack(void)
 }
 
 static float const dv = 0.1f;
+static float const sqrt1_2 = std::sqrt(0.5f);
 
 void HeroImpl::Up(void)
 {
-  dynamics_.v() -= dv;
+  y_sign_ -= 1;
+  Velocity();
 }
 
 void HeroImpl::Down(void)
 {
-  dynamics_.v() += dv;
+  y_sign_ += 1;
+  Velocity();
 }
 
 void HeroImpl::Left(void)
 {
-  dynamics_.u() -= dv;
+  x_sign_ -= 1;
+  Velocity();
 }
 
 void HeroImpl::Right(void)
 {
-  dynamics_.u() += dv;
+  x_sign_ += 1;
+  Velocity();
+}
+
+void HeroImpl::Velocity(void)
+{
+  float v = dv;
+  if(x_sign_ && y_sign_)
+  {
+    v *= sqrt1_2;
+  }
+
+  dynamics_.u(float(x_sign_) * v);
+  dynamics_.v(float(y_sign_) * v);
 }
 
 void HeroImpl::EnemyCollision(void)
 {
-  sound_effect_.Stop();
-  animation_ = destroyed_animation_;
-  render_box_ = destroyed_render_box_;
-  sound_effect_ = destroyed_sound_effect_;
-  sound_effect_.Play();
-  animation_.Play();
+  Current.sound_effect_.Stop();
+  Current.animation_.Pause();
+  Current = Destroyed;
+  Current.sound_effect_.Play();
+  Current.animation_.Play();
+  Current.animation_.End([this](){this->end_.Notify(); return false;});
   if(paused_)
   {
-    animation_.Pause();
-    sound_effect_.Pause();
+    Current.animation_.Pause();
+    Current.sound_effect_.Pause();
   }
+}
+
+bool HeroImpl::Position(Dynamics::Position const& position)
+{
+  position_.first = int(position.first); 
+  position_.second = int(position.second);
+
+  render_box_.Copy(Current.render_box_);
+  render_box_.x(render_box_.x() + position_.first);
+  render_box_.y(render_box_.y() + position_.second);
+
+  if(Current.collision_box_)
+  {
+    collision_box_.Copy(Current.collision_box_);
+    collision_box_.x(collision_box_.x() + position_.first);
+    collision_box_.y(collision_box_.y() + position_.second);
+  }
+  else
+  {
+    collision_box_ = display::BoundingBox();
+  }
+  return true;
 }
 
 void HeroImpl::Render(void)
 {
-  display::BoundingBox destination(
-    render_box_.x() + int(dynamics_.x()),
-    render_box_.y() + int(dynamics_.y()),
-    render_box_.w(),
-    render_box_.h());
-  animation_.Render(destination, 1.f, false, 0.);
+  Current.animation_.Render(render_box_, 1.f, false, 0.);
 }
 
 HeroImpl::HeroImpl(json::JSON const& json, display::Window& window)
@@ -129,38 +173,45 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window)
     "sound effect", &destroyed_sound_effect,
     "collision box", &collision_box);
 
-  moving_animation_ = Animation(moving_animation, window);
-  moving_render_box_ = display::BoundingBox(moving_render_box);
-  moving_sound_effect_ = audio::Sound(moving_sound_effect);
-    
-  destroyed_animation_ = Animation(destroyed_animation, window);
-  destroyed_render_box_ = display::BoundingBox(destroyed_render_box);
-  destroyed_sound_effect_ = audio::Sound(destroyed_sound_effect);
+  Moving.animation_ = Animation(moving_animation, window);
+  Moving.render_box_ = display::BoundingBox(moving_render_box);
+  Moving.sound_effect_ = audio::Sound(moving_sound_effect);
+  Moving.collision_box_ = display::BoundingBox(collision_box);
+
+  Destroyed.animation_ = Animation(destroyed_animation, window);
+  Destroyed.render_box_ = display::BoundingBox(destroyed_render_box);
+  Destroyed.sound_effect_ = audio::Sound(destroyed_sound_effect);
+  Destroyed.collision_box_ = display::BoundingBox();
   
-  collision_box_ = display::BoundingBox(collision_box);
   paused_ = true;
 
-  animation_ = moving_animation_;
-  animation_.Play(-1);
-  animation_.Pause();
-  render_box_ = moving_render_box_;
-  sound_effect_ = moving_sound_effect_;
-  sound_effect_.Play(1);
-  sound_effect_.Pause();
+  Current = Moving;
+  Current.animation_.Play(-1);
+  Current.animation_.Pause();
+  Current.sound_effect_.Play(0);
+  Current.sound_effect_.Pause();
+  collision_box_ = display::BoundingBox(collision_box);
+  render_box_ = display::BoundingBox(moving_render_box);
+  position_ = game::Position(0, 0);
   dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f);
+  dynamics_.Add(std::bind(&HeroImpl::Position, this, std::placeholders::_1));
   dynamics_.Play();
   dynamics_.Pause();
+
+  x_sign_ = 0;
+  y_sign_ = 0;
 }
 
-void Hero::Position(int x, int y)
+void Hero::Position(game::Position const& position)
 {
-  impl_->dynamics_.x() = float(x);
-  impl_->dynamics_.y() = float(y);
+  impl_->position_ = position;
+  impl_->dynamics_.x(float(position.first));
+  impl_->dynamics_.y(float(position.second));
 }
 
 game::Position Hero::Position(void)
 {
-  return game::Position(int(impl_->dynamics_.x()), int(impl_->dynamics_.y()));
+  return impl_->position_;
 }
 
 void Hero::End(event::Command const& command)
@@ -168,38 +219,23 @@ void Hero::End(event::Command const& command)
   impl_->End(command);
 }
 
-template<class T> event::Command Bind(std::shared_ptr<T> const& impl, void (T::*method)(void))
+Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision)
 {
-  std::weak_ptr<T> hero_ptr = impl;
-  return [=](void)
-  {
-    bool locked = false;
-    if(auto hero = hero_ptr.lock())
-    {
-      T* ptr = hero.get();
-      (ptr->*method)();
-      locked = true;
-    }
-    return locked;
-  };
-}
+  impl_ = std::make_shared<HeroImpl>(json, window);
 
-Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision) :
-  impl_(new HeroImpl(json, window))
-{
-  scene.Add(Bind(impl_, &HeroImpl::Render), 0);
-  event::pause.first.Add(Bind(impl_, &HeroImpl::Pause));
-  event::pause.second.Add(Bind(impl_, &HeroImpl::Resume));
-  event::up.first.Add(Bind(impl_, &HeroImpl::Up));
-  event::up.second.Add(Bind(impl_, &HeroImpl::Down));
-  event::down.first.Add(Bind(impl_, &HeroImpl::Down));
-  event::down.second.Add(Bind(impl_, &HeroImpl::Up));
-  event::left.first.Add(Bind(impl_, &HeroImpl::Left));
-  event::left.second.Add(Bind(impl_, &HeroImpl::Right));
-  event::right.first.Add(Bind(impl_, &HeroImpl::Right));
-  event::right.second.Add(Bind(impl_, &HeroImpl::Left));
-  event::button1.first.Add(Bind(impl_, &HeroImpl::Attack));
-  collision.Add(0, 1, impl_->collision_box_, Bind(impl_, &HeroImpl::EnemyCollision));
+  scene.Add(event::Bind(&HeroImpl::Render, impl_), 0);
+  event::pause.first.Add(event::Bind(&HeroImpl::Pause, impl_));
+  event::pause.second.Add(event::Bind(&HeroImpl::Resume, impl_));
+  event::up.first.Add(event::Bind(&HeroImpl::Up, impl_));
+  event::up.second.Add(event::Bind(&HeroImpl::Down, impl_));
+  event::down.first.Add(event::Bind(&HeroImpl::Down, impl_));
+  event::down.second.Add(event::Bind(&HeroImpl::Up, impl_));
+  event::left.first.Add(event::Bind(&HeroImpl::Left, impl_));
+  event::left.second.Add(event::Bind(&HeroImpl::Right, impl_));
+  event::right.first.Add(event::Bind(&HeroImpl::Right, impl_));
+  event::right.second.Add(event::Bind(&HeroImpl::Left, impl_));
+  event::button1.first.Add(event::Bind(&HeroImpl::Attack, impl_));
+  collision.Add(0, 1, impl_->collision_box_, event::Bind(&HeroImpl::EnemyCollision, impl_));
 }
 
 Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision) :

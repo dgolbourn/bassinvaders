@@ -14,7 +14,7 @@ class Frame
 public:
   Frame(void);
   AVFrame* operator->(void) const;
-  operator AVFrame* (void) const;
+  operator AVFrame*(void) const;
   void Clear(void);
   uint8_t const** data(void) const;
 

@@ -36,32 +36,63 @@ BoundingBox::operator SDL_Rect*(void) const
   return rect;
 }
 
-int& BoundingBox::x(void) const
+void BoundingBox::x(int x)
+{
+  impl_->rect_.x = x;
+}
+
+void BoundingBox::y(int y)
+{
+  impl_->rect_.y = y;
+}
+
+void BoundingBox::w(int w)
+{
+  impl_->rect_.w = w;
+}
+
+void BoundingBox::h(int h)
+{
+  impl_->rect_.h = h;
+}
+
+int BoundingBox::x(void) const
 {
   return impl_->rect_.x;
 }
 
-int& BoundingBox::y(void) const
+int BoundingBox::y(void) const
 {
   return impl_->rect_.y;
 }
 
-int& BoundingBox::w(void) const
+int BoundingBox::w(void) const
 {
   return impl_->rect_.w;
 }
 
-int& BoundingBox::h(void) const
+int BoundingBox::h(void) const
 {
   return impl_->rect_.h;
+}
+
+BoundingBox BoundingBox::Copy(void) const
+{
+  return BoundingBox(impl_->rect_.x, impl_->rect_.y, impl_->rect_.w, impl_->rect_.h);
+}
+
+void BoundingBox::Copy(BoundingBox const& other)
+{
+  impl_->rect_ = other.impl_->rect_;
 }
 
 BoundingBox::BoundingBox(void)
 {
 }
 
-BoundingBox::BoundingBox(int x, int y, int w, int h) : impl_(new BoundingBoxImpl(x, y, w, h))
+BoundingBox::BoundingBox(int x, int y, int w, int h)
 {
+  impl_ = std::make_shared<BoundingBoxImpl>(x, y, w, h);
 }
 
 BoundingBoxImpl::BoundingBoxImpl(int x, int y, int w, int h) : rect_({x, y, w, h})
@@ -73,12 +104,14 @@ BoundingBoxImpl::BoundingBoxImpl(json::JSON const& json)
   json.Unpack("[iiii]", &rect_.x, &rect_.y, &rect_.w, &rect_.h);
 }
 
-BoundingBox::BoundingBox(std::string const& filename) : impl_(new BoundingBoxImpl(json::JSON(filename)))
+BoundingBox::BoundingBox(std::string const& filename)
 {
+  impl_ = std::make_shared<BoundingBoxImpl>(json::JSON(filename));
 }
 
-BoundingBox::BoundingBox(json::JSON const& json) : impl_(new BoundingBoxImpl(json))
+BoundingBox::BoundingBox(json::JSON const& json)
 {
+  impl_ = std::make_shared<BoundingBoxImpl>(json);
 }
 
 BoundingBox::BoundingBox(BoundingBox const& other) : impl_(other.impl_)

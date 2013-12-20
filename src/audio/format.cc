@@ -7,6 +7,7 @@ class FormatImpl
 {
 public:
   FormatImpl(std::string const& filename);
+  void Destroy(void);
 
   ~FormatImpl(void);
 
@@ -23,43 +24,55 @@ FormatImpl::FormatImpl(std::string const& filename)
   }
   if(avformat_open_input(&format_, filename.c_str(), nullptr, nullptr))
   {
-    throw Exception();
-  }
-  if(avformat_find_stream_info(format_, nullptr) < 0)
-  {
+    avformat_free_context(format_);
     throw Exception();
   }
 
-  audio_stream_ = nullptr;
-  for(unsigned int i = 0; i < format_->nb_streams; ++i)
+  try
   {
-    if(format_->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
+    if(avformat_find_stream_info(format_, nullptr) < 0)
     {
-      audio_stream_ = format_->streams[i];
-      break;
+      throw Exception();
+    }
+    audio_stream_ = nullptr;
+    for(unsigned int i = 0; i < format_->nb_streams; ++i)
+    {
+      if(AVMEDIA_TYPE_AUDIO == format_->streams[i]->codec->codec_type)
+      {
+        audio_stream_ = format_->streams[i];
+        break;
+      }
+    }
+    if(!audio_stream_)
+    {
+      throw Exception();
     }
   }
-  if(!audio_stream_)
+  catch(...)
   {
-    throw Exception();
+    Destroy();
+    throw;
   }
+}
+
+void FormatImpl::Destroy(void)
+{
+  avformat_close_input(&format_);
+  avformat_free_context(format_);
 }
 
 FormatImpl::~FormatImpl(void)
 {
-  if(format_)
-  {
-    avformat_close_input(&format_);
-    avformat_free_context(format_);
-  }
+  Destroy();
 }
 
 Format::Format(void)
 {    
 }
 
-Format::Format(std::string const& filename) : impl_(new FormatImpl(filename))
+Format::Format(std::string const& filename)
 {
+  impl_ = std::make_shared<FormatImpl>(filename);
 }
 
 Format::Format(Format const& other) : impl_(other.impl_)

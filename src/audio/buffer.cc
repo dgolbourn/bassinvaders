@@ -9,7 +9,7 @@ class BufferImpl
 public:
   BufferImpl(int size);
   void Add(Samples const& samples);
-  bool Full(void);
+  bool Full(void) const;
   explicit operator bool(void) const;
   int Read(uint8_t* buffer, int size);
 
@@ -35,7 +35,6 @@ BufferImpl::BufferImpl(int size)
 
 void BufferImpl::Add(Samples const& samples)
 {
-  mutex_.lock();
   bool empty_flag = false;
   if(queue_.empty())
   {
@@ -50,14 +49,11 @@ void BufferImpl::Add(Samples const& samples)
     data_size_ = queue_.front().size();
     data_ = queue_.front().data()[0];
   }
-  mutex_.unlock();
 }
 
-bool BufferImpl::Full(void)
+bool BufferImpl::Full(void) const
 {
-  mutex_.lock();
   bool full = total_buffer_size_ >= target_buffer_size_;
-  mutex_.unlock();
   return full;
 }
 
@@ -68,7 +64,6 @@ BufferImpl::operator bool(void) const
 
 int BufferImpl::Read(uint8_t* buffer, int size)
 {
-  mutex_.lock();
   int start_size = size;
 
   while(size)
@@ -108,27 +103,30 @@ int BufferImpl::Read(uint8_t* buffer, int size)
   }
 
   start_size -= size;
-  mutex_.unlock();
   return start_size;
 }
 
 void Buffer::Add(Samples const& samples)
 {
+  std::lock_guard<std::mutex> lock(impl_->mutex_);
   impl_->Add(samples);
 }
 
-bool Buffer::Full(void)
+bool Buffer::Full(void) const
 {
+  std::lock_guard<std::mutex> lock(impl_->mutex_);
   return impl_->Full();
 }
 
 Buffer::operator bool(void) const
 {
+  std::lock_guard<std::mutex> lock(impl_->mutex_);
   return bool(impl_);
 }
 
 int Buffer::Read(uint8_t* buffer, int size)
 {
+  std::lock_guard<std::mutex> lock(impl_->mutex_);
   return impl_->Read(buffer, size);
 }
 
@@ -136,8 +134,9 @@ Buffer::Buffer(void)
 {
 }
 
-Buffer::Buffer(int size) : impl_((new BufferImpl(size)))
+Buffer::Buffer(int size)
 {
+  impl_ = std::make_shared<BufferImpl>(size);
 }
 
 Buffer::Buffer(Buffer const& other) : impl_(other.impl_)

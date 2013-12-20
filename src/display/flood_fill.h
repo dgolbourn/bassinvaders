@@ -19,7 +19,7 @@ private:
   {
     if(set_.insert(coords_).second)
     {
-      if(node.Fill(coords_))
+      if(node(coords_))
       {
         coords_.first -= 1; Fill(node);
         coords_.first += 2; Fill(node);

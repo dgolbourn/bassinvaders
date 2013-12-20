@@ -17,7 +17,7 @@ public:
   void Render(display::BoundingBox const& destination, float parallax, bool tile, double angle);
   void Pause(void);
   void Resume(void);
-  void Play(int loops);
+  void Play(int loops, bool end_on_first);
   void End(event::Command const& command);
 
   display::Texture texture_;
@@ -90,10 +90,10 @@ void AnimationImpl::Resume(void)
   timer_.Resume();
 }
 
-void AnimationImpl::Play(int loops)
+void AnimationImpl::Play(int loops, bool end_on_first)
 {
   mutex_.lock();
-  int const frames = (loops + 1) * frames_.size() - 1;
+  int const frames = (loops + 1) * frames_.size() - 2 + int(end_on_first);
   timer_.Play(frames);
   frame_ = frames_.begin(); 
   mutex_.unlock();
@@ -127,9 +127,9 @@ void Animation::Resume(void)
   impl_->Resume();
 }
 
-void Animation::Play(int loops)
+void Animation::Play(int loops, bool end_on_first)
 {
-  impl_->Play(loops);
+  impl_->Play(loops, end_on_first);
 }
 
 void Animation::End(event::Command const& command)

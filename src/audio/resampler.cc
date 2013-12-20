@@ -36,27 +36,33 @@ ResamplerImpl::ResamplerImpl(Codec const& codec)
     throw Exception();
   }
 
-  int err = 0;
-  err |= av_opt_set_int(swr_, "in_channel_layout", codec->channel_layout, 0);
-  err |= av_opt_set_int(swr_, "out_channel_layout", FFMPEG_CHANNEL_LAYOUT, 0);
-  err |= av_opt_set_int(swr_, "in_sample_rate", codec->sample_rate, 0);
-  err |= av_opt_set_int(swr_, "out_sample_rate", FFMPEG_SAMPLE_RATE, 0);
-  err |= av_opt_set_sample_fmt(swr_, "in_sample_fmt", codec->sample_fmt, 0);
-  err |= av_opt_set_sample_fmt(swr_, "out_sample_fmt", FFMPEG_FORMAT, 0);
-  if(err)
+  try
+  {
+    int err = 0;
+    err |= av_opt_set_int(swr_, "in_channel_layout", codec->channel_layout, 0);
+    err |= av_opt_set_int(swr_, "out_channel_layout", FFMPEG_CHANNEL_LAYOUT, 0);
+    err |= av_opt_set_int(swr_, "in_sample_rate", codec->sample_rate, 0);
+    err |= av_opt_set_int(swr_, "out_sample_rate", FFMPEG_SAMPLE_RATE, 0);
+    err |= av_opt_set_sample_fmt(swr_, "in_sample_fmt", codec->sample_fmt, 0);
+    err |= av_opt_set_sample_fmt(swr_, "out_sample_fmt", FFMPEG_FORMAT, 0);
+    if(err)
+    {
+      throw Exception();
+    }
+
+    if(swr_init(swr_))
+    {
+      throw Exception();
+    }
+
+    input_sample_rate_ = codec->sample_rate;
+    channels_ = av_get_channel_layout_nb_channels(FFMPEG_CHANNEL_LAYOUT);
+  }
+  catch(...)
   {
     Destroy();
-    throw Exception();
+    throw;
   }
-
-  if(swr_init(swr_))
-  {
-    Destroy();
-    throw Exception();
-  }
-
-  input_sample_rate_ = codec->sample_rate;
-  channels_ = av_get_channel_layout_nb_channels(FFMPEG_CHANNEL_LAYOUT);
 }
 
 ResamplerImpl::~ResamplerImpl(void)
@@ -86,8 +92,9 @@ Resampler::Resampler(void)
 {
 }
 
-Resampler::Resampler(Codec const& codec) : impl_(new ResamplerImpl(codec))
+Resampler::Resampler(Codec const& codec)
 {
+  impl_ = std::make_shared<ResamplerImpl>(codec);
 }
   
 Resampler::Resampler(Resampler const& other) : impl_(other.impl_)

@@ -35,7 +35,7 @@ Texture::Texture(SDL_Renderer* renderer, SDL_Surface* surface)
   {
     if(!impl_)
     {
-      Deleter().operator()(impl);
+      Deleter()(impl);
     }
     throw;
   }

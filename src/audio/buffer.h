@@ -12,7 +12,7 @@ public:
   Buffer(void);
   Buffer(int size);
   void Add(Samples const& samples);
-  bool Full(void);
+  bool Full(void) const;
   int Read(uint8_t* buffer, int size);
   explicit operator bool(void) const;
 

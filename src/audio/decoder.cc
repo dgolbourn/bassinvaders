@@ -142,8 +142,9 @@ Decoder::Decoder(void)
 {
 }
 
-Decoder::Decoder(std::string const& filename, int buffer_size) : impl_(new DecoderImpl(filename, buffer_size))
+Decoder::Decoder(std::string const& filename, int buffer_size)
 {
+  impl_ = std::make_shared<DecoderImpl>(filename, buffer_size);
 }
 
 Decoder::Decoder(Decoder const& other) : impl_(other.impl_)

@@ -17,7 +17,7 @@ class Painter
 {
 public:
   Painter(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, double angle);
-  bool Fill(algorithm::NodeCoordinates const& coords);
+  bool operator()(algorithm::NodeCoordinates const& coords);
   void MovementVectors(void);
   void EnclosingRect(void);
   void StartingRect(void);
@@ -127,7 +127,7 @@ Painter::Painter(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* textur
   StartingRect();
 }
 
-bool Painter::Fill(algorithm::NodeCoordinates const& coords)
+bool Painter::operator()(algorithm::NodeCoordinates const& coords)
 {
   bool filled = false;
   float east = float(coords.first);

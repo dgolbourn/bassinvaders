@@ -1,6 +1,7 @@
 #include "collision.h"
 #include <list>
 #include <map>
+#include <iostream>
 
 namespace game
 {

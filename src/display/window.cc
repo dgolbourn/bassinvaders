@@ -169,8 +169,11 @@ void WindowImpl::Free(void)
 
 void WindowImpl::View(int x, int y, float zoom)
 {
-  view_.x = x;
-  view_.y = y;
+  int w;
+  int h;
+  SDL_GetWindowSize(window_, &w, &h);
+  view_.x = x - w/2;
+  view_.y = y - h/2;
   zoom_ = zoom;
 }
 

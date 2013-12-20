@@ -3,13 +3,14 @@
 #include "bounding_box.h"
 #include "sound.h"
 #include "event.h"
+#include "dynamics.h"
 
 namespace game
 {
 class EnemyImpl
 {
 public:
-  EnemyImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause);
+  EnemyImpl(json::JSON const& json, display::Window& window);
   void End(event::Command const& command);
   Animation moving_animation_;
   display::BoundingBox moving_render_box_;
@@ -18,98 +19,137 @@ public:
   display::BoundingBox destroyed_render_box_;
   audio::Sound destroyed_sound_effect_;
   display::BoundingBox collision_box_;
-  event::Command render_;
-  event::Command pause_;
   bool paused_;
   Animation animation_;
   display::BoundingBox render_box_;
   audio::Sound sound_effect_;
-  int x_;
-  int y_;
-  event::Command hero_collision_;
-  class RenderCommand;
-  class PauseCommand;
   event::Signal end_;
+  Dynamics dynamics_;
+  void Render(void);
+  void Pause(void);
+  bool up_;
+  bool down_;
+  bool left_;
+  bool right_;
+  void Up(void);
+  void Down(void);
+  void Left(void);
+  void Right(void);
+  void Attack(void);
+  void HeroCollision(void);
 };
 
-class EnemyImpl::RenderCommand : public event::CommandImpl
+void EnemyImpl::End(event::Command const& command)
 {
-public:
-  RenderCommand(EnemyImpl& impl);
-  void operator()(void) final;
-  EnemyImpl& impl_;
-};
-
-EnemyImpl::RenderCommand::RenderCommand(EnemyImpl& impl) : impl_(impl)
-{
+  end_.Add(command);
 }
 
-void EnemyImpl::RenderCommand::operator()(void)
+void EnemyImpl::Pause(void)
 {
-  display::BoundingBox destination(
-    impl_.render_box_.x() + impl_.x_, 
-    impl_.render_box_.y() + impl_.y_,
-    impl_.render_box_.w(),
-    impl_.render_box_.h());
-  impl_.animation_.Render(destination);
-}
-
-class EnemyImpl::PauseCommand : public event::CommandImpl
-{
-public:
-  PauseCommand(EnemyImpl& impl);
-  void operator()(void) final;
-  EnemyImpl& impl_;
-};
-
-EnemyImpl::PauseCommand::PauseCommand(EnemyImpl& impl) : impl_(impl)
-{
-}
-
-void EnemyImpl::PauseCommand::operator()(void)
-{
-  if(impl_.paused_)
+  if(paused_)
   {
-    impl_.paused_ = false;
-    impl_.animation_.Resume();
-    impl_.sound_effect_.Resume();
+    paused_ = false;
+    animation_.Resume();
+    sound_effect_.Resume();
+    dynamics_.Resume();
   }
   else
   {
-    impl_.paused_ = true;
-    impl_.animation_.Pause();
-    impl_.sound_effect_.Pause();
+    paused_ = true;
+    animation_.Pause();
+    sound_effect_.Pause();
+    dynamics_.Pause();
   }
 }
 
-class HeroCollisionCommand : public event::CommandImpl
-{
-public:
-  HeroCollisionCommand(EnemyImpl& impl);
-  void operator()(void) final;
-  EnemyImpl& impl_;
-};
-
-HeroCollisionCommand::HeroCollisionCommand(EnemyImpl& impl) : impl_(impl)
+void EnemyImpl::Attack(void)
 {
 }
 
-void HeroCollisionCommand::operator()(void)
+static float const dv = 0.1f;
+
+void EnemyImpl::Up(void)
 {
-  impl_.sound_effect_.Stop();
-  impl_.animation_ = impl_.destroyed_animation_;
-  impl_.render_box_ = impl_.destroyed_render_box_;
-  impl_.sound_effect_ = impl_.destroyed_sound_effect_;
-  impl_.sound_effect_.Play();
-  impl_.animation_.Play();
-  if(impl_.paused_)
+  if(up_)
   {
-    impl_.animation_.Pause();
-    impl_.sound_effect_.Pause();
+    dynamics_.v(-dv);
+    up_ = false;
+  }
+  else
+  {
+    dynamics_.v(dv);
+    up_ = true;
   }
 }
 
-EnemyImpl::EnemyImpl(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause)
+void EnemyImpl::Down(void)
+{
+  if(down_)
+  {
+    dynamics_.v(dv);
+    down_ = false;
+  }
+  else
+  {
+    dynamics_.v(-dv);
+    down_ = true;
+  }
+}
+
+void EnemyImpl::Left(void)
+{
+  if(left_)
+  {
+    dynamics_.u(-dv);
+    left_ = false;
+  }
+  else
+  {
+    dynamics_.u(dv);
+    left_ = true;
+  }
+}
+
+void EnemyImpl::Right(void)
+{
+  if(right_)
+  {
+    dynamics_.u(dv);
+    right_ = false;
+  }
+  else
+  {
+    dynamics_.u(-dv);
+    right_ = true;
+  }
+}
+
+void EnemyImpl::HeroCollision(void)
+{
+  sound_effect_.Stop();
+  animation_ = destroyed_animation_;
+  render_box_ = destroyed_render_box_;
+  sound_effect_ = destroyed_sound_effect_;
+  sound_effect_.Play();
+  animation_.Play();
+  if(paused_)
+  {
+    animation_.Pause();
+    sound_effect_.Pause();
+  }
+}
+
+void EnemyImpl::Render(void)
+{
+  display::BoundingBox destination(
+    render_box_.x() + int(dynamics_.x()),
+    render_box_.y() + int(dynamics_.y()),
+    render_box_.w(),
+    render_box_.h());
+  animation_.Render(destination, 1.f, false, 0.);
+}
+
+EnemyImpl::EnemyImpl(json::JSON const& json, display::Window& window)
 {
   json_t* moving_animation;
   json_t* moving_render_box;
@@ -139,37 +179,31 @@ EnemyImpl::EnemyImpl(json::JSON const& json, display::Window& window, Scene& sce
   destroyed_sound_effect_ = audio::Sound(destroyed_sound_effect);
   
   collision_box_ = display::BoundingBox(collision_box);
-  render_ = event::Command(new RenderCommand(*this));
-  scene.Add(render_, 0);
   paused_ = true;
-  pause_ = event::Command(new PauseCommand(*this));
-  pause.Add(pause_);
 
   animation_ = moving_animation_;
   animation_.Play(-1);
   animation_.Pause();
   render_box_ = moving_render_box_;
   sound_effect_ = moving_sound_effect_;
-  sound_effect_.Play(-1);
+  sound_effect_.Play(1);
   sound_effect_.Pause();
-
-  hero_collision_ = event::Command(new HeroCollisionCommand(*this));
-  collision.Add(1, 0, collision_box_, hero_collision_);
+  up_ = true;
+  down_ = true;
+  left_ = true;
+  right_ = true;
+  dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f);
+  dynamics_.Play();
+  dynamics_.Pause();
 }
 
-void EnemyImpl::End(event::Command const& command)
+void Enemy::Position(int x, int y)
 {
-  end_.Add(command);
 }
 
-int& Enemy::x(void)
+game::Position Enemy::Position(void)
 {
-  return impl_->x_;
-}
-
-int& Enemy::y(void)
-{
-  return impl_->y_;
+  return game::Position(int(impl_->dynamics_.x()), int(impl_->dynamics_.y()));
 }
 
 void Enemy::End(event::Command const& command)
@@ -177,13 +211,38 @@ void Enemy::End(event::Command const& command)
   impl_->End(command);
 }
 
-Enemy::Enemy(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
-  impl_(new EnemyImpl(json::JSON(filename), window, scene, collision, pause))
+typedef void (EnemyImpl::*EnemyImplMethod)(void);
+static event::Command Bind(std::shared_ptr<EnemyImpl> const& impl, EnemyImplMethod method)
 {
+  std::weak_ptr<EnemyImpl> Enemy_ptr = impl;
+  return [=](void)
+  {
+    bool locked = false;
+    if(auto Enemy = Enemy_ptr.lock())
+    {
+      EnemyImpl* ptr = Enemy.get();
+      (ptr->*method)();
+      locked = true;
+    }
+    return locked;
+  };
 }
 
-Enemy::Enemy(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause) :
-  impl_(new EnemyImpl(json, window, scene, collision, pause))
+Enemy::Enemy(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause, Role& role) :
+  impl_(new EnemyImpl(json, window))
+{
+  scene.Add(Bind(impl_, &EnemyImpl::Render), 0);
+  pause.Add(Bind(impl_, &EnemyImpl::Pause));
+  role.Up(Bind(impl_, &EnemyImpl::Up));
+  role.Down(Bind(impl_, &EnemyImpl::Down));
+  role.Left(Bind(impl_, &EnemyImpl::Left));
+  role.Right(Bind(impl_, &EnemyImpl::Right));
+  role.Attack(Bind(impl_, &EnemyImpl::Attack));
+  collision.Add(1, 0, impl_->collision_box_, Bind(impl_, &EnemyImpl::HeroCollision));
+}
+
+Enemy::Enemy(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause, Role& role) :
+Enemy(json::JSON(filename), window, scene, collision, pause, role)
 {
 }
 

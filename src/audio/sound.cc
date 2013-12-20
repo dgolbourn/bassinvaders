@@ -99,8 +99,9 @@ void SoundImpl::End(event::Command const& command)
   signal_.Add(command);
 }
 
-Sound::Sound(std::string const& filename) : impl_(new SoundImpl(filename))
+Sound::Sound(std::string const& filename)
 {
+  impl_ = std::make_shared<SoundImpl>(filename);
 }
 
 Sound::Sound(void)

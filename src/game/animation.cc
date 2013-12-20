@@ -104,12 +104,13 @@ void AnimationImpl::End(event::Command const& command)
   timer_.End(command);
 }
 
-Animation::Animation(std::string const& filename, display::Window& window) : impl_(new AnimationImpl(json::JSON(filename), window))
+Animation::Animation(std::string const& filename, display::Window& window) : Animation(json::JSON(filename), window)
 {
 }
 
-Animation::Animation(json::JSON const& json, display::Window& window) : impl_(new AnimationImpl(json, window))
+Animation::Animation(json::JSON const& json, display::Window& window)
 {
+  impl_ = std::make_shared<AnimationImpl>(json, window);
 }
 
 void Animation::Render(display::BoundingBox const& destination, float parallax, bool tile, double angle)

@@ -33,7 +33,7 @@ void SignalImpl::Add(Command const& comand)
   commands_.push_back(comand);
 }
 
-void Signal::Notify(void)
+void Signal::operator()(void)
 {
   impl_->Notify();
 }
@@ -43,8 +43,9 @@ void Signal::Add(Command const& comand)
   impl_->Add(comand);
 }
 
-Signal::Signal(void) : impl_(new SignalImpl())
+Signal::Signal(void)
 {
+  impl_ = std::make_shared<SignalImpl>();
 }
 
 Signal::Signal(Signal const& other) : impl_(other.impl_)

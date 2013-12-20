@@ -10,7 +10,7 @@ class Signal
 {
 public:
   Signal(void);
-  void Notify(void);
+  void operator()(void);
   void Add(Command const& command);
 
   ~Signal(void);

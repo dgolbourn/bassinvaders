@@ -164,20 +164,49 @@ void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SD
 {
   if(destination)
   {
-    SDL_Rect adjusted;
+    SDL_Rect adjusted = *destination;
+
+    if(!adjusted.w || !adjusted.h)
+    {
+      int w, h;
+      if(SDL_QueryTexture(texture, nullptr, nullptr, &w, &h))
+      {
+        throw sdl::Exception();
+      }
+      if(!adjusted.w)
+      {
+        adjusted.w = w;
+      }
+      if(!adjusted.h)
+      {
+        adjusted.h = h;
+      }
+    }
+
     if(parallax > 0.f)
     {
-      int w;
-      int h;
+      int w, h;
       SDL_GetWindowSize(window, &w, &h);
-      adjusted.x = Transform(destination->x, view->x, w, zoom, parallax);
-      adjusted.y = Transform(destination->y, view->y, h, zoom, parallax);
-      adjusted.w = int(zoom * float(destination->w));
-      adjusted.h = int(zoom * float(destination->h));
+      adjusted.x = Transform(adjusted.x, view->x, w, zoom, parallax);
+      adjusted.y = Transform(adjusted.y, view->y, h, zoom, parallax);
+      adjusted.w = int(zoom * float(adjusted.w));
+      adjusted.h = int(zoom * float(adjusted.h));
     }
     else
     {
-      adjusted = *destination;
+      if((adjusted.x < 0) || (adjusted.y < 0))
+      {
+        int w, h;
+        SDL_GetWindowSize(window, &w, &h);
+        if(adjusted.x < 0)
+        {
+          adjusted.x += w - adjusted.w;
+        }
+        if(adjusted.h < 0)
+        {
+          adjusted.y += h - adjusted.h;
+        }
+      }
     }
    
     if(tile)

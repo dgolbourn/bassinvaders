@@ -116,7 +116,7 @@ void TimerImpl::End(event::Command const& command)
 
 Uint32 TimerImpl::Update(void)
 {
-  signal_.Notify();
+  signal_();
   last_update_ = SDL_GetTicks();
   
   int interval = interval_;
@@ -124,7 +124,7 @@ Uint32 TimerImpl::Update(void)
   {
     if(loops_ == max_loops_)
     {
-      end_.Notify();
+      end_();
       interval = 0;
       timer_ = timer_null;
     }
@@ -137,8 +137,9 @@ Timer::Timer(void)
 {
 }
 
-Timer::Timer(int interval) : impl_(new TimerImpl(interval))
+Timer::Timer(int interval)
 {
+  impl_ = std::make_shared<TimerImpl>(interval);
 }
 
 Timer::~Timer(void)

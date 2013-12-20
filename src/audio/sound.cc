@@ -30,14 +30,14 @@ static int const default_volume = -1;
 
 static std::unordered_map<int, SoundPtr> active_channels;
 
-static void ChannelFinishedCallback(int channel)
+static void ChannelFinished(int channel)
 {
   auto sound_iter = active_channels.find(channel);
   if(sound_iter != active_channels.end())
   {
     if(auto sound = sound_iter->second.lock())
     {
-      sound->signal_.Notify();
+      sound->signal_();
       Mix_Volume(sound->channel_, default_volume);
       sound->channel_ = no_channel;
       (void)active_channels.erase(sound_iter);
@@ -50,7 +50,7 @@ SoundImpl::SoundImpl(std::string const& filename) : chunk_(filename), volume_(de
   static bool initialised;
   if(!initialised)
   {
-    Mix_ChannelFinished(ChannelFinishedCallback);
+    Mix_ChannelFinished(ChannelFinished);
     initialised = true;
   }
 }

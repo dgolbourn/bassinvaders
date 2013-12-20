@@ -54,7 +54,7 @@ SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
       "parallax", &parallax,
       "render box", &render_box);
 
-    event::Command bind_layer = std::bind(
+    event::Command bind = std::bind(
       window.Load(filename),
       display::BoundingBox(),
       display::BoundingBox(render_box),
@@ -62,7 +62,7 @@ SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
       true,
       0);
     
-    Add(bind_layer, plane);
+    Add(bind, plane);
   }
 }
 
@@ -80,12 +80,13 @@ void Scene::Add(event::Command const& layer, int z)
   impl_->Add(layer, z);
 }
 
-Scene::Scene(std::string const& filename, display::Window& window) : impl_(new SceneImpl(json::JSON(filename), window))
+Scene::Scene(std::string const& filename, display::Window& window) : Scene(json::JSON(filename), window)
 {
 }
 
-Scene::Scene(json::JSON const& json, display::Window& window) : impl_(new SceneImpl(json, window))
+Scene::Scene(json::JSON const& json, display::Window& window)
 {
+  impl_ = std::make_shared<SceneImpl>(json, window);
 }
 
 Scene::Scene(Scene const& other) : impl_(other.impl_)

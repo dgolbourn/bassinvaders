@@ -46,7 +46,7 @@ bool DynamicsImpl::Step(void)
 {
   model_[0].Step(float(dt));
   model_[1].Step(float(dt));
-  signal_.Notify();
+  signal_();
   return true;
 }
 

@@ -115,8 +115,9 @@ void CollisionImpl::Add(display::BoundingBox const& a, display::BoundingBox cons
   collisions_[pair].push_back(c);
 }
 
-Collision::Collision(void) : impl_(new CollisionImpl())
+Collision::Collision(void)
 {
+  impl_ = std::make_shared<CollisionImpl>();
 }
 
 void Collision::Add(display::BoundingBox const& a, display::BoundingBox const& b, event::Command const& c)

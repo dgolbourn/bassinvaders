@@ -117,7 +117,7 @@ void HeroImpl::EnemyCollision(void)
   Current = Destroyed;
   Current.sound_effect_.Play();
   Current.animation_.Play();
-  Current.animation_.End([this](){this->end_.Notify(); return false;});
+  Current.animation_.End([this](){this->end_(); return false;});
   if(paused_)
   {
     Current.animation_.Pause();

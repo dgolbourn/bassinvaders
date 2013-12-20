@@ -24,10 +24,10 @@ static void KeydownEvent(SDL_KeyboardEvent const& keyboard_event, Uint32 const& 
       switch (type)
       {
       case SDL_KEYDOWN:
-        iter->second.first.Notify();
+        iter->second.first();
         break;
       case SDL_KEYUP:
-        iter->second.second.Notify();
+        iter->second.second();
         break;
       }
       
@@ -64,7 +64,7 @@ void Check(void)
     switch(event.type)
     {
     case SDL_QUIT:
-      quit.Notify();
+      quit();
       break;
     case SDL_KEYDOWN:
     case SDL_KEYUP:

@@ -17,8 +17,8 @@ class WindowImpl
 {
 public:
   WindowImpl(json::JSON const& json);
-  sdl::TexturePtr Load(std::string const& filename);
-  sdl::TexturePtr Text(std::string const& text, Font const& font);
+  sdl::Texture::WeakPtr Load(std::string const& filename);
+  sdl::Texture Text(std::string const& text, Font const& font);
   void Free(void);
   void Clear(void) const;
   void Show(void) const;
@@ -33,9 +33,6 @@ public:
   SDL_Window* window_;
   SDL_Renderer* renderer_;
   std::unordered_map<std::string, sdl::Texture> textures_;
-  typedef std::pair<std::string, Font> TextPair;
-  typedef algorithm::Hash<std::string, Font> TextHash;
-  std::unordered_map<TextPair, sdl::Texture, TextHash> text_;
   SDL_Point view_;
   float zoom_;
 };
@@ -114,9 +111,9 @@ WindowImpl::~WindowImpl(void)
   Destroy();
 }
 
-sdl::TexturePtr WindowImpl::Load(std::string const& filename)
+sdl::Texture::WeakPtr WindowImpl::Load(std::string const& filename)
 {
-  sdl::TexturePtr texture_ptr;
+  sdl::Texture::WeakPtr texture_ptr;
   auto fileiter = textures_.find(filename);
   if(fileiter != textures_.end())
   {
@@ -131,22 +128,11 @@ sdl::TexturePtr WindowImpl::Load(std::string const& filename)
   return texture_ptr;
 }
 
-sdl::TexturePtr WindowImpl::Text(std::string const& text, Font const& font)
+sdl::Texture WindowImpl::Text(std::string const& text, Font const& font)
 {
-  sdl::TexturePtr texture_ptr;
-  auto textpair = TextPair(text, font);
-  auto fileiter = text_.find(textpair);
-  if(fileiter != text_.end())
-  {
-    texture_ptr = fileiter->second;
-  }
-  else
-  {
-    sdl::Texture texture(renderer_, sdl::Surface(font.impl_->font_, text.c_str(), font.impl_->colour_));
-    text_[textpair] = texture;
-    texture_ptr = texture;
-  }
-  return texture_ptr;
+  sdl::Surface surface(font.impl_->font_, text.c_str(), font.impl_->colour_);
+  SDL_SetSurfaceAlphaMod(surface, font.impl_->colour_.a);
+  return sdl::Texture(renderer_, surface);
 }
 
 void WindowImpl::Clear(void) const
@@ -177,12 +163,13 @@ void WindowImpl::View(int x, int y, float zoom)
   zoom_ = zoom;
 }
 
-Window::Window(std::string const& filename) : impl_(new WindowImpl(json::JSON(filename)))
+Window::Window(std::string const& filename) : Window(json::JSON(filename))
 {
 }
 
-Window::Window(json::JSON const& json) : impl_(new WindowImpl(json))
+Window::Window(json::JSON const& json)
 {
+  impl_ = std::make_shared<WindowImpl>(json);
 }
 
 Window::Window(void)
@@ -207,7 +194,7 @@ Window& Window::operator=(Window other)
   return *this;
 }
 
-static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::TexturePtr texture_ptr)
+static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::Texture::WeakPtr texture_ptr)
 {
   return [window_ptr, texture_ptr](display::BoundingBox const& source, display::BoundingBox const& destination, float parallax, bool tile, double angle)
   {
@@ -219,6 +206,20 @@ static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::TexturePtr textur
         sdl::Render(window->window_, window->renderer_, texture, source, destination, &window->view_, window->zoom_, parallax, tile, angle);
         locked = true;
       }
+    }
+    return locked;
+  };
+}
+
+static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::Texture texture)
+{
+  return [window_ptr, texture](display::BoundingBox const& source, display::BoundingBox const& destination, float parallax, bool tile, double angle)
+  {
+    bool locked = false;
+    if(auto window = window_ptr.lock())
+    {
+      sdl::Render(window->window_, window->renderer_, texture, source, destination, &window->view_, window->zoom_, parallax, tile, angle);
+      locked = true;
     }
     return locked;
   };

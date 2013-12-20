@@ -7,11 +7,8 @@
 
 namespace sdl
 {
-typedef memory::WeakPtr<class Texture, SDL_Texture> TexturePtr;
-
 class Texture
 {
-  friend TexturePtr;
 public:
   Texture(void);
   Texture(SDL_Renderer* renderer, SDL_Surface* surface);
@@ -23,8 +20,10 @@ public:
   Texture(Texture const& other);
   Texture(Texture&& other);
   Texture& operator=(Texture other);
+  typedef memory::WeakPtr<class Texture, SDL_Texture> WeakPtr;
 private:
   std::shared_ptr<SDL_Texture> impl_;
+  friend WeakPtr;
 };
 }
 #endif

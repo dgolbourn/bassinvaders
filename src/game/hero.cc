@@ -127,43 +127,27 @@ void HeroImpl::Attack(void)
 static float const dv = 0.5f;
 static float const sqrt1_2 = std::sqrt(0.5f);
 
-void HeroImpl::ResetX(void)
-{
-  x_sign_ = 0;
-  Update();
-}
-
-void HeroImpl::ResetY(void)
-{
-  y_sign_ = 0;
-  Update();
-}
-
 void HeroImpl::Up(void)
 {
-  y_facing_ = -1;
-  y_sign_ = -1;
+  --y_sign_;
   Update();
 }
 
 void HeroImpl::Down(void)
 {
-  y_facing_ = 1;
-  y_sign_ = 1;
+  ++y_sign_;
   Update();
 }
 
 void HeroImpl::Left(void)
 {
-  x_facing_ = -1;
-  x_sign_ = -1;
+  --x_sign_;
   Update();
 }
 
 void HeroImpl::Right(void)
 {
-  x_facing_ = 1;
-  x_sign_ = 1;
+  ++x_sign_;
   Update();
 }
 
@@ -173,6 +157,10 @@ void HeroImpl::Update(void)
   if(x_sign_ && y_sign_)
   {
     v *= sqrt1_2;
+  }
+  if(x_sign_)
+  {
+    x_facing_ = x_sign_;
   }
 
   dynamics_.u(float(x_sign_) * v);
@@ -333,13 +321,13 @@ Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collis
   event::pause.first.Add(event::Bind(&HeroImpl::Pause, impl_));
   event::pause.second.Add(event::Bind(&HeroImpl::Resume, impl_));
   event::up.first.Add(event::Bind(&HeroImpl::Up, impl_));
-  event::up.second.Add(event::Bind(&HeroImpl::ResetY, impl_));
+  event::up.second.Add(event::Bind(&HeroImpl::Down, impl_));
   event::down.first.Add(event::Bind(&HeroImpl::Down, impl_));
-  event::down.second.Add(event::Bind(&HeroImpl::ResetY, impl_));
+  event::down.second.Add(event::Bind(&HeroImpl::Up, impl_));
   event::left.first.Add(event::Bind(&HeroImpl::Left, impl_));
-  event::left.second.Add(event::Bind(&HeroImpl::ResetX, impl_));
+  event::left.second.Add(event::Bind(&HeroImpl::Right, impl_));
   event::right.first.Add(event::Bind(&HeroImpl::Right, impl_));
-  event::right.second.Add(event::Bind(&HeroImpl::ResetX, impl_));
+  event::right.second.Add(event::Bind(&HeroImpl::Left, impl_));
   event::button1.first.Add(event::Bind(&HeroImpl::Attack, impl_));
   collision.Add(0, 1, impl_->collision_box_, event::Bind(&HeroImpl::EnemyCollision, impl_));
 }

@@ -23,7 +23,7 @@ extern Switch button1;
 extern Switch pause;
 
 void Check(void);
-void DefaultKeys(void);
+void Default(void);
 
 class Event
 {

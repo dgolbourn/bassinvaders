@@ -16,6 +16,7 @@ public:
   void Pause(void) const;
   void Resume(void) const;
   void Stop(void) const;
+  void Fade(int ms) const;
   void Volume(int volume);
   void End(event::Command const& command);
 
@@ -88,6 +89,14 @@ void SoundImpl::Stop(void) const
   }
 }
 
+void SoundImpl::Fade(int ms) const
+{
+  if(channel_ != no_channel)
+  {
+    (void)Mix_FadeOutChannel(channel_, ms);
+  }
+}
+
 void SoundImpl::Volume(int volume)
 {
   volume_ = volume;
@@ -144,6 +153,11 @@ void Sound::Resume(void) const
 void Sound::Stop(void) const
 {
   impl_->Stop();
+}
+
+void Sound::Fade(int ms) const
+{
+  impl_->Fade(ms);
 }
 
 void Sound::Volume(int volume)

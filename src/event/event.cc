@@ -43,7 +43,7 @@ Event::~Event(void)
 {
 }
 
-void DefaultKeys(void)
+void Default(void)
 {
   key_map[SDL_SCANCODE_UP] = up;
   key_map[SDL_SCANCODE_W] = up;

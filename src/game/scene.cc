@@ -48,11 +48,13 @@ SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
     int plane;
     double parallax;
     json_t* render_box;
-    json_unpack(layer, "{sssisfso}", 
+    double angle;
+    json_unpack(layer, "{sssisfsosf}", 
       "image", &filename,
       "z", &plane,
       "parallax", &parallax,
-      "render box", &render_box);
+      "render box", &render_box,
+      "angle", &angle);
 
     event::Command bind = std::bind(
       window.Load(filename),
@@ -60,7 +62,7 @@ SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
       display::BoundingBox(render_box),
       float(parallax),
       true,
-      0);
+      angle);
     
     Add(bind, plane);
   }

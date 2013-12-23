@@ -11,7 +11,22 @@ template<class Method, class Shared, class... Args> event::Command Bind(Method&&
     bool locked = false;
     if(auto shared_locked = weak.Lock())
     {
-      (shared_locked.*method)(args...);
+      (void)(shared_locked.*method)(args...);
+      locked = true;
+    }
+    return locked;
+  };
+}
+
+template<class Return, class Shared, class... Args> std::function<bool(Args...)> Bind(Return(Shared::*method)(Args...), Shared const& shared)
+{
+  Shared::WeakPtr weak(shared);
+  return [=](Args... args)
+  {
+    bool locked = false;
+    if(auto shared_locked = weak.Lock())
+    {
+      (void)(shared_locked.*method)(args...);
       locked = true;
     }
     return locked;

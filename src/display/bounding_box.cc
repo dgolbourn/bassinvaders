@@ -1,5 +1,6 @@
 #include "bounding_box.h"
 #include "SDL_rect.h"
+#include "rect.h"
 
 namespace display
 {
@@ -13,7 +14,7 @@ public:
 
 bool BoundingBox::operator&&(BoundingBox const& other) const
 {
-  return SDL_TRUE == SDL_HasIntersection(&impl_->rect_, &other.impl_->rect_);
+  return sdl::Intersection(&impl_->rect_, &other.impl_->rect_);
 }
 
 bool BoundingBox::operator<(BoundingBox const& other) const

@@ -1,5 +1,6 @@
 #include "hud.h"
 #include "bind.h"
+#include <limits>
 
 namespace game
 {
@@ -68,6 +69,11 @@ void HUD::Life(int life)
   impl_->Life(life);
 }
 
+HUD::operator bool(void) const
+{
+  return bool(impl_);
+}
+
 HUD::HUD(std::string const& filename, display::Window& window, Scene& scene) : HUD(json::JSON(filename), window, scene)
 {
 }
@@ -75,7 +81,7 @@ HUD::HUD(std::string const& filename, display::Window& window, Scene& scene) : H
 HUD::HUD(json::JSON const& json, display::Window& window, Scene& scene)
 {
   impl_ = std::make_shared<HUDImpl>(json, window);
-  scene.Add(event::Bind(&HUDImpl::Render, impl_), 10);
+  scene.Add(event::Bind(&HUDImpl::Render, impl_), std::numeric_limits<int>().max());
 }
 
 HUD::HUD(void)

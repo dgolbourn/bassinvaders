@@ -16,6 +16,7 @@ public:
   void Pause(void) const;
   void Resume(void) const;
   void Stop(void) const;
+  void Fade(int ms) const;
   void Volume(int volume);
   void End(event::Command const& command);
 

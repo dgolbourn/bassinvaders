@@ -21,7 +21,7 @@ public:
 class DynamicsImpl
 {
 public:
-  Model model_[2];
+  std::pair<Model, Model> model_;
   event::Timer timer_;
   event::Signal signal_;
   DynamicsImpl(float x, float y, float u, float v);
@@ -29,14 +29,14 @@ public:
   void Pause(void);
   void Resume(void);
   bool Step(void);
-  void Add(Dynamics::Command const& command);
+  void Add(Dynamics::Command command);
 };
 
-void DynamicsImpl::Add(Dynamics::Command const& command)
+void DynamicsImpl::Add(Dynamics::Command command)
 {
   auto bind = [command, this](void)
   {
-    Dynamics::Position position(this->model_[0].x_, this->model_[1].x_);
+    Dynamics::Position position(this->model_.first.x_, this->model_.second.x_);
     return command(position);
   };
   signal_.Add(bind);
@@ -44,18 +44,18 @@ void DynamicsImpl::Add(Dynamics::Command const& command)
 
 bool DynamicsImpl::Step(void)
 {
-  model_[0].Step(float(dt));
-  model_[1].Step(float(dt));
+  model_.first.Step(float(dt));
+  model_.second.Step(float(dt));
   signal_();
   return true;
 }
 
 DynamicsImpl::DynamicsImpl(float x, float y, float u, float v) : timer_(dt)
 {
-  model_[0].x_ = x;
-  model_[0].v_ = u;
-  model_[1].x_ = y;
-  model_[1].v_ = v;
+  model_.first.x_ = x;
+  model_.first.v_ = u;
+  model_.second.x_ = y;
+  model_.second.v_ = v;
   timer_.Add(std::bind(&DynamicsImpl::Step, this));
 }
 
@@ -85,42 +85,42 @@ Dynamics::Dynamics(float x, float y, float u, float v)
 
 void Dynamics::x(float x)
 {
-  impl_->model_[0].x_ = x;
+  impl_->model_.first.x_ = x;
 }
 
 void Dynamics::y(float y)
 {
-  impl_->model_[1].x_ = y;
+  impl_->model_.second.x_ = y;
 }
 
 void Dynamics::u(float u)
 {
-  impl_->model_[0].v_ = u;
+  impl_->model_.first.v_ = u;
 }
 
 void Dynamics::v(float v)
 {
-  impl_->model_[1].v_ = v;
+  impl_->model_.second.v_ = v;
 }
 
 float Dynamics::x(void) const
 {
-  return impl_->model_[0].x_;
+  return impl_->model_.first.x_;
 }
 
 float Dynamics::y(void) const
 {
-  return impl_->model_[1].x_;
+  return impl_->model_.second.x_;
 }
 
 float Dynamics::u(void) const
 {
-  return impl_->model_[0].v_;
+  return impl_->model_.first.v_;
 }
 
 float Dynamics::v(void) const
 {
-  return impl_->model_[1].v_;
+  return impl_->model_.second.v_;
 }
 
 void Dynamics::Play(void)

@@ -1,6 +1,7 @@
 #include "render.h"
 #include "sdl_exception.h"
 #include "flood_fill.h"
+#include "rect.h"
 #include <cmath>
 
 namespace sdl
@@ -82,7 +83,7 @@ void Painter::StartingRect(void)
       temp.x -= adjust.x;
       temp.y -= adjust.y;
 
-      if(SDL_TRUE == SDL_HasIntersection(&temp, &clip_))
+      if(SDL_TRUE == sdl::Intersection(&temp, &clip_))
       {
         collision_box_ = temp;
         destination_.x -= adjust.x;
@@ -138,11 +139,13 @@ bool Painter::operator()(algorithm::NodeCoordinates const& coords)
   SDL_Rect collision_box = collision_box_;
   collision_box.x += move.x;
   collision_box.y += move.y;
-  if(SDL_TRUE == SDL_HasIntersection(&collision_box, &clip_))
+  if(SDL_TRUE == sdl::Intersection(&collision_box, &clip_))
   {
     SDL_Rect destination = destination_;
     destination.x += move.x;
     destination.y += move.y;
+    destination.w += 1;
+    destination.h += 1;
     RenderCopy(renderer_, texture_, source_, &destination, angle_);
     filled = true;
   }

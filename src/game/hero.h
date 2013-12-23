@@ -9,6 +9,7 @@
 #include "signal.h"
 #include "collision.h"
 #include "position.h"
+#include "weak_ptr.h"
 
 namespace game
 {
@@ -20,14 +21,17 @@ public:
   Hero(void);
   void Position(game::Position const& position);
   game::Position Position(void);
+  void Life(std::function<bool(int)> const& command);
   void End(event::Command const& command);
 
   ~Hero(void);
   Hero(Hero const& other);
   Hero(Hero&& other);
   Hero& operator=(Hero other);
+  typedef memory::WeakPtr<Hero, class HeroImpl> WeakPtr;
 private:
   std::shared_ptr<class HeroImpl> impl_;
+  friend WeakPtr;
 };
 }
 #endif

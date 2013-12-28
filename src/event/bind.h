@@ -1,6 +1,7 @@
 #ifndef BIND_H_
 #define BIND_H_
 #include "command.h"
+#include "thread.h"
 namespace event
 {
 template<class Method, class Shared, class... Args> event::Command Bind(Method&& method, Shared const& shared, Args... args)
@@ -42,7 +43,40 @@ template<class Method, class Impl, class... Args> event::Command Bind(Method&& m
     if(auto shared_locked = weak.lock())
     {
       Impl* ptr = shared_locked.get();
-      (ptr->*method)(args...);
+      thread::Lock lock(ptr->mutex_);
+      (void)(ptr->*method)(args...);
+      locked = true;
+    }
+    return locked;
+  };
+}
+
+template<class Method, class Impl, class... Args> event::Command Bind(Method&& method, std::weak_ptr<Impl> weak, Args... args)
+{
+  return [=](void)
+  {
+    bool locked = false;
+    if(auto shared_locked = weak.lock())
+    {
+      Impl* ptr = shared_locked.get();
+      thread::Lock lock(ptr->mutex_);
+      (void)(ptr->*method)(args...);
+      locked = true;
+    }
+    return locked;
+  };
+}
+
+template<class Return, class Impl, class... Args> std::function<bool(Args...)> Bind(Return(Impl::*method)(Args...), std::weak_ptr<Impl> weak)
+{
+  return [=](Args... args)
+  {
+    bool locked = false;
+    if(auto shared_locked = weak.lock())
+    {
+      Impl* ptr = shared_locked.get();
+      thread::Lock lock(ptr->mutex_);
+      (void)(ptr->*method)(args...);
       locked = true;
     }
     return locked;

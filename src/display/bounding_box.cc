@@ -82,7 +82,7 @@ BoundingBox BoundingBox::Copy(void) const
   return BoundingBox(impl_->rect_.x, impl_->rect_.y, impl_->rect_.w, impl_->rect_.h);
 }
 
-void BoundingBox::Copy(BoundingBox const& other)
+void BoundingBox::Copy(BoundingBox const& other) const
 {
   impl_->rect_ = other.impl_->rect_;
 }

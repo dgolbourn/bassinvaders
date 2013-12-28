@@ -19,7 +19,7 @@ static void KeydownEvent(SDL_KeyboardEvent const& keyboard_event, Uint32 const& 
   if(keyboard_event.repeat == 0)
   {
     auto iter = key_map.find(keyboard_event.keysym.scancode);
-    if (iter != key_map.end())
+    if(iter != key_map.end())
     {
       switch (type)
       {

@@ -3,7 +3,7 @@
 #include "sdl_library.h"
 #include "sdl_exception.h"
 #include "signal.h"
-
+#include "mutex.h"
 namespace event
 {
 class TimerImpl
@@ -29,13 +29,17 @@ public:
   int loops_;
   int max_loops_;
   bool paused_;
+  sdl::Mutex mutex_;
 };
 
 static SDL_TimerID const timer_null = static_cast<SDL_TimerID>(NULL);
 
 static Uint32 TimerCallback(Uint32 interval, void* param)
 {
-  return static_cast<TimerImpl*>(param)->Update();
+  (void)interval;
+  TimerImpl* impl = static_cast<TimerImpl*>(param);
+  sdl::Lock lock(impl->mutex_);
+  return impl->Update();
 }
 
 static SDL_TimerID AddTimer(Uint32 interval, SDL_TimerCallback callback, void* param)
@@ -162,26 +166,31 @@ Timer& Timer::operator=(Timer other)
 
 void Timer::Pause(void)
 {
+  sdl::Lock lock(impl_->mutex_);
   impl_->Pause();
 }
 
 void Timer::Resume(void)
 {
+  sdl::Lock lock(impl_->mutex_);
   impl_->Resume();
 }
 
 void Timer::Add(event::Command const& command)
 {
+  sdl::Lock lock(impl_->mutex_);
   return impl_->Add(command);
 }
 
 void Timer::End(event::Command const& command)
 {
+  sdl::Lock lock(impl_->mutex_);
   impl_->End(command);
 }
 
 void Timer::Play(int loops)
 {
+  sdl::Lock lock(impl_->mutex_);
   impl_->Play(loops);
 }
 }

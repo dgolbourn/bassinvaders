@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     event::quit.Add(Quit);
 
     display::Window w("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/window.json");
-    display::Texture S = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/BassInvaders/BassInvaders/resources/sprites/bulletred.bmp");
+    display::Texture S = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/petrified_rock_large__x1_iconic_png_1354840406.png");
     audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
     //audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
     event::pause.first.Add(event::Bind(&audio::Music::Pause, mixer));
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     {
       box = display::BoundingBox(-1500 + rand() & 3000, -1500 + rand() % 3000, 50, 50);
       event::Command c = std::bind(S, display::BoundingBox(), box, 1.f, false, 0.);
-      Sc.Add(c, 1);
+      Sc.Add(c, -1);
       col.Add(1, 0, box, [=](void){std::cout << "hit!" << std::endl; return true;});
     }
 

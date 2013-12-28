@@ -1,6 +1,6 @@
 #include "buffer.h"
 #include <queue>
-#include <mutex>
+#include "thread.h"
 
 namespace ffmpeg
 {
@@ -108,25 +108,25 @@ int BufferImpl::Read(uint8_t* buffer, int size)
 
 void Buffer::Add(Samples const& samples)
 {
-  std::lock_guard<std::mutex> lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   impl_->Add(samples);
 }
 
 bool Buffer::Full(void) const
 {
-  std::lock_guard<std::mutex> lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   return impl_->Full();
 }
 
 Buffer::operator bool(void) const
 {
-  std::lock_guard<std::mutex> lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   return bool(impl_);
 }
 
 int Buffer::Read(uint8_t* buffer, int size)
 {
-  std::lock_guard<std::mutex> lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   return impl_->Read(buffer, size);
 }
 
@@ -156,5 +156,4 @@ Buffer& Buffer::operator=(Buffer other)
 Buffer::~Buffer(void)
 {
 }
-
 }

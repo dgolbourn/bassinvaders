@@ -15,7 +15,7 @@ public:
   Animation(std::string const& filename, display::Window& window);
   Animation(json::JSON const& json, display::Window& window);
   Animation(void);
-  void Render(display::BoundingBox const& destination, float parallax = 0.f, bool tile = false, double angle = 0.);
+  void Render(display::BoundingBox const& destination, float parallax = 0.f, bool tile = false, double angle = 0.) const;
   void Pause(void);
   void Resume(void);
   void Play(int loops = 0, bool end_on_first = false);

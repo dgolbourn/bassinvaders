@@ -3,9 +3,9 @@
 #include "jansson.h"
 #include "json_exception.h"
 #include "bounding_box.h"
-
+#include "bind.h"
 #include <vector>
-#include <mutex>
+#include "thread.h"
 
 namespace game
 {
@@ -14,7 +14,7 @@ class AnimationImpl
 public:
   AnimationImpl(json::JSON const& json, display::Window& window);
   bool Next(void);
-  void Render(display::BoundingBox const& destination, float parallax, bool tile, double angle);
+  void Render(display::BoundingBox const& destination, float parallax, bool tile, double angle) const;
   void Pause(void);
   void Resume(void);
   void Play(int loops, bool end_on_first);
@@ -25,6 +25,7 @@ public:
   std::vector<display::BoundingBox> frames_;
   std::vector<display::BoundingBox>::iterator frame_;
   std::mutex mutex_;
+  std::weak_ptr<AnimationImpl> this_;
 };
 
 AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
@@ -44,7 +45,6 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
 
   texture_ = window.Load(std::string(sprite_sheet));
   timer_ = event::Timer(interval);
-  timer_.Add(std::bind(&game::AnimationImpl::Next, this));
   frames_ = std::vector<display::BoundingBox>(json_array_size(frames));
   frame_ = frames_.begin();
 
@@ -63,21 +63,17 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
 
 bool AnimationImpl::Next(void)
 {
-  mutex_.lock();
   ++frame_;
   if(frame_ == frames_.end())
   {
     frame_ = frames_.begin();
   }
-  mutex_.unlock();
   return true;
 }
 
-void AnimationImpl::Render(display::BoundingBox const& destination, float parallax, bool tile, double angle)
+void AnimationImpl::Render(display::BoundingBox const& destination, float parallax, bool tile, double angle) const
 {
-  mutex_.lock();
   texture_(*frame_, destination, parallax, tile, angle);
-  mutex_.unlock();
 }
 
 void AnimationImpl::Pause(void)
@@ -92,11 +88,9 @@ void AnimationImpl::Resume(void)
 
 void AnimationImpl::Play(int loops, bool end_on_first)
 {
-  mutex_.lock();
   int const frames = (loops + 1) * frames_.size() - 2 + int(end_on_first);
   timer_.Play(frames);
   frame_ = frames_.begin(); 
-  mutex_.unlock();
 }
 
 void AnimationImpl::End(event::Command const& command)
@@ -111,30 +105,38 @@ Animation::Animation(std::string const& filename, display::Window& window) : Ani
 Animation::Animation(json::JSON const& json, display::Window& window)
 {
   impl_ = std::make_shared<AnimationImpl>(json, window);
+  impl_->this_ = impl_;
+  thread::Lock lock(impl_->mutex_);
+  impl_->timer_.Add(event::Bind(&AnimationImpl::Next, impl_));
 }
 
-void Animation::Render(display::BoundingBox const& destination, float parallax, bool tile, double angle)
+void Animation::Render(display::BoundingBox const& destination, float parallax, bool tile, double angle) const
 {
+  thread::Lock lock(impl_->mutex_);
   impl_->Render(destination, parallax, tile, angle);
 }
 
 void Animation::Pause(void)
 {
+  thread::Lock lock(impl_->mutex_);
   impl_->Pause();
 }
 
 void Animation::Resume(void)
 {
+  thread::Lock lock(impl_->mutex_);
   impl_->Resume();
 }
 
 void Animation::Play(int loops, bool end_on_first)
 {
+  thread::Lock lock(impl_->mutex_);
   impl_->Play(loops, end_on_first);
 }
 
 void Animation::End(event::Command const& command)
 {
+  thread::Lock lock(impl_->mutex_);
   impl_->End(command);
 }
 

@@ -3,15 +3,6 @@
 
 namespace ffmpeg
 {
-class Deleter
-{
-public:
-  void operator()(AVCodecContext* codec)
-  {
-    avcodec_close(codec);
-  }
-};
-
 static AVCodecContext* InitAVCodecContext(Format const& format)
 {
   AVCodecContext* codec = format.audio_stream()->codec;
@@ -27,7 +18,7 @@ static AVCodecContext* InitAVCodecContext(Format const& format)
   return codec;
 }
 
-Codec::Codec(Format const& format) : codec_(InitAVCodecContext(format), Deleter())
+Codec::Codec(Format const& format) : codec_(InitAVCodecContext(format), &avcodec_close)
 {
 }
 

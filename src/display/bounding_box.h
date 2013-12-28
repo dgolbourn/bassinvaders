@@ -30,7 +30,7 @@ public:
   int w(void) const;
   int h(void) const;
   BoundingBox Copy(void) const;
-  void Copy(BoundingBox const& other);
+  void Copy(BoundingBox const& other) const;
  
   BoundingBox(BoundingBox const& other);
   BoundingBox(BoundingBox&& other);

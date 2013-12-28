@@ -36,7 +36,7 @@ Surface::Surface(TTF_Font* font, char const* text, SDL_Color fg)
   }
   catch(...)
   {
-    if(!impl_)
+    if(impl_)
     {
       Deleter()(impl);
     }
@@ -58,7 +58,7 @@ Surface::Surface(char const* file)
   }
   catch(...)
   {
-    if(!impl_)
+    if(impl_)
     {
       Deleter()(impl);
     }

@@ -34,6 +34,7 @@ private:
 public:
   void operator()(Node& node)
   {
+    set_.clear();
     coords_ = NodeCoordinates(0, 0);
     Fill(node);
   }

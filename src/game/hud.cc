@@ -1,6 +1,7 @@
 #include "hud.h"
 #include "bind.h"
 #include <limits>
+#include <mutex>
 
 namespace game
 {
@@ -17,6 +18,7 @@ public:
   display::Texture life_;
   display::BoundingBox score_position_;
   display::BoundingBox life_position_;
+  std::mutex mutex_;
 };
 
 HUDImpl::HUDImpl(json::JSON const& json, display::Window& window) : window_(window)
@@ -61,11 +63,13 @@ void HUDImpl::Render(void)
 
 void HUD::Score(int score)
 {
+  thread::Lock lock(impl_->mutex_);
   impl_->Score(score);
 }
 
 void HUD::Life(int life)
 {
+  thread::Lock lock(impl_->mutex_);
   impl_->Life(life);
 }
 

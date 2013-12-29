@@ -25,7 +25,6 @@ public:
   std::vector<display::BoundingBox> frames_;
   std::vector<display::BoundingBox>::iterator frame_;
   std::mutex mutex_;
-  std::weak_ptr<AnimationImpl> this_;
 };
 
 AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
@@ -105,7 +104,6 @@ Animation::Animation(std::string const& filename, display::Window& window) : Ani
 Animation::Animation(json::JSON const& json, display::Window& window)
 {
   impl_ = std::make_shared<AnimationImpl>(json, window);
-  impl_->this_ = impl_;
   thread::Lock lock(impl_->mutex_);
   impl_->timer_.Add(event::Bind(&AnimationImpl::Next, impl_));
 }

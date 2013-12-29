@@ -3,7 +3,6 @@
 #include "event.h"
 #include "dynamics.h"
 #include "bind.h"
-#include <mutex>
 #include "state.h"
 
 namespace game
@@ -32,7 +31,6 @@ public:
   int y_facing_;
   int life_;
   std::mutex mutex_;
-  std::weak_ptr<HeroImpl> this_;
   void Render(void);
   void Pause(void);
   void Resume(void);
@@ -46,7 +44,7 @@ public:
   void SignalEnd(void);
   void Reset(void);
   void Position(Dynamics::Position const& position);
-  void Change(State& next, int loops);
+  void Change(State& next);
   void Life(std::function<bool(int)> command);
 };
 
@@ -119,14 +117,14 @@ void HeroImpl::Update(void)
   {
     if(current_ == idle_)
     {
-      Change(moving_, -1);
+      Change(moving_);
     }
   }
   else
   {
     if(current_ == moving_)
     {
-      Change(idle_, -1);
+      Change(idle_);
     }
   }
 }
@@ -137,22 +135,20 @@ void HeroImpl::EnemyCollision(void)
   if(life_ <= 0)
   {
     life_ = 0;
-    Change(destroyed_, 0);
-    current_.End(event::Bind(&HeroImpl::SignalEnd, this_));
+    Change(destroyed_);
   }
   else
   {
-    Change(hit_, 0);
-    current_.End(event::Bind(&HeroImpl::Reset, this_));
+    Change(hit_);
   }
   life_signal_();
 }
 
-void HeroImpl::Change(State& next, int loops)
+void HeroImpl::Change(State& next)
 {
   current_.Stop();
   current_ = next;
-  current_.Play(loops);
+  current_.Play();
   if(paused_)
   {
     current_.Pause();
@@ -190,7 +186,7 @@ void HeroImpl::Render(void)
 
 void HeroImpl::Reset(void)
 {
-  Change(idle_, -1); 
+  Change(idle_); 
   Update();
 }
 
@@ -221,7 +217,7 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window)
   hit_ = State(hit, window);
   spawn_ = State(spawn, window);
   current_ = spawn_;
-  current_.Play(0);
+  current_.Play();
   current_.Pause();
   collision_box_ = current_.Collision().Copy();
   render_box_ = current_.Render().Copy();
@@ -271,11 +267,11 @@ void Hero::Life(std::function<bool(int)> const& command)
 Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision)
 {
   impl_ = std::make_shared<HeroImpl>(json, window);
-  impl_->this_ = impl_;
-
   thread::Lock lock(impl_->mutex_);
-  impl_->dynamics_.Add(event::Bind(&HeroImpl::Position, impl_->this_));
-  impl_->spawn_.End(event::Bind(&HeroImpl::Reset, impl_->this_));
+  impl_->hit_.End(event::Bind(&HeroImpl::Reset, impl_));
+  impl_->destroyed_.End(event::Bind(&HeroImpl::SignalEnd, impl_));
+  impl_->dynamics_.Add(event::Bind(&HeroImpl::Position, impl_));
+  impl_->spawn_.End(event::Bind(&HeroImpl::Reset, impl_));
   scene.Add(event::Bind(&HeroImpl::Render, impl_), 0);
   event::pause.first.Add(event::Bind(&HeroImpl::Pause, impl_));
   event::pause.second.Add(event::Bind(&HeroImpl::Resume, impl_));

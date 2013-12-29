@@ -13,7 +13,7 @@ public:
   State(json::JSON const& json, display::Window& window);
   State(void);
   bool operator==(State const& other) const;
-  void Play(int loops);
+  void Play(void);
   void Pause(void);
   void Resume(void);
   void Stop(void);

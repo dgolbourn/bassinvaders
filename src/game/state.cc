@@ -8,7 +8,7 @@ class StateImpl
 {
 public:
   StateImpl(json::JSON const& json, display::Window& window);
-  void Play(int loops);
+  void Play(void);
   void Pause(void);
   void Resume(void);
   void Stop(void);
@@ -19,6 +19,7 @@ public:
   display::BoundingBox render_box_;
   audio::Sound sound_;
   display::BoundingBox collision_box_;
+  int loops_;
 };
 
 StateImpl::StateImpl(json::JSON const& json, display::Window& window)
@@ -28,11 +29,12 @@ StateImpl::StateImpl(json::JSON const& json, display::Window& window)
   json_t* collision_box;
   char const* sound_effect;
 
-  json.Unpack("{sosossso}",
+  json.Unpack("{sososssosi}",
     "animation", &animation,
     "render box", &render_box,
     "sound effect", &sound_effect,
-    "collision box", &collision_box);
+    "collision box", &collision_box,
+    "loops", &loops_);
 
   animation_ = Animation(animation, window);
   render_box_ = display::BoundingBox(render_box);
@@ -40,10 +42,10 @@ StateImpl::StateImpl(json::JSON const& json, display::Window& window)
   collision_box_ = display::BoundingBox(collision_box);
 }
 
-void StateImpl::Play(int loops)
+void StateImpl::Play(void)
 {
-  animation_.Play(loops);
-  sound_.Play(loops);
+  animation_.Play(loops_);
+  sound_.Play(loops_);
 }
 
 void StateImpl::Pause(void)
@@ -88,9 +90,9 @@ void StateImpl::End(event::Command const& command)
   animation_.End(command);
 }
 
-void State::Play(int loops)
+void State::Play(void)
 {
-  impl_->Play(loops);
+  impl_->Play();
 }
 
 void State::Pause(void)

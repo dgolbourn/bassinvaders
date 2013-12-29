@@ -51,6 +51,23 @@ template<class Method, class Impl, class... Args> event::Command Bind(Method&& m
   };
 }
 
+template<class Return, class Impl, class... Args> std::function<bool(Args...)> Bind(Return(Impl::*method)(Args...), std::shared_ptr<Impl> const& shared)
+{
+  std::weak_ptr<Impl> weak = shared;
+  return [=](Args... args)
+  {
+    bool locked = false;
+    if (auto shared_locked = weak.lock())
+    {
+      Impl* ptr = shared_locked.get();
+      thread::Lock lock(ptr->mutex_);
+      (void)(ptr->*method)(args...);
+      locked = true;
+    }
+    return locked;
+  };
+}
+
 template<class Method, class Impl, class... Args> event::Command Bind(Method&& method, std::weak_ptr<Impl> weak, Args... args)
 {
   return [=](void)

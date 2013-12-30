@@ -12,7 +12,6 @@ namespace game
 class Animation
 {
 public:
-  Animation(std::string const& filename, display::Window& window);
   Animation(json::JSON const& json, display::Window& window);
   Animation(void);
   void Render(display::BoundingBox const& destination, float parallax = 0.f, bool tile = false, double angle = 0.) const;

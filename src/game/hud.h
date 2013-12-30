@@ -12,7 +12,6 @@ namespace game
 class HUD
 {
 public:
-  HUD(std::string const& filename, display::Window& window, Scene& scene);
   HUD(json::JSON const& json, display::Window& window, Scene& scene);
   HUD(void);
   void Score(int score);

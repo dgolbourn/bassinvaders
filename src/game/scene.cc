@@ -82,10 +82,6 @@ void Scene::Add(event::Command const& layer, int z)
   impl_->Add(layer, z);
 }
 
-Scene::Scene(std::string const& filename, display::Window& window) : Scene(json::JSON(filename), window)
-{
-}
-
 Scene::Scene(json::JSON const& json, display::Window& window)
 {
   impl_ = std::make_shared<SceneImpl>(json, window);

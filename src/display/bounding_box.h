@@ -15,7 +15,6 @@ class BoundingBox
 public:
   BoundingBox(void);
   BoundingBox(int x, int y, int w, int h);
-  BoundingBox(std::string const& filename);
   BoundingBox(json::JSON const& json);
   bool operator&&(BoundingBox const& other) const;
   bool operator<(BoundingBox const& other) const;

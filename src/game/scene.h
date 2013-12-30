@@ -13,7 +13,6 @@ class Scene
 {
 public:
   Scene(void);
-  Scene(std::string const& filename, display::Window& window);
   Scene(json::JSON const& json, display::Window& window);
   void Add(event::Command const& layer, int z);
   void Render(void);

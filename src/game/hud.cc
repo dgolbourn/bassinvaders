@@ -78,10 +78,6 @@ HUD::operator bool(void) const
   return bool(impl_);
 }
 
-HUD::HUD(std::string const& filename, display::Window& window, Scene& scene) : HUD(json::JSON(filename), window, scene)
-{
-}
-
 HUD::HUD(json::JSON const& json, display::Window& window, Scene& scene)
 {
   impl_ = std::make_shared<HUDImpl>(json, window);

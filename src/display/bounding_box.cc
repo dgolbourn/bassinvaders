@@ -105,10 +105,6 @@ BoundingBoxImpl::BoundingBoxImpl(json::JSON const& json)
   json.Unpack("[iiii]", &rect_.x, &rect_.y, &rect_.w, &rect_.h);
 }
 
-BoundingBox::BoundingBox(std::string const& filename) : BoundingBox(json::JSON(filename))
-{
-}
-
 BoundingBox::BoundingBox(json::JSON const& json)
 {
   impl_ = std::make_shared<BoundingBoxImpl>(json);

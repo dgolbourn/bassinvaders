@@ -97,10 +97,6 @@ void AnimationImpl::End(event::Command const& command)
   timer_.End(command);
 }
 
-Animation::Animation(std::string const& filename, display::Window& window) : Animation(json::JSON(filename), window)
-{
-}
-
 Animation::Animation(json::JSON const& json, display::Window& window)
 {
   impl_ = std::make_shared<AnimationImpl>(json, window);

@@ -15,7 +15,6 @@ typedef std::function<bool(display::BoundingBox const& source, display::Bounding
 class Window
 {
 public:
-  Window(std::string const& filename);
   Window(json::JSON const& json);
   Window(void);
   Texture Load(std::string const& filename);

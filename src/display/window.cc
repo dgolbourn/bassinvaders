@@ -163,10 +163,6 @@ void WindowImpl::View(int x, int y, float zoom)
   zoom_ = zoom;
 }
 
-Window::Window(std::string const& filename) : Window(json::JSON(filename))
-{
-}
-
 Window::Window(json::JSON const& json)
 {
   impl_ = std::make_shared<WindowImpl>(json);

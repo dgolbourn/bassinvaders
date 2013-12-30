@@ -235,7 +235,7 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window)
 
 void HeroImpl::Life(std::function<bool(int)> command)
 {
-  life_signal_.Add([=](){return command(this->life_);});
+  life_signal_.Add([=](){return command(life_);});
 }
 
 void Hero::Position(game::Position const& position)
@@ -285,10 +285,6 @@ Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collis
   event::right.second.Add(event::Bind(&HeroImpl::Left, impl_));
   event::button1.first.Add(event::Bind(&HeroImpl::Attack, impl_));
   collision.Add(0, 1, impl_->collision_box_, event::Bind(&HeroImpl::EnemyCollision, impl_));
-}
-
-Hero::Hero(std::string const& filename, display::Window& window, Scene& scene, Collision& collision) : Hero(json::JSON(filename), window, scene, collision)
-{
 }
 
 Hero::Hero(Hero const& other) : impl_(other.impl_)

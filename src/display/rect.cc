@@ -36,7 +36,7 @@ static bool Intersection(int a_x, int a_w, int b_x, int b_w)
 
 static bool Empty(SDL_Rect const *a)
 {
-  return a && (a->w == 0 || a->h == 0);
+  return !a || a->w == 0 || a->h == 0;
 }
 
 bool Intersection(SDL_Rect const* a, SDL_Rect const* b)

@@ -5,7 +5,7 @@
 
 namespace sdl
 {
-void RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, double angle)
+void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, double angle)
 {
   if(SDL_RenderCopyEx(renderer, texture, source, destination, angle, nullptr, SDL_FLIP_NONE))
   {
@@ -80,12 +80,12 @@ void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SD
     }
     else
     {
-      RenderCopy(renderer, texture, source, &adjusted, angle);
+      Render(renderer, texture, source, &adjusted, angle);
     }
   }
   else
   {
-    RenderCopy(renderer, texture, source, nullptr, angle);
+    Render(renderer, texture, source, nullptr, angle);
   }
 }
 }

@@ -37,7 +37,8 @@ void PainterImpl::EnclosingRect(void)
   float sw = s_ * w;
   float sh = s_ * h;
 
-  SDL_Point points[4];
+  static int const size = 4;
+  SDL_Point points[size];
   points[0].x = int(-cw + sh);
   points[0].y = int(ch + sw);
   points[1].x = int(cw + sh);
@@ -47,7 +48,7 @@ void PainterImpl::EnclosingRect(void)
   points[3].x = int(cw - sh);
   points[3].y = int(-ch - sw);
 
-  (void)SDL_EnclosePoints(points, 4, nullptr, &collision_box_);
+  (void)SDL_EnclosePoints(points, size, nullptr, &collision_box_);
   collision_box_.x += destination_.x + int(w);
   collision_box_.y += destination_.y + int(h);
 }
@@ -59,7 +60,7 @@ void PainterImpl::StartingRect(void)
   float a = std::round((c_ * x + s_ * y) / w_);
   float b = std::round((-s_ * x + c_ * y) / h_);
 
-  float sign[] = { 1.f, 0.f, -1.f };
+  float sign[] = {1.f, 0.f, -1.f};
   for(float const& i : sign)
   {
     bool break_flag = false;
@@ -136,7 +137,7 @@ bool PainterImpl::operator()(algorithm::NodeCoordinates const& coords)
     destination.y += move.y;
     destination.w += 1;
     destination.h += 1;
-    RenderCopy(renderer_, texture_, source_, &destination, angle_);
+    Render(renderer_, texture_, source_, &destination, angle_);
     filled = true;
   }
   return filled;

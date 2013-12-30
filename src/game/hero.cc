@@ -45,7 +45,7 @@ public:
   void Reset(void);
   void Position(Dynamics::Position const& position);
   void Change(State& next);
-  void Life(std::function<bool(int)> command);
+  void Life(Hero::Command command);
 };
 
 void HeroImpl::End(event::Command const& command)
@@ -233,7 +233,7 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window)
   life_ = 100;
 }
 
-void HeroImpl::Life(std::function<bool(int)> command)
+void HeroImpl::Life(Hero::Command command)
 {
   life_signal_.Add([=](){return command(life_);});
 }
@@ -258,7 +258,7 @@ void Hero::End(event::Command const& command)
   impl_->End(command);
 }
 
-void Hero::Life(std::function<bool(int)> const& command)
+void Hero::Life(Command const& command)
 {
   thread::Lock lock(impl_->mutex_);
   impl_->Life(command);

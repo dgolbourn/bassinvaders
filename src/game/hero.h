@@ -20,7 +20,8 @@ public:
   Hero(void);
   void Position(game::Position const& position);
   game::Position Position(void);
-  void Life(std::function<bool(int)> const& command);
+  typedef std::function<bool(int)> Command;
+  void Life(Command const& command);
   void End(event::Command const& command);
 
   ~Hero(void);

@@ -38,11 +38,11 @@ HUDImpl::HUDImpl(json::JSON const& json, display::Window& window) : window_(wind
     "score position", &score_x, &score_y,
     "life position", &life_x, &life_y);
 
-  font_ = display::Font(std::string(filename), point , r, g, b, a);
+  font_ = display::Font(std::string(filename), point, r, g, b, a);
   score_position_ = display::BoundingBox(score_x, score_y, 0, 0);
   life_position_ = display::BoundingBox(life_x, life_y, 0, 0);
   Score(0);
-  Life(100);
+  Life(0);
 }
 
 void HUDImpl::Score(int score)

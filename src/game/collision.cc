@@ -1,62 +1,20 @@
 #include "collision.h"
 #include <list>
 #include <map>
-#include <iostream>
 
 namespace game
 {
 typedef std::pair<display::BoundingBox::WeakPtr, display::BoundingBox::WeakPtr> BoundingBoxPair;
 typedef std::list<event::Command> CommandList;
-typedef std::list<display::BoundingBox::WeakPtr> MemberList;
-typedef std::pair<display::BoundingBox::WeakPtr, event::Command> CollisionPair;
-typedef std::list<CollisionPair> CollisionPairList;
-
 typedef std::map<BoundingBoxPair, CommandList> CollisionMap;
-typedef std::map<int, MemberList> MemberMap;
-typedef std::map<int, CollisionPairList> TargetMap;
 
 class CollisionImpl
 {
 public:
   void Check(void);
   void Add(display::BoundingBox const& a, display::BoundingBox const& b, event::Command const& c);
-  void Add(int this_group, int other_group, display::BoundingBox const& bounding_box, event::Command const& command);
   CollisionMap collisions_;
-  MemberMap members_;
-  TargetMap targets_;
 };
-
-void CollisionImpl::Add(int this_group, int other_group, display::BoundingBox const& bounding_box, event::Command const& command)
-{
-  for(auto iter = targets_[this_group].begin(); iter != targets_[this_group].end();)
-  {
-    if(display::BoundingBox other_box = iter->first.Lock())
-    {
-      Add(bounding_box, other_box, iter->second);
-      ++iter;
-    }
-    else
-    {
-      iter = targets_[this_group].erase(iter);
-    }
-  }
-
-  for(auto iter = members_[other_group].begin(); iter != members_[other_group].end();)
-  {
-    if(display::BoundingBox other_box = iter->Lock())
-    {
-      Add(bounding_box, other_box, command);
-      ++iter;
-    }
-    else
-    {
-      iter = members_[other_group].erase(iter);
-    }
-  }
-
-  members_[this_group].push_back(bounding_box);
-  targets_[other_group].push_back(CollisionPair(bounding_box, command));
-}
 
 void CollisionImpl::Check(void)
 {
@@ -81,7 +39,7 @@ void CollisionImpl::Check(void)
               command_iter = iter->second.erase(command_iter);
             }
           }
-          if(iter->second.size() == 0)
+          if(iter->second.empty())
           {
             erase_flag = true;
           }
@@ -101,18 +59,14 @@ void CollisionImpl::Check(void)
 
 void CollisionImpl::Add(display::BoundingBox const& a, display::BoundingBox const& b, event::Command const& c)
 {
-  BoundingBoxPair pair;
-  if(a < b)
+  if(a > b)
   {
-    pair.first = a;
-    pair.second = b;
+    collisions_[BoundingBoxPair(b, a)].push_back(c);
   }
   else
   {
-    pair.first = b;
-    pair.second = a;
+    collisions_[BoundingBoxPair(a, b)].push_back(c);
   }
-  collisions_[pair].push_back(c);
 }
 
 Collision::Collision(void)
@@ -123,11 +77,6 @@ Collision::Collision(void)
 void Collision::Add(display::BoundingBox const& a, display::BoundingBox const& b, event::Command const& c)
 {
   impl_->Add(a, b, c);
-}
-
-void Collision::Add(int this_group, int other_group, display::BoundingBox const& bounding_box, event::Command const& command)
-{
-  impl_->Add(this_group, other_group, bounding_box, command);
 }
 
 void Collision::Check(void)

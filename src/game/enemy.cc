@@ -238,7 +238,7 @@ Enemy::Enemy(json::JSON const& json, display::Window& window, Scene& scene, Coll
   role.Left(Bind(impl_, &EnemyImpl::Left));
   role.Right(Bind(impl_, &EnemyImpl::Right));
   role.Attack(Bind(impl_, &EnemyImpl::Attack));
-  collision.Add(1, 0, impl_->collision_box_, Bind(impl_, &EnemyImpl::HeroCollision));
+//  collision.Add(1, 0, impl_->collision_box_, Bind(impl_, &EnemyImpl::HeroCollision));
 }
 
 Enemy::Enemy(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause, Role& role) :

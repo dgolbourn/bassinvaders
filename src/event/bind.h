@@ -51,20 +51,40 @@ template<class Method, class Impl, class... Args> event::Command Bind(Method&& m
   };
 }
 
-template<class Return, class Impl, class... Args> std::function<bool(Args...)> Bind(Return(Impl::*method)(Args...), std::shared_ptr<Impl> const& shared)
+template<class Return, class Impl, class... Args> std::function<std::pair<Return, bool>(Args...)> Bind(Return(Impl::*method)(Args...), std::shared_ptr<Impl> const& shared)
 {
   std::weak_ptr<Impl> weak = shared;
   return [=](Args... args)
   {
-    bool locked = false;
-    if (auto shared_locked = weak.lock())
+    if(auto shared_locked = weak.lock())
     {
       Impl* ptr = shared_locked.get();
       thread::Lock lock(ptr->mutex_);
-      (void)(ptr->*method)(args...);
-      locked = true;
+      return std::pair<Return, bool>((ptr->*method)(args...), true);
     }
-    return locked;
+    else
+    {
+      return std::pair<Return, bool>(Return(), false);
+    }
+  };
+}
+
+template<class Impl, class... Args> std::function<bool(Args...)> Bind(void(Impl::*method)(Args...), std::shared_ptr<Impl> const& shared)
+{
+  std::weak_ptr<Impl> weak = shared;
+  return [=](Args... args)
+  {
+    if(auto shared_locked = weak.lock())
+    {
+      Impl* ptr = shared_locked.get();
+      thread::Lock lock(ptr->mutex_);
+      (ptr->*method)(args...);
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   };
 }
 

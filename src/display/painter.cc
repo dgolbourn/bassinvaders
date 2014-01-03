@@ -74,7 +74,7 @@ void PainterImpl::StartingRect(void)
       temp.x -= adjust.x;
       temp.y -= adjust.y;
 
-      if(SDL_TRUE == sdl::Intersection(&temp, &clip_))
+      if(sdl::Intersection(&temp, &clip_))
       {
         collision_box_ = temp;
         destination_.x -= adjust.x;
@@ -130,7 +130,7 @@ bool PainterImpl::operator()(algorithm::NodeCoordinates const& coords)
   SDL_Rect collision_box = collision_box_;
   collision_box.x += move.x;
   collision_box.y += move.y;
-  if(SDL_TRUE == sdl::Intersection(&collision_box, &clip_))
+  if(sdl::Intersection(&collision_box, &clip_))
   {
     SDL_Rect destination = destination_;
     destination.x += move.x;

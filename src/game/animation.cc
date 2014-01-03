@@ -13,7 +13,7 @@ class AnimationImpl
 {
 public:
   AnimationImpl(json::JSON const& json, display::Window& window);
-  bool Next(void);
+  void Next(void);
   void Render(display::BoundingBox const& destination, float parallax, bool tile, double angle) const;
   void Pause(void);
   void Resume(void);
@@ -60,14 +60,13 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
   frame_ = frames_.begin(); 
 }
 
-bool AnimationImpl::Next(void)
+void AnimationImpl::Next(void)
 {
   ++frame_;
   if(frame_ == frames_.end())
   {
     frame_ = frames_.begin();
   }
-  return true;
 }
 
 void AnimationImpl::Render(display::BoundingBox const& destination, float parallax, bool tile, double angle) const

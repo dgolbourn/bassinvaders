@@ -20,8 +20,9 @@
 #include "enemy.h"
 #include "bind.h"
 #include "hud.h"
+#include "rules_collision.h"
 
-bool quit = false;
+static bool quit = false;
 static bool Quit(void)
 {
   quit = true;
@@ -30,7 +31,7 @@ static bool Quit(void)
 
 int main(int argc, char *argv[]) 
 {
-  int ret = 0;
+  int ret;
   try
   {
     event::Event eL;
@@ -45,7 +46,9 @@ int main(int argc, char *argv[])
     event::pause.second.Add(event::Bind(&audio::Music::Resume, mixer));
     game::Scene Sc(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/scene.json"), w);
     game::Collision col;
-    game::Hero h(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json"), w, Sc, col);
+    game::RulesCollision rc(col);
+    rc.Link(0, 1);
+    game::Hero h(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json"), w, Sc, rc);
     h.End(Quit);
     game::HUD hud(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hud.json"), w, Sc);
     h.Life(event::Bind(&game::HUD::Life, hud));
@@ -53,10 +56,14 @@ int main(int argc, char *argv[])
     std::vector<display::BoundingBox> boxes(100);
     for(auto& box : boxes)
     {
-      box = display::BoundingBox(-1500 + rand() & 3000, -1500 + rand() % 3000, 50, 50);
+      box = display::BoundingBox(-1500 + (rand() & 3000), -1500 + (rand() % 3000), 50, 50);
       event::Command c = std::bind(S, display::BoundingBox(), box, 1.f, false, 0.);
       Sc.Add(c, -1);
-      col.Add(1, 0, box, [=](void){std::cout << "hit!" << std::endl; return true;});
+
+      game::RulesCollision::Channel::Send send = [=](){return std::pair<game::RulesCollision::Rules, bool>(game::RulesCollision::Rules(rand() %10, 0), true); };
+      game::RulesCollision::Channel::Receive receive = [=](game::RulesCollision::Rules const& rules){(void)rules;  std::cout << "hit!" << std::endl; return true; };
+      game::RulesCollision::Channel::Pair channel(send, receive);
+      rc.Add(1, box, channel);
     }
 
     event::pause.second();
@@ -72,12 +79,16 @@ int main(int argc, char *argv[])
       w.Show();
       col.Check();
     }
+    ret = EXIT_SUCCESS;
   }
   catch(std::exception& e)
   {
-    std::cout << e.what() << std::endl;
-    std::cin.get();
-    ret = -1;
+    std::cerr << e.what() << std::endl;
+    ret = EXIT_FAILURE;
+  }
+  catch(...)
+  {
+    ret = EXIT_FAILURE;
   }
   return ret;
 }

@@ -11,7 +11,6 @@ class Collision
 public:
   Collision(void);
   void Add(display::BoundingBox const& a, display::BoundingBox const& b, event::Command const& c);
-  void Add(int this_group, int other_group, display::BoundingBox const& bounding_box, event::Command const& command);
   void Check(void);
 
   ~Collision(void);

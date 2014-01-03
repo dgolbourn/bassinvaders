@@ -40,7 +40,8 @@ public:
   void Right(void);
   void Update(void);
   void Attack(void);
-  void EnemyCollision(void);
+  RulesCollision::Rules EnemySend(void);
+  void EnemyReceive(RulesCollision::Rules const& rules);
   void SignalEnd(void);
   void Reset(void);
   void Position(Dynamics::Position const& position);
@@ -129,9 +130,15 @@ void HeroImpl::Update(void)
   }
 }
 
-void HeroImpl::EnemyCollision(void)
+RulesCollision::Rules HeroImpl::EnemySend(void)
 {
-  life_ -= 10;
+  return RulesCollision::Rules();
+}
+
+void HeroImpl::EnemyReceive(RulesCollision::Rules const& rules)
+{
+  (void)rules;
+  life_ -= rules.first;
   if(life_ <= 0)
   {
     life_ = 0;
@@ -264,7 +271,7 @@ void Hero::Life(Command const& command)
   impl_->Life(command);
 }
 
-Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collision& collision)
+Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesCollision& collision)
 {
   impl_ = std::make_shared<HeroImpl>(json, window);
   thread::Lock lock(impl_->mutex_);
@@ -284,7 +291,10 @@ Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, Collis
   event::right.first.Add(event::Bind(&HeroImpl::Right, impl_));
   event::right.second.Add(event::Bind(&HeroImpl::Left, impl_));
   event::button1.first.Add(event::Bind(&HeroImpl::Attack, impl_));
-  collision.Add(0, 1, impl_->collision_box_, event::Bind(&HeroImpl::EnemyCollision, impl_));
+  RulesCollision::Channel::Send send(event::Bind(&HeroImpl::EnemySend, impl_));
+  RulesCollision::Channel::Receive receive(event::Bind(&HeroImpl::EnemyReceive, impl_));
+  RulesCollision::Channel::Pair channel(send, receive);
+  collision.Add(0, impl_->collision_box_, channel);
 }
 
 Hero::Hero(Hero const& other) : impl_(other.impl_)

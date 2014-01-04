@@ -19,11 +19,6 @@ public:
   void Resume(void);
   void Play(int loops = 0, bool end_on_first = false);
   void End(event::Command const& command);
-
-  ~Animation(void);
-  Animation(Animation const& other);
-  Animation(Animation&& other);
-  Animation& operator=(Animation other);
 private:
   std::shared_ptr<class AnimationImpl> impl_;
 };

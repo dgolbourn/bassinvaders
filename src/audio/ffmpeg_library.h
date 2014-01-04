@@ -7,7 +7,6 @@ class Library
 {
 public:
   Library(void);
-  ~Library(void);
 };
 }
 #endif

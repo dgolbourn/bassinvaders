@@ -17,11 +17,6 @@ public:
   Samples(void);
   uint8_t**& data(void) const;
   int size(void) const;
-
-  ~Samples(void);
-  Samples(Samples const& other);
-  Samples(Samples&& other);
-  Samples& operator=(Samples other);
 private:
   std::shared_ptr<class SamplesImpl> impl_;
 };

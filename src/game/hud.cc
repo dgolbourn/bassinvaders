@@ -87,22 +87,4 @@ HUD::HUD(json::JSON const& json, display::Window& window, Scene& scene)
 HUD::HUD(void)
 {
 }
-
-HUD::HUD(HUD const& other) : impl_(other.impl_)
-{
-}
-
-HUD::HUD(HUD&& other) : impl_(std::move(other.impl_))
-{
-}
-
-HUD::~HUD(void)
-{
-}
-
-HUD& HUD::operator=(HUD other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

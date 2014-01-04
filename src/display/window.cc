@@ -172,24 +172,6 @@ Window::Window(void)
 {
 }
 
-Window::Window(Window const& other) : impl_(other.impl_)
-{
-}
-
-Window::Window(Window&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Window::~Window(void)
-{
-}
-
-Window& Window::operator=(Window other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
-
 static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::Texture::WeakPtr texture_ptr)
 {
   return [window_ptr, texture_ptr](display::BoundingBox const& source, display::BoundingBox const& destination, float parallax, bool tile, double angle)

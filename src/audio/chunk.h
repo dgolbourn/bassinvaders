@@ -12,11 +12,6 @@ public:
   Chunk(void);
   Chunk(std::string const& filename);
   int Play(int repeats, int volume);
-
-  Chunk(Chunk const& other);
-  Chunk(Chunk&& other);
-  Chunk& operator=(Chunk other);
-  ~Chunk(void);
 private:
   std::shared_ptr<class ChunkImpl> impl_;
 };

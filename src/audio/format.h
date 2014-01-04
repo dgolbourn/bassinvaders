@@ -17,11 +17,6 @@ public:
   Format(std::string const& filename);
   AVFormatContext* format(void) const;
   AVStream* audio_stream(void) const;
-
-  Format(Format const& other);
-  Format(Format&& other);
-  Format& operator=(Format other);
-  ~Format(void);
 private:
   std::shared_ptr<class FormatImpl> impl_;
 };

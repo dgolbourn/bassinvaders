@@ -87,10 +87,6 @@ void BoundingBox::Copy(BoundingBox const& other) const
   impl_->rect_ = other.impl_->rect_;
 }
 
-BoundingBox::BoundingBox(void)
-{
-}
-
 BoundingBox::BoundingBox(int x, int y, int w, int h)
 {
   impl_ = std::make_shared<BoundingBoxImpl>(x, y, w, h);
@@ -110,21 +106,7 @@ BoundingBox::BoundingBox(json::JSON const& json)
   impl_ = std::make_shared<BoundingBoxImpl>(json);
 }
 
-BoundingBox::BoundingBox(BoundingBox const& other) : impl_(other.impl_)
+BoundingBox::BoundingBox(void)
 {
-}
-
-BoundingBox::BoundingBox(BoundingBox&& other) : impl_(std::move(other.impl_))
-{
-}
-
-BoundingBox::~BoundingBox(void)
-{
-}
-
-BoundingBox& BoundingBox::operator=(BoundingBox other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
 }
 }

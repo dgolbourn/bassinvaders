@@ -13,8 +13,8 @@ public:
   void EnclosingRect(void);
   void StartingRect(void);
 
-  float north_[2];
-  float east_[2];
+  std::pair<float, float> north_;
+  std::pair<float, float> east_;
   SDL_Rect clip_;
   SDL_Rect collision_box_;
   SDL_Renderer* renderer_;
@@ -67,8 +67,8 @@ void PainterImpl::StartingRect(void)
     for(float const& j : sign)
     {
       SDL_Point adjust;
-      adjust.x = int((a + i) * east_[0] + (b + j) * north_[0]);
-      adjust.y = int((a + i) * east_[1] + (b + j) * north_[1]);
+      adjust.x = int((a + i) * east_.first + (b + j) * north_.first);
+      adjust.y = int((a + i) * east_.second + (b + j) * north_.second);
 
       SDL_Rect temp = collision_box_;
       temp.x -= adjust.x;
@@ -97,10 +97,10 @@ void PainterImpl::MovementVectors(void)
   s_ = std::sin(angle);
   w_ = float(destination_.w);
   h_ = float(destination_.h);
-  east_[0] = c_ * w_;
-  east_[1] = s_ * w_;
-  north_[0] = -s_ * h_;
-  north_[1] = c_ * h_;
+  east_.first = c_ * w_;
+  east_.second = s_ * w_;
+  north_.first = -s_ * h_;
+  north_.second = c_ * h_;
 }
 
 PainterImpl::PainterImpl(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, double angle)
@@ -125,8 +125,8 @@ bool PainterImpl::operator()(algorithm::NodeCoordinates const& coords)
   float east = float(coords.first);
   float north = float(coords.second);
   SDL_Point move;
-  move.x = int(east_[0] * east + north_[0] * north);
-  move.y = int(east_[1] * east + north_[1] * north);
+  move.x = int(east_.first * east + north_.first * north);
+  move.y = int(east_.second * east + north_.second * north);
   SDL_Rect collision_box = collision_box_;
   collision_box.x += move.x;
   collision_box.y += move.y;
@@ -154,24 +154,6 @@ Painter::Painter(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* textur
 }
 
 Painter::Painter(void)
-{
-}
-
-Painter::Painter(Painter const& other) : impl_(other.impl_)
-{
-}
-
-Painter::Painter(Painter&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Painter& Painter::operator=(Painter other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
-
-Painter::~Painter(void)
 {
 }
 }

@@ -71,4 +71,19 @@ Library::~Library(void)
     initialised = false;
   }
 }
+
+Library::Library(Library const& other) : Library(other.flags_)
+{
+}
+
+Library::Library(Library&& other) : Library(0)
+{
+  std::swap(flags_, other.flags_);
+}
+
+Library& Library::operator=(Library other)
+{
+  std::swap(flags_, other.flags_);
+  return *this;
+}
 }

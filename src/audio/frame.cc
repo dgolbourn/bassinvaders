@@ -31,24 +31,6 @@ Frame::Frame(void) : frame_(InitAVFrame(), Deleter())
 {
 }
 
-Frame::Frame(Frame const& other) : frame_(other.frame_)
-{
-}
-
-Frame::Frame(Frame&& other) : frame_(std::move(other.frame_))
-{
-}
-
-Frame& Frame::operator=(Frame other)
-{
-  std::swap(frame_, other.frame_);
-  return *this;
-}
-
-Frame::~Frame(void)
-{
-}
-
 AVFrame* Frame::operator->(void) const
 {
   return frame_.operator->();

@@ -117,24 +117,6 @@ Sound::Sound(void)
 {
 }
 
-Sound::Sound(Sound const& other) : impl_(other.impl_)
-{
-}
-
-Sound::Sound(Sound&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Sound::~Sound(void)
-{
-}
-
-Sound& Sound::operator=(Sound other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
-
 void Sound::Play(int repeats)
 {
   impl_->Play(repeats, impl_);

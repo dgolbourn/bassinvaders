@@ -75,24 +75,6 @@ Format::Format(std::string const& filename)
   impl_ = std::make_shared<FormatImpl>(filename);
 }
 
-Format::Format(Format const& other) : impl_(other.impl_)
-{
-}
-
-Format::Format(Format&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Format& Format::operator=(Format other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
-
-Format::~Format(void)
-{
-}
-
 AVFormatContext* Format::format(void) const
 {
   return impl_->format_;

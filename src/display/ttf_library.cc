@@ -26,4 +26,17 @@ Library::~Library(void)
     }
   }
 }
+
+Library::Library(Library const& other) : Library()
+{
+}
+
+Library::Library(Library&& other) : Library()
+{
+}
+
+Library& Library::operator=(Library other)
+{
+  return *this;
+}
 }

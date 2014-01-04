@@ -19,11 +19,6 @@ public:
   void Fade(int ms) const;
   void Volume(int volume);
   void End(event::Command const& command);
-
-  Sound(Sound const& other);
-  Sound(Sound&& other);
-  Sound& operator=(Sound other);
-  ~Sound(void);
 private:
   std::shared_ptr<class SoundImpl> impl_;
 };

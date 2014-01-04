@@ -83,22 +83,4 @@ void Collision::Check(void)
 {
   impl_->Check();
 }
-
-Collision::Collision(Collision const& other) : impl_(other.impl_)
-{
-}
-
-Collision::Collision(Collision&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Collision::~Collision(void)
-{
-}
-
-Collision& Collision::operator=(Collision other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

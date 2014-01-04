@@ -70,25 +70,7 @@ int Chunk::Play(int repeats, int volume)
   return channel;
 }
 
-Chunk::~Chunk(void)
-{
-}
-
 Chunk::Chunk(void)
 {    
-}
-
-Chunk::Chunk(Chunk const& other) : impl_(other.impl_)
-{
-}
-
-Chunk::Chunk(Chunk&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Chunk& Chunk::operator=(Chunk other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
 }
 }

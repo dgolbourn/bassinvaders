@@ -148,22 +148,4 @@ State::State(json::JSON const& json, display::Window& window)
 {
   impl_ = std::make_shared<StateImpl>(json, window);
 }
-
-State::State(State const& other) : impl_(other.impl_)
-{
-}
-
-State::State(State&& other) : impl_(std::move(other.impl_))
-{
-}
-
-State::~State(void)
-{
-}
-
-State& State::operator=(State other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

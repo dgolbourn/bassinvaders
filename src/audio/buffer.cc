@@ -138,22 +138,4 @@ Buffer::Buffer(int size)
 {
   impl_ = std::make_shared<BufferImpl>(size);
 }
-
-Buffer::Buffer(Buffer const& other) : impl_(other.impl_)
-{
-}
-
-Buffer::Buffer(Buffer&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Buffer& Buffer::operator=(Buffer other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
-
-Buffer::~Buffer(void)
-{
-}
 }

@@ -23,4 +23,17 @@ Library::~Library(void)
     IMG_Quit();
   }
 }
+
+Library::Library(Library const& other) : Library(0)
+{
+}
+
+Library::Library(Library&& other) : Library(0)
+{
+}
+
+Library& Library::operator=(Library other)
+{
+  return *this;
+}
 }

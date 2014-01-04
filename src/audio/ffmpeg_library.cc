@@ -17,8 +17,4 @@ Library::Library(void)
     registered = true;
   }
 }
-
-Library::~Library(void)
-{
-}
 }

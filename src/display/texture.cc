@@ -55,22 +55,4 @@ Texture::operator bool(void) const
 {
   return bool(impl_);
 }
-
-Texture::~Texture(void)
-{
-}
-
-Texture::Texture(Texture const& other) : impl_(other.impl_)
-{
-}
-
-Texture::Texture(Texture&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Texture& Texture::operator=(Texture other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

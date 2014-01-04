@@ -147,24 +147,6 @@ Decoder::Decoder(std::string const& filename, int buffer_size)
   impl_ = std::make_shared<DecoderImpl>(filename, buffer_size);
 }
 
-Decoder::Decoder(Decoder const& other) : impl_(other.impl_)
-{
-}
-
-Decoder::Decoder(Decoder&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Decoder& Decoder::operator=(Decoder other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
-
-Decoder::~Decoder(void)
-{
-}
-
 void Decoder::Read(uint8_t* buffer, int size)
 {
   impl_->Read(buffer, size);

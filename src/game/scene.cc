@@ -86,22 +86,4 @@ Scene::Scene(json::JSON const& json, display::Window& window)
 {
   impl_ = std::make_shared<SceneImpl>(json, window);
 }
-
-Scene::Scene(Scene const& other) : impl_(other.impl_)
-{
-}
-
-Scene::Scene(Scene&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Scene::~Scene(void)
-{
-}
-
-Scene& Scene::operator=(Scene other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

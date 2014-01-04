@@ -146,24 +146,6 @@ Timer::Timer(int interval)
   impl_ = std::make_shared<TimerImpl>(interval);
 }
 
-Timer::~Timer(void)
-{
-}
-
-Timer::Timer(Timer const& other) : impl_(other.impl_)
-{
-}
-
-Timer::Timer(Timer&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Timer& Timer::operator=(Timer other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
-
 void Timer::Pause(void)
 {
   sdl::Lock lock(impl_->mutex_);

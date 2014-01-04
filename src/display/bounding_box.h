@@ -30,16 +30,10 @@ public:
   int h(void) const;
   BoundingBox Copy(void) const;
   void Copy(BoundingBox const& other) const;
- 
-  BoundingBox(BoundingBox const& other);
-  BoundingBox(BoundingBox&& other);
-  ~BoundingBox(void);
-  BoundingBox& operator=(BoundingBox other);
-
   typedef memory::WeakPtr<BoundingBox, class BoundingBoxImpl> WeakPtr;
+  friend WeakPtr;
 private:
   std::shared_ptr<class BoundingBoxImpl> impl_;
-  friend WeakPtr;
 };
 }
 #endif

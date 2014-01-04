@@ -32,22 +32,4 @@ void Mutex::unlock(void)
 Mutex::Mutex(void) : mutex_(CreateMutex(), &SDL_DestroyMutex)
 {
 }
-
-Mutex::Mutex(Mutex const& other) : mutex_(other.mutex_)
-{
-}
-
-Mutex::Mutex(Mutex&& other) : mutex_(std::move(other.mutex_))
-{
-}
-
-Mutex& Mutex::operator=(Mutex other)
-{
-  std::swap(mutex_, other.mutex_);
-  return *this;
-}
-
-Mutex::~Mutex(void)
-{
-}
 };

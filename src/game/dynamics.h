@@ -25,11 +25,6 @@ public:
   typedef std::pair<float, float> Position;
   typedef std::function<bool(Position const&)> Command;
   void Add(Command const& command);
-
-  ~Dynamics(void);
-  Dynamics(Dynamics const& other);
-  Dynamics(Dynamics&& other);
-  Dynamics& operator=(Dynamics other);
 private:
   std::shared_ptr<class DynamicsImpl> impl_;
 };

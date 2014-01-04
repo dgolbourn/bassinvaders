@@ -14,11 +14,6 @@ public:
   typedef event::Channel<Rules> Channel;
   void Add(int group, display::BoundingBox const& bounding_box, Channel::Pair const& channel);
   void Link(int group_a, int group_b);
-
-  ~RulesCollision(void);
-  RulesCollision(RulesCollision const& other);
-  RulesCollision(RulesCollision&& other);
-  RulesCollision& operator=(RulesCollision other);
 private:
   std::shared_ptr<class RulesCollisionImpl> impl_;
 };

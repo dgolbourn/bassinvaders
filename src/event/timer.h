@@ -15,11 +15,6 @@ public:
   void Resume(void);
   void Add(Command const& command);
   void End(Command const& command);
-
-  ~Timer(void);
-  Timer(Timer const& other);
-  Timer(Timer&& other);
-  Timer& operator=(Timer other);
 private:
   std::shared_ptr<class TimerImpl> impl_;
 };

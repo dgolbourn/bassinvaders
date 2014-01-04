@@ -75,22 +75,4 @@ SDL_Surface* Surface::operator->(void) const
 {
   return impl_.get();
 }
-
-Surface::~Surface(void)
-{
-}
-
-Surface::Surface(Surface const& other) : impl_(other.impl_)
-{
-}
-
-Surface::Surface(Surface&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Surface& Surface::operator=(Surface other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

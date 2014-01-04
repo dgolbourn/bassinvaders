@@ -142,22 +142,4 @@ void Dynamics::Add(Dynamics::Command const& command)
 {
   impl_->Add(command);
 }
-
-Dynamics::Dynamics(Dynamics const& other) : impl_(other.impl_)
-{
-}
-
-Dynamics::Dynamics(Dynamics&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Dynamics::~Dynamics(void)
-{
-}
-
-Dynamics& Dynamics::operator=(Dynamics other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

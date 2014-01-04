@@ -35,24 +35,6 @@ Samples::Samples(void)
 {
 }
 
-Samples::Samples(Samples const& other) : impl_(other.impl_)
-{
-}
-
-Samples::Samples(Samples&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Samples& Samples::operator=(Samples other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
-
-Samples::~Samples(void)
-{
-}
-
 uint8_t**& Samples::data(void) const
 {
   return impl_->data_;

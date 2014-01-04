@@ -15,11 +15,6 @@ public:
   bool Full(void) const;
   int Read(uint8_t* buffer, int size);
   explicit operator bool(void) const;
-
-  Buffer(Buffer const& other);
-  Buffer(Buffer&& other);
-  Buffer& operator=(Buffer other);
-  ~Buffer(void);
 private:
   std::shared_ptr<class BufferImpl> impl_;
 };

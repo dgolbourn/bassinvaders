@@ -51,12 +51,25 @@ Library::~Library(void)
 {
   if(reference_count > 0)
   {
-    reference_count--;  
+    --reference_count;  
     if(reference_count == 0)
     {
       Mix_CloseAudio();
       MixQuit();
     }
   }
+}
+
+Library::Library(Library const& other) : Library()
+{
+}
+
+Library::Library(Library&& other) : Library()
+{
+}
+
+Library& Library::operator=(Library other)
+{
+  return *this;
 }
 }

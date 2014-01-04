@@ -47,22 +47,4 @@ Signal::Signal(void)
 {
   impl_ = std::make_shared<SignalImpl>();
 }
-
-Signal::Signal(Signal const& other) : impl_(other.impl_)
-{
-}
-
-Signal::Signal(Signal&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Signal::~Signal(void)
-{
-}
-
-Signal& Signal::operator=(Signal other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

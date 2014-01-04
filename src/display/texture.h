@@ -15,11 +15,6 @@ public:
   operator SDL_Texture*(void) const;
   SDL_Texture* operator->(void) const;
   explicit operator bool(void) const;
-
-  ~Texture(void);
-  Texture(Texture const& other);
-  Texture(Texture&& other);
-  Texture& operator=(Texture other);
   typedef memory::WeakPtr<class Texture, SDL_Texture> WeakPtr;
 private:
   std::shared_ptr<SDL_Texture> impl_;

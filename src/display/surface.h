@@ -15,11 +15,6 @@ public:
   Surface(char const* file);
   operator SDL_Surface*(void) const;
   SDL_Surface* operator->(void) const;
-  
-  ~Surface(void);
-  Surface(Surface const& other);
-  Surface(Surface&& other);
-  Surface& operator=(Surface other);
 private:
   std::shared_ptr<SDL_Surface> impl_;
 };

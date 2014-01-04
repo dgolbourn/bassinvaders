@@ -77,27 +77,9 @@ Music::Music(std::string const& filename)
   impl_ = std::make_shared<MusicImpl>(filename);
 }
 
-Music::Music(Music const& other) : impl_(other.impl_)
-{
-}
-
-Music::Music(Music&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Music::~Music(void)
-{
-}
-
 Music::operator bool(void) const
 {
   return bool(impl_);
-}
-
-Music& Music::operator=(Music other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
 }
 
 void Music::Pause(void) const

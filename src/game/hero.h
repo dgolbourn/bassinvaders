@@ -23,11 +23,6 @@ public:
   typedef std::function<bool(int)> Command;
   void Life(Command const& command);
   void End(event::Command const& command);
-
-  ~Hero(void);
-  Hero(Hero const& other);
-  Hero(Hero&& other);
-  Hero& operator=(Hero other);
   typedef memory::WeakPtr<Hero, class HeroImpl> WeakPtr;
 private:
   std::shared_ptr<class HeroImpl> impl_;

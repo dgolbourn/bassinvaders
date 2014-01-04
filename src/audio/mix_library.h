@@ -9,6 +9,9 @@ class Library
 {
 public:
   Library(void);
+  Library(Library const& other);
+  Library(Library&& other);
+  Library& operator=(Library other);
   ~Library(void);
 private:
   sdl::Library const sdl_;

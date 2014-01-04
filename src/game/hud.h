@@ -17,11 +17,6 @@ public:
   void Score(int score);
   void Life(int life);
   explicit operator bool(void) const;
-
-  ~HUD(void);
-  HUD(HUD const& other);
-  HUD(HUD&& other);
-  HUD& operator=(HUD other);
   typedef memory::WeakPtr<HUD, class HUDImpl> WeakPtr;
 private:
   std::shared_ptr<class HUDImpl> impl_;

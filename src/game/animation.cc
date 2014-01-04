@@ -136,22 +136,4 @@ void Animation::End(event::Command const& command)
 Animation::Animation(void)
 {
 }
-
-Animation::Animation(Animation const& other) : impl_(other.impl_)
-{
-}
-
-Animation::Animation(Animation&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Animation::~Animation(void)
-{
-}
-
-Animation& Animation::operator=(Animation other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

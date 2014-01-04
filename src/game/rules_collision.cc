@@ -101,22 +101,4 @@ RulesCollision::RulesCollision(Collision const& collision)
 RulesCollision::RulesCollision(void)
 {
 }
-
-RulesCollision::RulesCollision(RulesCollision const& other) : impl_(other.impl_)
-{
-}
-
-RulesCollision::RulesCollision(RulesCollision&& other) : impl_(std::move(other.impl_))
-{
-}
-
-RulesCollision::~RulesCollision(void)
-{
-}
-
-RulesCollision& RulesCollision::operator=(RulesCollision other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

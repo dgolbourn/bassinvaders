@@ -137,7 +137,6 @@ RulesCollision::Rules HeroImpl::EnemySend(void)
 
 void HeroImpl::EnemyReceive(RulesCollision::Rules const& rules)
 {
-  (void)rules;
   life_ -= rules.first;
   if(life_ <= 0)
   {
@@ -295,23 +294,5 @@ Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesC
   RulesCollision::Channel::Receive receive(event::Bind(&HeroImpl::EnemyReceive, impl_));
   RulesCollision::Channel::Pair channel(send, receive);
   collision.Add(0, impl_->collision_box_, channel);
-}
-
-Hero::Hero(Hero const& other) : impl_(other.impl_)
-{
-}
-
-Hero::Hero(Hero&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Hero::~Hero(void)
-{
-}
-
-Hero& Hero::operator=(Hero other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
 }
 }

@@ -22,11 +22,6 @@ public:
   display::BoundingBox const& Collision(void) const;
   display::BoundingBox const& Render(void) const;
   void Render(display::BoundingBox const& bounding_box);
- 
-  ~State(void);
-  State(State const& other);
-  State(State&& other);
-  State& operator=(State other);
 private:
   std::shared_ptr<class StateImpl> impl_;
 };

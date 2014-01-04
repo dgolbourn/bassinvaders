@@ -26,22 +26,4 @@ Font::Font(std::string const& filename, int point, int r, int g, int b, int a)
 Font::Font(void)
 {
 }
-
-Font::Font(Font const& other) : impl_(other.impl_)
-{
-}
-
-Font::Font(Font&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Font::~Font(void)
-{
-}
-
-Font& Font::operator=(Font other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
 }

@@ -7,6 +7,9 @@ class Library
 {
 public:
   Library(int flags);
+  Library(Library const& other);
+  Library(Library&& other);
+  Library& operator=(Library other);
   ~Library(void);
 };
 }

@@ -26,24 +26,6 @@ Codec::Codec(void)
 {    
 }
 
-Codec::Codec(Codec const& other) : codec_(other.codec_)
-{
-}
-
-Codec::Codec(Codec&& other) : codec_(std::move(other.codec_))
-{
-}
-
-Codec& Codec::operator=(Codec other)
-{
-  std::swap(codec_, other.codec_);
-  return *this;
-}
-
-Codec::~Codec(void)
-{
-}
-
 AVCodecContext* Codec::operator->(void) const
 {
   return codec_.operator->();

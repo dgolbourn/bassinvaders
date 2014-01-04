@@ -96,24 +96,6 @@ Resampler::Resampler(Codec const& codec)
 {
   impl_ = std::make_shared<ResamplerImpl>(codec);
 }
-  
-Resampler::Resampler(Resampler const& other) : impl_(other.impl_)
-{
-}
-
-Resampler::Resampler(Resampler&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Resampler& Resampler::operator=(Resampler other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
-}
-
-Resampler::~Resampler(void)
-{
-}
 
 Samples Resampler::Resample(uint8_t const** input, int in_samples)
 {

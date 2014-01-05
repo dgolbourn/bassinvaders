@@ -19,7 +19,7 @@ public:
   bool operator&&(BoundingBox const& other) const;
   bool operator<(BoundingBox const& other) const;
   explicit operator bool(void) const;
-  operator SDL_Rect*(void) const;
+  operator SDL_Rect(void) const;
   void x(int x);
   void y(int y);
   void w(int w);

@@ -62,7 +62,7 @@ void MusicImpl::Volume(int volume)
   (void)Mix_VolumeMusic(volume_);
 }
 
-int const buffer_size = static_cast<int>(1) << 12;
+static int const buffer_size = static_cast<int>(1) << 12;
 static int const default_volume = -1;
 MusicImpl::MusicImpl(std::string const& filename) : mix_(), volume_(default_volume), music_(filename, buffer_size)
 {

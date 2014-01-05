@@ -161,28 +161,26 @@ void HeroImpl::Change(State& next)
   }
 }
 
+static void BoxUpdate(display::BoundingBox const& source, display::BoundingBox& destination, Position const& position, int x_facing)
+{
+  display::BoundingBox temp = source.Copy();
+  int sourcex = temp.x();
+  temp.x(temp.x() + position.first);
+  temp.y(temp.y() + position.second);
+  if(x_facing < 0)
+  {
+    temp.x(temp.x() - 2 * sourcex);
+    temp.w(-temp.w());
+  }
+  destination.Copy(temp);
+}
+
 void HeroImpl::Position(Dynamics::Position const& position)
 {
   position_.first = int(position.first); 
   position_.second = int(position.second);
-
-  render_box_.Copy(current_.Render());
-  render_box_.x(render_box_.x() + position_.first);
-  render_box_.y(render_box_.y() + position_.second);
-  if(x_facing_ < 0)
-  {
-    render_box_.x(render_box_.x() - 2*current_.Render().x());
-    render_box_.w(-render_box_.w());
-  }
-
-  collision_box_.Copy(current_.Collision());
-  collision_box_.x(collision_box_.x() + position_.first);
-  collision_box_.y(collision_box_.y() + position_.second);
-  if(x_facing_ < 0)
-  {
-    collision_box_.x(collision_box_.x() - 2*current_.Collision().x());
-    collision_box_.w(-collision_box_.w());
-  }
+  BoxUpdate(current_.Render(), render_box_, position_, x_facing_);
+  BoxUpdate(current_.Collision(), collision_box_, position_, x_facing_);
 }
 
 void HeroImpl::Render(void)

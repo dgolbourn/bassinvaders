@@ -22,8 +22,8 @@ class DynamicsImpl
 {
 public:
   std::pair<Model, Model> model_;
-  event::Timer timer_;
   event::Signal signal_;
+  event::Timer timer_;
   DynamicsImpl(float x, float y, float u, float v);
   void Play(void);
   void Pause(void);

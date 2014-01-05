@@ -60,7 +60,7 @@ void PainterImpl::StartingRect(void)
   float a = std::round((c_ * x + s_ * y) / w_);
   float b = std::round((-s_ * x + c_ * y) / h_);
 
-  float sign[] = {1.f, 0.f, -1.f};
+  static float const sign[] = {1.f, 0.f, -1.f};
   for(float const& i : sign)
   {
     bool break_flag = false;

@@ -10,6 +10,7 @@
 #include "surface.h"
 #include "hash.h"
 #include "render.h"
+#include "thread.h"
 
 namespace display
 {
@@ -35,6 +36,7 @@ public:
   std::unordered_map<std::string, sdl::Texture> textures_;
   SDL_Point view_;
   float zoom_;
+  std::mutex mutex_;
 };
 
 void WindowImpl::Destroy(void)
@@ -172,16 +174,38 @@ Window::Window(void)
 {
 }
 
+static void Render(std::shared_ptr<WindowImpl> const& window, sdl::Texture const& texture, BoundingBox const& source, BoundingBox const& destination, float parallax, bool tile, double angle)
+{
+  SDL_Rect* source_ptr = nullptr;
+  SDL_Rect source_copy;
+  if(source)
+  {
+    source_copy = source;
+    source_ptr = &source_copy;
+  }
+
+  SDL_Rect* destination_ptr = nullptr;
+  SDL_Rect destination_copy;
+  if(destination)
+  {
+    destination_copy = destination;
+    destination_ptr = &destination_copy;
+  }
+
+  thread::Lock(window->mutex_);
+  sdl::Render(window->window_, window->renderer_, texture, source_ptr, destination_ptr, &window->view_, window->zoom_, parallax, tile, angle);
+}
+
 static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::Texture::WeakPtr texture_ptr)
 {
-  return [window_ptr, texture_ptr](display::BoundingBox const& source, display::BoundingBox const& destination, float parallax, bool tile, double angle)
+  return [window_ptr, texture_ptr](BoundingBox const& source, BoundingBox const& destination, float parallax, bool tile, double angle)
   {
     bool locked = false;
     if(auto window = window_ptr.lock())
     {
       if(auto texture = texture_ptr.Lock())
       {
-        sdl::Render(window->window_, window->renderer_, texture, source, destination, &window->view_, window->zoom_, parallax, tile, angle);
+        Render(window, texture, source, destination, parallax, tile, angle);
         locked = true;
       }
     }
@@ -191,12 +215,12 @@ static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::Texture::WeakPtr 
 
 static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::Texture texture)
 {
-  return [window_ptr, texture](display::BoundingBox const& source, display::BoundingBox const& destination, float parallax, bool tile, double angle)
+  return [window_ptr, texture](BoundingBox const& source, BoundingBox const& destination, float parallax, bool tile, double angle)
   {
     bool locked = false;
     if(auto window = window_ptr.lock())
     {
-      sdl::Render(window->window_, window->renderer_, texture, source, destination, &window->view_, window->zoom_, parallax, tile, angle);
+      Render(window, texture, source, destination, parallax, tile, angle);
       locked = true;
     }
     return locked;
@@ -205,31 +229,37 @@ static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::Texture texture)
 
 Texture Window::Load(std::string const& filename)
 {
+  thread::Lock(impl_->mutex_);
   return Bind(impl_, impl_->Load(filename));
 }
 
 Texture Window::Text(std::string const& text, Font const& font)
 {
+  thread::Lock(impl_->mutex_);
   return Bind(impl_, impl_->Text(text, font));
 }
 
 void Window::Clear(void) const
 {
+  thread::Lock(impl_->mutex_);
   return impl_->Clear();
 }
 
 void Window::Show(void) const
 {
+  thread::Lock(impl_->mutex_);
   return impl_->Show();
 }
 
 void Window::Free(void)
 {
+  thread::Lock(impl_->mutex_);
   impl_->Free();
 }
 
 void Window::View(int x, int y, float zoom)
 {
+  thread::Lock(impl_->mutex_);
   impl_->View(x, y, zoom);
 }
 }

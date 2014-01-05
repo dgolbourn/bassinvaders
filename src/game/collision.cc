@@ -59,7 +59,7 @@ void CollisionImpl::Check(void)
 
 void CollisionImpl::Add(display::BoundingBox const& a, display::BoundingBox const& b, event::Command const& c)
 {
-  if(a > b)
+  if(b < a)
   {
     collisions_[BoundingBoxPair(b, a)].push_back(c);
   }

@@ -43,7 +43,7 @@ template<class Method, class Impl, class... Args> event::Command Bind(Method&& m
     if(auto shared_locked = weak.lock())
     {
       Impl* ptr = shared_locked.get();
-      thread::Lock lock(ptr->mutex_);
+      std::lock_guard<decltype(ptr->mutex_)> lock(ptr->mutex_);
       (void)(ptr->*method)(args...);
       locked = true;
     }
@@ -59,7 +59,7 @@ template<class Return, class Impl, class... Args> std::function<std::pair<Return
     if(auto shared_locked = weak.lock())
     {
       Impl* ptr = shared_locked.get();
-      thread::Lock lock(ptr->mutex_);
+      std::lock_guard<decltype(ptr->mutex_)> lock(ptr->mutex_);
       return std::pair<Return, bool>((ptr->*method)(args...), true);
     }
     else
@@ -77,7 +77,7 @@ template<class Impl, class... Args> std::function<bool(Args...)> Bind(void(Impl:
     if(auto shared_locked = weak.lock())
     {
       Impl* ptr = shared_locked.get();
-      thread::Lock lock(ptr->mutex_);
+      std::lock_guard<decltype(ptr->mutex_)> lock(ptr->mutex_);
       (ptr->*method)(args...);
       return true;
     }
@@ -96,7 +96,7 @@ template<class Method, class Impl, class... Args> event::Command Bind(Method&& m
     if(auto shared_locked = weak.lock())
     {
       Impl* ptr = shared_locked.get();
-      thread::Lock lock(ptr->mutex_);
+      std::lock_guard<decltype(ptr->mutex_)> lock(ptr->mutex_);
       (void)(ptr->*method)(args...);
       locked = true;
     }
@@ -112,7 +112,7 @@ template<class Return, class Impl, class... Args> std::function<bool(Args...)> B
     if(auto shared_locked = weak.lock())
     {
       Impl* ptr = shared_locked.get();
-      thread::Lock lock(ptr->mutex_);
+      std::lock_guard<decltype(ptr->mutex_)> lock(ptr->mutex_);
       (void)(ptr->*method)(args...);
       locked = true;
     }

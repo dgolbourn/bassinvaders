@@ -13,7 +13,7 @@ class Animation
 {
 public:
   Animation(json::JSON const& json, display::Window& window);
-  Animation(void);
+  Animation(void) noexcept;
   void Render(display::BoundingBox const& destination, float parallax = 0.f, bool tile = false, double angle = 0.) const;
   void Pause(void);
   void Resume(void);

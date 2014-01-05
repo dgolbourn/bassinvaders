@@ -70,7 +70,7 @@ int Chunk::Play(int repeats, int volume)
   return channel;
 }
 
-Chunk::Chunk(void)
+Chunk::Chunk(void) noexcept
 {    
 }
 }

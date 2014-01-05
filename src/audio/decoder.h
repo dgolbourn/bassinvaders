@@ -10,7 +10,7 @@ namespace ffmpeg
 class Decoder
 {
 public:
-  Decoder(void);
+  Decoder(void) noexcept;
   Decoder(std::string const& filename, int buffer_size);
   void Read(uint8_t* buffer, int size);
   explicit operator bool(void) const;

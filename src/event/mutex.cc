@@ -29,7 +29,7 @@ void Mutex::unlock(void)
   }
 }
 
-Mutex::Mutex(void) : mutex_(CreateMutex(), &SDL_DestroyMutex)
+Mutex::Mutex(void) : mutex_(CreateMutex(), SDL_DestroyMutex)
 {
 }
 };

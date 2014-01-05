@@ -18,7 +18,7 @@ public:
   }
 };
 
-Surface::Surface(void)
+Surface::Surface(void) noexcept
 {
 }
 

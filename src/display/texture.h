@@ -10,7 +10,7 @@ namespace sdl
 class Texture
 {
 public:
-  Texture(void);
+  Texture(void) noexcept;
   Texture(SDL_Renderer* renderer, SDL_Surface* surface);
   operator SDL_Texture*(void) const;
   SDL_Texture* operator->(void) const;

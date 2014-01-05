@@ -113,7 +113,7 @@ Sound::Sound(std::string const& filename)
   impl_ = std::make_shared<SoundImpl>(filename);
 }
 
-Sound::Sound(void)
+Sound::Sound(void) noexcept
 {
 }
 

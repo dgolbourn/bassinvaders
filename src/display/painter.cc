@@ -153,7 +153,7 @@ Painter::Painter(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* textur
   impl_ = std::make_shared<PainterImpl>(window, renderer, texture, source, destination, view, angle);
 }
 
-Painter::Painter(void)
+Painter::Painter(void) noexcept
 {
 }
 }

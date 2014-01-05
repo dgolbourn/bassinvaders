@@ -66,7 +66,7 @@ FormatImpl::~FormatImpl(void)
   Destroy();
 }
 
-Format::Format(void)
+Format::Format(void) noexcept
 {    
 }
 

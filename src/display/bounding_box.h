@@ -13,7 +13,7 @@ namespace display
 class BoundingBox
 {
 public:
-  BoundingBox(void);
+  BoundingBox(void) noexcept;
   BoundingBox(int x, int y, int w, int h);
   BoundingBox(json::JSON const& json);
   bool operator&&(BoundingBox const& other) const;

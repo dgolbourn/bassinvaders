@@ -75,7 +75,7 @@ void DynamicsImpl::Resume(void)
   timer_.Resume();
 }
 
-Dynamics::Dynamics(void)
+Dynamics::Dynamics(void) noexcept
 {
 }
 

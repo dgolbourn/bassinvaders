@@ -130,7 +130,7 @@ int Buffer::Read(uint8_t* buffer, int size)
   return impl_->Read(buffer, size);
 }
 
-Buffer::Buffer(void)
+Buffer::Buffer(void) noexcept
 {
 }
 

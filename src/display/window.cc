@@ -170,7 +170,7 @@ Window::Window(json::JSON const& json)
   impl_ = std::make_shared<WindowImpl>(json);
 }
 
-Window::Window(void)
+Window::Window(void) noexcept
 {
 }
 

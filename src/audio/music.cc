@@ -68,7 +68,7 @@ MusicImpl::MusicImpl(std::string const& filename) : mix_(), volume_(default_volu
 {
 }
 
-Music::Music(void)
+Music::Music(void) noexcept
 {
 }
 

@@ -88,7 +88,7 @@ Samples ResamplerImpl::Resample(uint8_t const** input, int in_samples)
   return Samples(output, size);
 }
 
-Resampler::Resampler(void)
+Resampler::Resampler(void) noexcept
 {
 }
 

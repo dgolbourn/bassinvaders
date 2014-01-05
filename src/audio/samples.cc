@@ -31,7 +31,7 @@ Samples::Samples(uint8_t** data, int size) : impl_(new SamplesImpl(data, size))
 {
 }
 
-Samples::Samples(void)
+Samples::Samples(void) noexcept
 {
 }
 

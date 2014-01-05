@@ -17,7 +17,7 @@ class Hero
 {
 public:
   Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesCollision& collision);
-  Hero(void);
+  Hero(void) noexcept;
   void Position(game::Position const& position);
   game::Position Position(void);
   typedef std::function<bool(int)> Command;

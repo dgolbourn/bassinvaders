@@ -15,7 +15,7 @@ public:
   }
 };
 
-Texture::Texture(void)
+Texture::Texture(void) noexcept
 {
 }
 

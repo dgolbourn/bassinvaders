@@ -11,13 +11,12 @@ class State
 {
 public:
   State(json::JSON const& json, display::Window& window);
-  State(void);
+  State(void) noexcept;
   bool operator==(State const& other) const;
   void Play(void);
   void Pause(void);
   void Resume(void);
   void Stop(void);
-  //void Render(Position const& position, bool facing);
   void End(event::Command const& command);
   display::BoundingBox const& Collision(void) const;
   display::BoundingBox const& Render(void) const;

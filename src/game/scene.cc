@@ -68,7 +68,7 @@ SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
   }
 }
 
-Scene::Scene(void)
+Scene::Scene(void) noexcept
 {
 }
 

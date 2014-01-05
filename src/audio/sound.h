@@ -10,7 +10,7 @@ namespace audio
 class Sound
 {
 public:
-  Sound(void);
+  Sound(void) noexcept;
   Sound(std::string const& filename);
   void Play(int repeats = 0);
   void Pause(void) const;

@@ -13,7 +13,7 @@ class HUD
 {
 public:
   HUD(json::JSON const& json, display::Window& window, Scene& scene);
-  HUD(void);
+  HUD(void) noexcept;
   void Score(int score);
   void Life(int life);
   explicit operator bool(void) const;

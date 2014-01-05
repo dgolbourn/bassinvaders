@@ -23,7 +23,7 @@ Font::Font(std::string const& filename, int point, int r, int g, int b, int a)
   impl_ = std::make_shared<FontImpl>(filename, point, r, g, b, a);
 }
 
-Font::Font(void)
+Font::Font(void) noexcept
 {
 }
 }

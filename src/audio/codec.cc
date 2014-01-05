@@ -22,7 +22,7 @@ Codec::Codec(Format const& format) : codec_(InitAVCodecContext(format), &avcodec
 {
 }
 
-Codec::Codec(void)
+Codec::Codec(void) noexcept
 {    
 }
 

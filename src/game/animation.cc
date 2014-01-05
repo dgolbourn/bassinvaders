@@ -133,7 +133,7 @@ void Animation::End(event::Command const& command)
   impl_->End(command);
 }
 
-Animation::Animation(void)
+Animation::Animation(void) noexcept
 {
 }
 }

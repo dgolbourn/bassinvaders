@@ -8,7 +8,7 @@ namespace event
 class Timer
 {
 public:
-  Timer(void);
+  Timer(void) noexcept;
   Timer(int interval);
   void Play(int loops = 0);
   void Pause(void);

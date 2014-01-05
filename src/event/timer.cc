@@ -137,7 +137,7 @@ Uint32 TimerImpl::Update(void)
   return interval;
 }
 
-Timer::Timer(void)
+Timer::Timer(void) noexcept
 {
 }
 

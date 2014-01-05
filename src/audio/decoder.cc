@@ -138,7 +138,7 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
   }
 }
 
-Decoder::Decoder(void)
+Decoder::Decoder(void) noexcept
 {
 }
 

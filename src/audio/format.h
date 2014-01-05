@@ -13,7 +13,7 @@ namespace ffmpeg
 class Format
 {
 public:
-  Format(void);
+  Format(void) noexcept;
   Format(std::string const& filename);
   AVFormatContext* format(void) const;
   AVStream* audio_stream(void) const;

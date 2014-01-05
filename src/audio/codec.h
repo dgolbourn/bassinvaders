@@ -13,7 +13,7 @@ namespace ffmpeg
 class Codec
 {
 public:
-  Codec(void);
+  Codec(void) noexcept;
   Codec(Format const& format);
   AVCodecContext* operator->(void) const;
   operator AVCodecContext*(void) const;

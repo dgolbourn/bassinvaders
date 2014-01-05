@@ -12,13 +12,13 @@ public:
   void Score(int score);
   void Life(int life);
   void Render(void);
+  std::mutex mutex_;
   display::Window window_;
   display::Font font_;
   display::Texture score_;
   display::Texture life_;
   display::BoundingBox score_position_;
   display::BoundingBox life_position_;
-  std::mutex mutex_;
 };
 
 HUDImpl::HUDImpl(json::JSON const& json, display::Window& window) : window_(window)

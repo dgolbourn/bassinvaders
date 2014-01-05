@@ -20,11 +20,11 @@ public:
   void Play(int loops, bool end_on_first);
   void End(event::Command const& command);
 
+  std::mutex mutex_;
   display::Texture texture_;
-  event::Timer timer_;
   std::vector<display::BoundingBox> frames_;
   std::vector<display::BoundingBox>::iterator frame_;
-  std::mutex mutex_;
+  event::Timer timer_;
 };
 
 AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)

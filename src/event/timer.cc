@@ -20,16 +20,16 @@ public:
   ~TimerImpl(void);
 
   sdl::Library const sdl_;
+  sdl::Mutex mutex_;
   Uint32 const interval_;
   Uint32 last_update_;
   Uint32 resume_interval_;
-  SDL_TimerID timer_;
   Signal signal_;
   Signal end_;
   int loops_;
   int max_loops_;
   bool paused_;
-  sdl::Mutex mutex_;
+  SDL_TimerID timer_;
 };
 
 static SDL_TimerID const timer_null = static_cast<SDL_TimerID>(NULL);

@@ -31,12 +31,12 @@ public:
   sdl::Library const sdl_;
   img::Library const img_;
   ttf::Library const ttf_;
+  std::mutex mutex_;
   SDL_Window* window_;
   SDL_Renderer* renderer_;
   std::unordered_map<std::string, sdl::Texture> textures_;
   SDL_Point view_;
   float zoom_;
-  std::mutex mutex_;
 };
 
 void WindowImpl::Destroy(void)

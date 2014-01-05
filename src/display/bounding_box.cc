@@ -10,8 +10,8 @@ class BoundingBoxImpl
 public:
   BoundingBoxImpl(int x, int y, int w, int h);
   BoundingBoxImpl(json::JSON const& json);
+  std::mutex mutex_; 
   SDL_Rect rect_;
-  std::mutex mutex_;
 };
 
 bool BoundingBox::operator&&(BoundingBox const& other) const

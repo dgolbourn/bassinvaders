@@ -12,6 +12,7 @@ class HeroImpl
 public:
   HeroImpl(json::JSON const& json, display::Window& window);
   void End(event::Command const& command);
+  std::mutex mutex_;
   State moving_;
   State destroyed_;
   State spawn_;
@@ -30,7 +31,6 @@ public:
   int y_sign_;
   int y_facing_;
   int life_;
-  std::mutex mutex_;
   void Render(void);
   void Pause(void);
   void Resume(void);

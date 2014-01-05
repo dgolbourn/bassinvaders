@@ -10,7 +10,6 @@ public:
   BufferImpl(int size);
   void Add(Samples const& samples);
   bool Full(void) const;
-  explicit operator bool(void) const;
   int Read(uint8_t* buffer, int size);
 
   std::mutex mutex_;
@@ -53,19 +52,12 @@ void BufferImpl::Add(Samples const& samples)
 
 bool BufferImpl::Full(void) const
 {
-  bool full = total_buffer_size_ >= target_buffer_size_;
-  return full;
-}
-
-BufferImpl::operator bool(void) const
-{
-  return !queue_.empty();
+  return total_buffer_size_ >= target_buffer_size_;
 }
 
 int BufferImpl::Read(uint8_t* buffer, int size)
 {
   int start_size = size;
-
   while(size)
   {
     if(!queue_.empty())
@@ -101,7 +93,6 @@ int BufferImpl::Read(uint8_t* buffer, int size)
       break;
     }
   }
-
   start_size -= size;
   return start_size;
 }
@@ -120,7 +111,6 @@ bool Buffer::Full(void) const
 
 Buffer::operator bool(void) const
 {
-  thread::Lock lock(impl_->mutex_);
   return bool(impl_);
 }
 

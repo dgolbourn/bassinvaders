@@ -23,7 +23,7 @@ public:
   }
 };
 
-class DynamicsImpl
+class DynamicsImpl : public std::enable_shared_from_this<DynamicsImpl>
 {
 public:
   sdl::Mutex mutex_;
@@ -31,6 +31,7 @@ public:
   event::Signal signal_;
   event::Timer timer_;
   DynamicsImpl(float x, float y, float u, float v);
+  void Init(void);
   void Play(void);
   void Pause(void);
   void Resume(void);
@@ -62,6 +63,11 @@ DynamicsImpl::DynamicsImpl(float x, float y, float u, float v) : timer_(dt)
   model_.v_ = v;
 }
 
+void DynamicsImpl::Init(void)
+{
+  timer_.Add(event::Bind(&DynamicsImpl::Step, shared_from_this()));
+}
+
 void DynamicsImpl::Play(void)
 {
   timer_.Play(-1);
@@ -85,7 +91,7 @@ Dynamics::Dynamics(float x, float y, float u, float v)
 {
   impl_ = std::make_shared<DynamicsImpl>(x, y, u, v);
   sdl::Lock(impl_->mutex_);
-  impl_->timer_.Add(event::Bind(&DynamicsImpl::Step, impl_));
+  impl_->Init();
 }
 
 void Dynamics::x(float x)

@@ -7,10 +7,11 @@
 
 namespace game
 {
-class HeroImpl
+class HeroImpl : public std::enable_shared_from_this<HeroImpl>
 {
 public:
   HeroImpl(json::JSON const& json, display::Window& window);
+  void Init(Scene& scene, RulesCollision& collision);
   void End(event::Command const& command);
   std::mutex mutex_;
   State moving_;
@@ -237,6 +238,31 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window)
   life_ = 100;
 }
 
+void HeroImpl::Init(Scene& scene, RulesCollision& collision)
+{
+  auto ptr = shared_from_this();
+  hit_.End(event::Bind(&HeroImpl::Reset, ptr));
+  destroyed_.End(event::Bind(&HeroImpl::SignalEnd, ptr));
+  dynamics_.Add(event::Bind(&HeroImpl::Position, ptr));
+  spawn_.End(event::Bind(&HeroImpl::Reset, ptr));
+  scene.Add(event::Bind(&HeroImpl::Render, ptr), 0);
+  event::pause.first.Add(event::Bind(&HeroImpl::Pause, ptr));
+  event::pause.second.Add(event::Bind(&HeroImpl::Resume, ptr));
+  event::up.first.Add(event::Bind(&HeroImpl::Up, ptr));
+  event::up.second.Add(event::Bind(&HeroImpl::Down, ptr));
+  event::down.first.Add(event::Bind(&HeroImpl::Down, ptr));
+  event::down.second.Add(event::Bind(&HeroImpl::Up, ptr));
+  event::left.first.Add(event::Bind(&HeroImpl::Left, ptr));
+  event::left.second.Add(event::Bind(&HeroImpl::Right, ptr));
+  event::right.first.Add(event::Bind(&HeroImpl::Right, ptr));
+  event::right.second.Add(event::Bind(&HeroImpl::Left, ptr));
+  event::button1.first.Add(event::Bind(&HeroImpl::Attack, ptr));
+  RulesCollision::Channel::Send send(event::Bind(&HeroImpl::EnemySend, ptr));
+  RulesCollision::Channel::Receive receive(event::Bind(&HeroImpl::EnemyReceive, ptr));
+  RulesCollision::Channel::Pair channel(send, receive);
+  collision.Add(0, ptr->collision_box_, channel);
+}
+
 void HeroImpl::Life(Hero::Command command)
 {
   life_signal_.Add([=](){return command(life_);});
@@ -276,25 +302,6 @@ Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesC
 {
   impl_ = std::make_shared<HeroImpl>(json, window);
   thread::Lock lock(impl_->mutex_);
-  impl_->hit_.End(event::Bind(&HeroImpl::Reset, impl_));
-  impl_->destroyed_.End(event::Bind(&HeroImpl::SignalEnd, impl_));
-  impl_->dynamics_.Add(event::Bind(&HeroImpl::Position, impl_));
-  impl_->spawn_.End(event::Bind(&HeroImpl::Reset, impl_));
-  scene.Add(event::Bind(&HeroImpl::Render, impl_), 0);
-  event::pause.first.Add(event::Bind(&HeroImpl::Pause, impl_));
-  event::pause.second.Add(event::Bind(&HeroImpl::Resume, impl_));
-  event::up.first.Add(event::Bind(&HeroImpl::Up, impl_));
-  event::up.second.Add(event::Bind(&HeroImpl::Down, impl_));
-  event::down.first.Add(event::Bind(&HeroImpl::Down, impl_));
-  event::down.second.Add(event::Bind(&HeroImpl::Up, impl_));
-  event::left.first.Add(event::Bind(&HeroImpl::Left, impl_));
-  event::left.second.Add(event::Bind(&HeroImpl::Right, impl_));
-  event::right.first.Add(event::Bind(&HeroImpl::Right, impl_));
-  event::right.second.Add(event::Bind(&HeroImpl::Left, impl_));
-  event::button1.first.Add(event::Bind(&HeroImpl::Attack, impl_));
-  RulesCollision::Channel::Send send(event::Bind(&HeroImpl::EnemySend, impl_));
-  RulesCollision::Channel::Receive receive(event::Bind(&HeroImpl::EnemyReceive, impl_));
-  RulesCollision::Channel::Pair channel(send, receive);
-  collision.Add(0, impl_->collision_box_, channel);
+  impl_->Init(scene, collision);
 }
 }

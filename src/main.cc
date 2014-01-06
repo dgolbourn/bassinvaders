@@ -21,11 +21,12 @@
 #include "bind.h"
 #include "hud.h"
 #include "rules_collision.h"
+#include <atomic>
 
-static bool quit = false;
+static std::atomic<bool> run(true);
 static bool Quit(void)
 {
-  quit = true;
+  run = false;
   return false;
 }
 
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
 
     event::pause.second();
     int score = 0;
-    while(!quit)
+    while(run)
     {
       hud.Score(score++);
       game::Position p = h.Position();

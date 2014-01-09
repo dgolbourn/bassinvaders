@@ -113,10 +113,6 @@ Sound::Sound(std::string const& filename)
   impl_ = std::make_shared<SoundImpl>(filename);
 }
 
-Sound::Sound(void) noexcept
-{
-}
-
 void Sound::Play(int repeats)
 {
   impl_->Play(repeats, impl_);

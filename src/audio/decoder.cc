@@ -138,10 +138,6 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
   }
 }
 
-Decoder::Decoder(void) noexcept
-{
-}
-
 Decoder::Decoder(std::string const& filename, int buffer_size)
 {
   impl_ = std::make_shared<DecoderImpl>(filename, buffer_size);

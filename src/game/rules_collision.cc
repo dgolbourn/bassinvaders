@@ -97,8 +97,4 @@ RulesCollision::RulesCollision(Collision const& collision)
 {
   impl_ = std::make_shared<RulesCollisionImpl>(collision);
 }
-
-RulesCollision::RulesCollision(void) noexcept
-{
-}
 }

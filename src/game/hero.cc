@@ -294,10 +294,6 @@ void Hero::Life(Command const& command)
   impl_->Life(command);
 }
 
-Hero::Hero(void) noexcept
-{
-}
-
 Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesCollision& collision)
 {
   impl_ = std::make_shared<HeroImpl>(json, window);

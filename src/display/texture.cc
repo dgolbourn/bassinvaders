@@ -15,10 +15,6 @@ public:
   }
 };
 
-Texture::Texture(void) noexcept
-{
-}
-
 Texture::Texture(SDL_Renderer* renderer, SDL_Surface* surface)
 {
   SDL_Texture* impl = nullptr;

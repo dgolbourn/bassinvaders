@@ -16,7 +16,7 @@ class Window
 {
 public:
   Window(json::JSON const& json);
-  Window(void) noexcept;
+  Window(void) = default;
   Texture Load(std::string const& filename);
   Texture Text(std::string const& text, Font const& font);
   void Free(void);

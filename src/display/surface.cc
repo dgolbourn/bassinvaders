@@ -18,10 +18,6 @@ public:
   }
 };
 
-Surface::Surface(void) noexcept
-{
-}
-
 Surface::Surface(TTF_Font* font, char const* text, SDL_Color fg)
 {
   SDL_Surface* impl = nullptr;

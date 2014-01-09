@@ -9,7 +9,7 @@ namespace mix
 class Chunk
 {
 public:
-  Chunk(void) noexcept;
+  Chunk(void) = default;
   Chunk(std::string const& filename);
   int Play(int repeats, int volume);
 private:

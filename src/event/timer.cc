@@ -137,10 +137,6 @@ Uint32 TimerImpl::Update(void)
   return interval;
 }
 
-Timer::Timer(void) noexcept
-{
-}
-
 Timer::Timer(int interval)
 {
   impl_ = std::make_shared<TimerImpl>(interval);

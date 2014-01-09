@@ -9,7 +9,7 @@ namespace game
 class Dynamics
 {
 public:
-  Dynamics(void) noexcept;
+  Dynamics(void) = default;
   Dynamics(float x, float y, float u, float v);
   void x(float x);
   void y(float y);

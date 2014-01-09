@@ -88,10 +88,6 @@ Samples ResamplerImpl::Resample(uint8_t const** input, int in_samples)
   return Samples(output, size);
 }
 
-Resampler::Resampler(void) noexcept
-{
-}
-
 Resampler::Resampler(Codec const& codec)
 {
   impl_ = std::make_shared<ResamplerImpl>(codec);

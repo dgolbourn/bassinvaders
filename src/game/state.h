@@ -11,7 +11,7 @@ class State
 {
 public:
   State(json::JSON const& json, display::Window& window);
-  State(void) noexcept;
+  State(void) = default;
   bool operator==(State const& other) const;
   void Play(void);
   void Pause(void);

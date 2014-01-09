@@ -68,10 +68,6 @@ MusicImpl::MusicImpl(std::string const& filename) : mix_(), volume_(default_volu
 {
 }
 
-Music::Music(void) noexcept
-{
-}
-
 Music::Music(std::string const& filename)
 {
   impl_ = std::make_shared<MusicImpl>(filename);

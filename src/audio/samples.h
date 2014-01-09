@@ -14,7 +14,7 @@ class Samples
 {
 public:
   Samples(uint8_t** data, int size);
-  Samples(void) noexcept;
+  Samples(void) = default;
   uint8_t**& data(void) const;
   int size(void) const;
 private:

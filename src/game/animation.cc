@@ -132,8 +132,4 @@ void Animation::End(event::Command const& command)
   thread::Lock lock(impl_->mutex_);
   impl_->End(command);
 }
-
-Animation::Animation(void) noexcept
-{
-}
 }

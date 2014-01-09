@@ -10,7 +10,7 @@ namespace audio
 class Music
 {
 public:
-  Music(void) noexcept;  
+  Music(void) = default;  
   Music(std::string const& filename);
   void Pause(void) const;
   void Resume(void);

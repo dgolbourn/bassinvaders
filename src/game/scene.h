@@ -11,7 +11,7 @@ namespace game
 class Scene
 {
 public:
-  Scene(void) noexcept;
+  Scene(void) = default;
   Scene(json::JSON const& json, display::Window& window);
   void Add(event::Command const& layer, int z);
   void Render(void);

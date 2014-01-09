@@ -9,7 +9,7 @@ namespace ffmpeg
 class Buffer
 {
 public:
-  Buffer(void) noexcept;
+  Buffer(void) = default;
   Buffer(int size);
   void Add(Samples const& samples);
   bool Full(void) const;

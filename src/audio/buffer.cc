@@ -120,10 +120,6 @@ int Buffer::Read(uint8_t* buffer, int size)
   return impl_->Read(buffer, size);
 }
 
-Buffer::Buffer(void) noexcept
-{
-}
-
 Buffer::Buffer(int size)
 {
   impl_ = std::make_shared<BufferImpl>(size);

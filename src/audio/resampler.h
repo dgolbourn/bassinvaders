@@ -11,7 +11,7 @@ namespace ffmpeg
 class Resampler
 {
 public:
-  Resampler(void) noexcept;
+  Resampler(void) = default;
   Resampler(Codec const& codec);
   Samples Resample(uint8_t const** input, int in_samples);
 private:

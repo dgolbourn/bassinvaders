@@ -22,10 +22,6 @@ Codec::Codec(Format const& format) : codec_(InitAVCodecContext(format), &avcodec
 {
 }
 
-Codec::Codec(void) noexcept
-{    
-}
-
 AVCodecContext* Codec::operator->(void) const
 {
   return codec_.operator->();

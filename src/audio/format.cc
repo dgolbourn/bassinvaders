@@ -66,10 +66,6 @@ FormatImpl::~FormatImpl(void)
   Destroy();
 }
 
-Format::Format(void) noexcept
-{    
-}
-
 Format::Format(std::string const& filename)
 {
   impl_ = std::make_shared<FormatImpl>(filename);

@@ -170,10 +170,6 @@ Window::Window(json::JSON const& json)
   impl_ = std::make_shared<WindowImpl>(json);
 }
 
-Window::Window(void) noexcept
-{
-}
-
 static void Render(std::shared_ptr<WindowImpl> const& window, sdl::Texture const& texture, BoundingBox const& source, BoundingBox const& destination, float parallax, bool tile, double angle)
 {
   SDL_Rect* source_ptr = nullptr;

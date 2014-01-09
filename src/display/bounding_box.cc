@@ -123,8 +123,4 @@ BoundingBox::BoundingBox(json::JSON const& json)
 {
   impl_ = std::make_shared<BoundingBoxImpl>(json);
 }
-
-BoundingBox::BoundingBox(void) noexcept
-{
-}
 }

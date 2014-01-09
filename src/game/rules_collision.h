@@ -8,7 +8,7 @@ namespace game
 class RulesCollision
 {
 public:
-  RulesCollision(void) noexcept;
+  RulesCollision(void) = default;
   RulesCollision(Collision const& collision);
   typedef std::pair<int, int> Rules;
   typedef event::Channel<Rules> Channel;

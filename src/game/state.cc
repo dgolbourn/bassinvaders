@@ -122,10 +122,6 @@ bool State::operator==(State const& other) const
   return impl_ == other.impl_;
 }
 
-State::State(void) noexcept
-{
-}
-
 State::State(json::JSON const& json, display::Window& window)
 {
   impl_ = std::make_shared<StateImpl>(json, window);

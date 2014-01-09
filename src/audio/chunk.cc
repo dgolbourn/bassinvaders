@@ -69,8 +69,4 @@ int Chunk::Play(int repeats, int volume)
   (void)Mix_Volume(channel, volume);
   return channel;
 }
-
-Chunk::Chunk(void) noexcept
-{    
-}
 }

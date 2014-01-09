@@ -83,8 +83,4 @@ HUD::HUD(json::JSON const& json, display::Window& window, Scene& scene)
   impl_ = std::make_shared<HUDImpl>(json, window);
   scene.Add(event::Bind(&HUDImpl::Render, impl_), std::numeric_limits<int>().max());
 }
-
-HUD::HUD(void) noexcept
-{
-}
 }

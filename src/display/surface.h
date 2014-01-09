@@ -10,7 +10,7 @@ namespace sdl
 class Surface
 {
 public:
-  Surface(void) noexcept;
+  Surface(void) = default;
   Surface(TTF_Font* font, char const* text, SDL_Color fg);
   Surface(char const* file);
   operator SDL_Surface*(void) const;

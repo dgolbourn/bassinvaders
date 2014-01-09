@@ -83,10 +83,6 @@ void DynamicsImpl::Resume(void)
   timer_.Resume();
 }
 
-Dynamics::Dynamics(void) noexcept
-{
-}
-
 Dynamics::Dynamics(float x, float y, float u, float v)
 {
   impl_ = std::make_shared<DynamicsImpl>(x, y, u, v);

@@ -7,29 +7,22 @@ namespace ffmpeg
 class BufferImpl
 {
 public:
-  BufferImpl(int size);
+  BufferImpl(void);
   void Add(Samples const& samples);
-  bool Full(void) const;
   int Read(uint8_t* buffer, int size);
 
   std::mutex mutex_;
   std::queue<Samples> queue_;
   uint8_t* data_;
   int data_size_;
-  int total_buffer_size_;
-  int target_buffer_size_;
+  int buffer_size_;
 };
 
-BufferImpl::BufferImpl(int size)
+BufferImpl::BufferImpl(void)
 {
   data_ = nullptr;
-  total_buffer_size_ = 0;
+  buffer_size_ = 0;
   data_size_ = 0;
-  if(size < 1)
-  {
-    size = 1;
-  }
-  target_buffer_size_ = size;
 }
 
 void BufferImpl::Add(Samples const& samples)
@@ -40,7 +33,7 @@ void BufferImpl::Add(Samples const& samples)
     empty_flag = true;
   }
   
-  total_buffer_size_ += samples.size();
+  buffer_size_ += samples.size();
   queue_.push(samples);
 
   if(empty_flag)
@@ -48,11 +41,6 @@ void BufferImpl::Add(Samples const& samples)
     data_size_ = queue_.front().size();
     data_ = queue_.front().data()[0];
   }
-}
-
-bool BufferImpl::Full(void) const
-{
-  return total_buffer_size_ >= target_buffer_size_;
 }
 
 int BufferImpl::Read(uint8_t* buffer, int size)
@@ -67,14 +55,14 @@ int BufferImpl::Read(uint8_t* buffer, int size)
         memcpy(buffer, data_, size);
         data_ += size;
         data_size_ -= size;
-        total_buffer_size_ -= size;
+        buffer_size_ -= size;
         size = 0;
       }
       else
       {
         memcpy(buffer, data_, data_size_);
         buffer += data_size_;
-        total_buffer_size_ -= data_size_;
+        buffer_size_ -= data_size_;
         size -= data_size_;
         queue_.pop();
         if(!queue_.empty())
@@ -103,15 +91,9 @@ void Buffer::Add(Samples const& samples)
   impl_->Add(samples);
 }
 
-bool Buffer::Full(void) const
-{
-  thread::Lock lock(impl_->mutex_);
-  return impl_->Full();
-}
-
 Buffer::operator bool(void) const
 {
-  return bool(impl_);
+  return impl_->buffer_size_ > 0;
 }
 
 int Buffer::Read(uint8_t* buffer, int size)
@@ -120,8 +102,8 @@ int Buffer::Read(uint8_t* buffer, int size)
   return impl_->Read(buffer, size);
 }
 
-Buffer::Buffer(int size)
+Buffer::Buffer(void)
 {
-  impl_ = std::make_shared<BufferImpl>(size);
+  impl_ = std::make_shared<BufferImpl>();
 }
 }

@@ -68,10 +68,6 @@ SceneImpl::SceneImpl(json::JSON const& json, display::Window& window)
   }
 }
 
-Scene::Scene(void) noexcept
-{
-}
-
 void Scene::Render(void)
 {
   impl_->Render();

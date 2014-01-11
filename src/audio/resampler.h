@@ -13,7 +13,7 @@ class Resampler
 public:
   Resampler(void) = default;
   Resampler(Codec const& codec);
-  Samples Resample(uint8_t const** input, int in_samples);
+  Samples operator()(uint8_t const** input, int in_samples);
 private:
   std::shared_ptr<class ResamplerImpl> impl_;
 };

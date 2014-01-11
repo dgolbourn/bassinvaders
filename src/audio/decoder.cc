@@ -8,20 +8,15 @@
 #include "frame.h"
 #include "ffmpeg_exception.h"
 
-#include <queue>
-#include <thread>
-
 namespace ffmpeg
 {
 class DecoderImpl
 {
 public:
-  DecoderImpl(std::string const& filename, int buffer_size);
+  DecoderImpl(std::string const& filename);
   void Decode(void);
-  void FillBuffer(void);
   bool Empty(void) const;
   void Read(uint8_t* buffer, int size);
-  void Flush(void);
 
   ~DecoderImpl(void);
 
@@ -31,44 +26,23 @@ public:
   ffmpeg::Resampler resampler_;
   ffmpeg::Frame frame_;
   ffmpeg::Buffer buffer_;
-  bool packets_finished_;
-  std::thread thread_;
+  bool finished_;
 };
 
-static void FillBufferThread(DecoderImpl* impl)
-{
-  while(!impl->packets_finished_)
-  {
-    impl->FillBuffer();
-  }
-}
-
-DecoderImpl::DecoderImpl(std::string const& filename, int buffer_size) : ffmpeg_()
+DecoderImpl::DecoderImpl(std::string const& filename) : finished_(false)
 {
   format_ = ffmpeg::Format(filename);
   codec_ = ffmpeg::Codec(format_);
   resampler_ = ffmpeg::Resampler(codec_);
-  buffer_ = ffmpeg::Buffer(buffer_size);
-
-  packets_finished_ = false;
-  FillBuffer();
-  thread_ = std::thread(FillBufferThread, this);
 }
 
 DecoderImpl::~DecoderImpl(void)
 {
-  packets_finished_ = true;
-  thread_.join();
-  Flush();
-}
-
-void DecoderImpl::Flush(void)
-{
   if(codec_->codec->capabilities & CODEC_CAP_DELAY)
   {
     ffmpeg::Packet packet;
-    int frameFinished = 0;
-    while(avcodec_decode_audio4(codec_, frame_, &frameFinished, packet) >= 0 && frameFinished)
+    int frame_finished = 0;
+    while(avcodec_decode_audio4(codec_, frame_, &frame_finished, packet) >= 0 && frame_finished)
     {
       frame_.Clear();
     }
@@ -77,70 +51,67 @@ void DecoderImpl::Flush(void)
 
 void DecoderImpl::Decode(void)
 {
-  if(!packets_finished_) 
+  ffmpeg::Packet packet;
+  if(av_read_frame(format_.format(), packet) == 0)
   {
-    ffmpeg::Packet packet;
-    if(av_read_frame(format_.format(), packet) == 0)
+    if(packet->stream_index == format_.audio_stream()->index)
     {
-      if(packet->stream_index == format_.audio_stream()->index)
+      while(packet)
       {
-        while(packet)
-        {
-          int frame_finished = 0;
-          int amount = avcodec_decode_audio4(codec_, frame_, &frame_finished, packet);
-          if(amount < 0)
-          { 
-            throw ffmpeg::Exception();
-          }
-          if(frame_finished)
-          {
-            ffmpeg::Samples samples = resampler_.Resample(frame_.data(), frame_->nb_samples);
-            buffer_.Add(samples);
-            frame_.Clear();
-          }
-          packet.Next(amount);
+        int frame_finished = 0;
+        int amount = avcodec_decode_audio4(codec_, frame_, &frame_finished, packet);
+        if(amount < 0)
+        { 
+          throw ffmpeg::Exception();
         }
+        if(frame_finished)
+        {
+          buffer_.Add(resampler_(frame_.data(), frame_->nb_samples));
+          frame_.Clear();
+        }
+        packet.Next(amount);
       }
     }
-    else
-    {
-      packets_finished_ = true;
-    }
   }
-}
-
-void DecoderImpl::FillBuffer(void)
-{
-  while(!buffer_.Full() && !packets_finished_)
+  else
   {
-    Decode();
-  } 
-}
-
-bool DecoderImpl::Empty(void) const
-{
-  return !buffer_ && packets_finished_;
+    finished_ = true;
+  }
 }
 
 void DecoderImpl::Read(uint8_t* buffer, int size)
 {
   while(size)
   {
-    int read_size = buffer_.Read(buffer, size);
-    buffer += read_size;
-    size -= read_size;
-
-    if(Empty())
+    if(buffer_)
     {
-      memset(buffer, 0, size);
-      size = 0;
+      int read_size = buffer_.Read(buffer, size);
+      buffer += read_size;
+      size -= read_size;
+    }
+    else
+    {
+      if(finished_)
+      {
+        memset(buffer, 0, size);
+        size = 0;
+      }
+      else
+      {
+        Decode();
+      }
     }
   }
 }
 
-Decoder::Decoder(std::string const& filename, int buffer_size)
+bool DecoderImpl::Empty(void) const
 {
-  impl_ = std::make_shared<DecoderImpl>(filename, buffer_size);
+  return !buffer_ && finished_;
+}
+
+Decoder::Decoder(std::string const& filename)
+{
+  impl_ = std::make_shared<DecoderImpl>(filename);
 }
 
 void Decoder::Read(uint8_t* buffer, int size)

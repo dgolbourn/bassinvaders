@@ -9,10 +9,8 @@ namespace ffmpeg
 class Buffer
 {
 public:
-  Buffer(void) = default;
-  Buffer(int size);
+  Buffer(void);
   void Add(Samples const& samples);
-  bool Full(void) const;
   int Read(uint8_t* buffer, int size);
   explicit operator bool(void) const;
 private:

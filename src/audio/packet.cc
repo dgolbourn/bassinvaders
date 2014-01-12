@@ -2,9 +2,17 @@
 
 namespace ffmpeg
 {
-Packet::Packet(void) : packet_(new AVPacket, av_free_packet)
+void FreePacket(AVPacket* packet)
+{
+  av_free_packet(packet);
+  delete packet;
+}
+
+Packet::Packet(void) : packet_(new AVPacket, FreePacket)
 {
   av_init_packet(packet_.get());
+  packet_->data = nullptr;
+  packet_->size = 0;
 }
 
 AVPacket* Packet::operator->(void) const
@@ -17,7 +25,7 @@ Packet::operator AVPacket*(void) const
   return packet_.get();
 }
 
-void Packet::Next(int amount_used)
+void Packet::operator+=(int amount_used)
 {
   packet_->data += amount_used;
   packet_->size -= amount_used;

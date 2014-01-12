@@ -10,10 +10,9 @@ class Samples
 {
 public:
   Samples(int samples);
-  Samples(void) = default;
-  uint8_t** data(void);
-  int size(void) const;
-  void size(int size) const;
+  uint8_t** Data(void);
+  int Size(void) const;
+  void Size(int size) const;
 private:
   std::shared_ptr<class SamplesImpl> impl_;
 };

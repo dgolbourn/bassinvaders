@@ -17,9 +17,6 @@ public:
   void Decode(void);
   bool Empty(void) const;
   void Read(uint8_t* buffer, int size);
-
-  ~DecoderImpl(void);
-
   ffmpeg::Library const ffmpeg_;
   ffmpeg::Format format_;
   ffmpeg::Codec codec_;
@@ -36,40 +33,46 @@ DecoderImpl::DecoderImpl(std::string const& filename) : finished_(false)
   resampler_ = ffmpeg::Resampler(codec_);
 }
 
-DecoderImpl::~DecoderImpl(void)
+static Packet ReadAudio(Format const& format)
 {
-  if(codec_->codec->capabilities & CODEC_CAP_DELAY)
+  bool audio_read = false;
+  Packet packet;
+  if(av_read_frame(format.format(), packet) == 0)
   {
-    ffmpeg::Packet packet;
-    int frame_finished = 0;
-    while(avcodec_decode_audio4(codec_, frame_, &frame_finished, packet) >= 0 && frame_finished)
+    if(packet->stream_index == format.audio_stream()->index)
     {
-      frame_.Clear();
+      audio_read = true;
     }
   }
+  if(!audio_read)
+  {
+    packet = Packet();
+  }
+  return packet;
+}
+
+static bool DecodeAudio(Codec const& codec, Frame const& frame, Packet& packet)
+{
+  int frame_finished;
+  int amount = avcodec_decode_audio4(codec, frame, &frame_finished, packet);
+  if(amount < 0)
+  {
+    throw ffmpeg::Exception();
+  }
+  packet += amount;
+  return frame_finished != 0;
 }
 
 void DecoderImpl::Decode(void)
 {
-  ffmpeg::Packet packet;
-  if(av_read_frame(format_.format(), packet) == 0)
+  if(ffmpeg::Packet packet = ReadAudio(format_))
   {
-    if(packet->stream_index == format_.audio_stream()->index)
+    while(packet)
     {
-      while(packet)
+      if(DecodeAudio(codec_, frame_, packet))
       {
-        int frame_finished = 0;
-        int amount = avcodec_decode_audio4(codec_, frame_, &frame_finished, packet);
-        if(amount < 0)
-        { 
-          throw ffmpeg::Exception();
-        }
-        if(frame_finished)
-        {
-          buffer_.Add(resampler_(frame_.data(), frame_->nb_samples));
-          frame_.Clear();
-        }
-        packet.Next(amount);
+        buffer_.Add(resampler_(frame_));
+        frame_.Clear();
       }
     }
   }

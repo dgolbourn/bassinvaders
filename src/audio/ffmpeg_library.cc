@@ -7,14 +7,8 @@ extern "C"
 
 namespace ffmpeg
 { 
-static bool registered;
-
 Library::Library(void)
 {
-  if(!registered)
-  {
-    av_register_all();
-    registered = true;
-  }
+  av_register_all();
 }
 }

@@ -33,13 +33,13 @@ void BufferImpl::Add(Samples const& samples)
     empty_flag = true;
   }
   
-  buffer_size_ += samples.size();
+  buffer_size_ += samples.Size();
   queue_.push(samples);
 
   if(empty_flag)
   {
-    data_size_ = queue_.front().size();
-    data_ = queue_.front().data()[0];
+    data_size_ = queue_.front().Size();
+    data_ = queue_.front().Data()[0];
   }
 }
 
@@ -67,8 +67,8 @@ int BufferImpl::Read(uint8_t* buffer, int size)
         queue_.pop();
         if(!queue_.empty())
         {
-          data_ = queue_.front().data()[0];
-          data_size_ = queue_.front().size();
+          data_ = queue_.front().Data()[0];
+          data_size_ = queue_.front().Size();
         }
         else
         {

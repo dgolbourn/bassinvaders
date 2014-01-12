@@ -46,7 +46,7 @@ void Frame::Clear(void)
   av_frame_unref(frame_.get());
 }
 
-uint8_t const** Frame::data(void) const
+uint8_t const** Frame::Data(void) const
 {
   return (uint8_t const**)frame_.get()->data;
 }

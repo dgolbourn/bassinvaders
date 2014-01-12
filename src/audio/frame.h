@@ -16,7 +16,7 @@ public:
   AVFrame* operator->(void) const;
   operator AVFrame*(void) const;
   void Clear(void);
-  uint8_t const** data(void) const;
+  uint8_t const** Data(void) const;
 private:
   std::shared_ptr<AVFrame> frame_;
 };

@@ -15,7 +15,7 @@ public:
   Packet(void);
   AVPacket* operator->(void) const;
   operator AVPacket*(void) const;
-  void Next(int amount_used);
+  void operator+=(int amount_used);
   explicit operator bool(void) const;
 private:
   std::shared_ptr<AVPacket> packet_;

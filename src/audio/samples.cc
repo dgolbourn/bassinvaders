@@ -39,17 +39,17 @@ Samples::Samples(int samples)
   impl_ = std::make_shared<SamplesImpl>(samples);
 }
 
-uint8_t** Samples::data(void)
+uint8_t** Samples::Data(void)
 {
   return impl_->data_;
 }
 
-int Samples::size(void) const
+int Samples::Size(void) const
 {
   return impl_->size_;
 }
 
-void Samples::size(int size) const
+void Samples::Size(int size) const
 {
   impl_->size_ = size;
 }

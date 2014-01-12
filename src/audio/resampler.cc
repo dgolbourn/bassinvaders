@@ -13,7 +13,7 @@ class ResamplerImpl
 {
 public:
   ResamplerImpl(Codec const& codec);
-  Samples Resample(uint8_t const** input, int in_samples);
+  Samples Resample(Frame const& frame);
   void Destroy(void);
 
   ~ResamplerImpl(void);
@@ -70,17 +70,18 @@ ResamplerImpl::~ResamplerImpl(void)
   Destroy();
 }
 
-Samples ResamplerImpl::Resample(uint8_t const** input, int in_samples)
+Samples ResamplerImpl::Resample(Frame const& frame)
 {
+  int in_samples = frame->nb_samples;
   int64_t delay = swr_get_delay(swr_, input_sample_rate_) + in_samples;
   int out_samples = static_cast<int>(av_rescale_rnd(delay, FFMPEG_SAMPLE_RATE, input_sample_rate_, AV_ROUND_UP));   
   Samples samples(out_samples);
-  int conv_samples = swr_convert(swr_, samples.data(), out_samples, input, in_samples);
+  int conv_samples = swr_convert(swr_, samples.Data(), out_samples, frame.Data(), in_samples);
   if(conv_samples < 0)
   {
     throw Exception();
   }
-  samples.size(av_samples_get_buffer_size(nullptr, channels_, conv_samples, FFMPEG_FORMAT, 0));
+  samples.Size(av_samples_get_buffer_size(nullptr, channels_, conv_samples, FFMPEG_FORMAT, 0));
   return samples;
 }
 
@@ -89,8 +90,8 @@ Resampler::Resampler(Codec const& codec)
   impl_ = std::make_shared<ResamplerImpl>(codec);
 }
 
-Samples Resampler::operator()(uint8_t const** input, int in_samples)
+Samples Resampler::operator()(Frame const& frame)
 {
-  return impl_->Resample(input, in_samples);
+  return impl_->Resample(frame);
 }
 }

@@ -5,6 +5,7 @@
 
 #include "codec.h"
 #include "samples.h"
+#include "frame.h"
 
 namespace ffmpeg
 {
@@ -13,7 +14,7 @@ class Resampler
 public:
   Resampler(void) = default;
   Resampler(Codec const& codec);
-  Samples operator()(uint8_t const** input, int in_samples);
+  Samples operator()(Frame const& frame);
 private:
   std::shared_ptr<class ResamplerImpl> impl_;
 };

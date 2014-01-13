@@ -44,6 +44,7 @@ Frame::operator AVFrame* (void) const
 void Frame::Clear(void)
 {
   av_frame_unref(frame_.get());
+  avcodec_get_frame_defaults(frame_.get());
 }
 
 uint8_t const** Frame::Data(void) const

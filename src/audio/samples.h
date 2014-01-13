@@ -11,8 +11,9 @@ class Samples
 public:
   Samples(int samples);
   uint8_t** Data(void);
-  int Size(void) const;
   void Size(int size) const;
+  int Read(uint8_t* data, int size);
+  explicit operator bool(void) const;
 private:
   std::shared_ptr<class SamplesImpl> impl_;
 };

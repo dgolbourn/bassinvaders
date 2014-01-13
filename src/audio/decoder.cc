@@ -17,20 +17,20 @@ public:
   void Decode(void);
   bool Empty(void) const;
   void Read(uint8_t* buffer, int size);
-  ffmpeg::Library const ffmpeg_;
-  ffmpeg::Format format_;
-  ffmpeg::Codec codec_;
-  ffmpeg::Resampler resampler_;
-  ffmpeg::Frame frame_;
-  ffmpeg::Buffer buffer_;
+  Library const ffmpeg_;
+  Format format_;
+  Codec codec_;
+  Resampler resampler_;
+  Frame frame_;
+  Buffer buffer_;
   bool finished_;
 };
 
 DecoderImpl::DecoderImpl(std::string const& filename) : finished_(false)
 {
-  format_ = ffmpeg::Format(filename);
-  codec_ = ffmpeg::Codec(format_);
-  resampler_ = ffmpeg::Resampler(codec_);
+  format_ = Format(filename);
+  codec_ = Codec(format_);
+  resampler_ = Resampler(codec_);
 }
 
 static Packet ReadAudio(Format const& format)
@@ -57,7 +57,7 @@ static bool DecodeAudio(Codec const& codec, Frame const& frame, Packet& packet)
   int amount = avcodec_decode_audio4(codec, frame, &frame_finished, packet);
   if(amount < 0)
   {
-    throw ffmpeg::Exception();
+    throw Exception();
   }
   packet += amount;
   return frame_finished != 0;
@@ -65,7 +65,7 @@ static bool DecodeAudio(Codec const& codec, Frame const& frame, Packet& packet)
 
 void DecoderImpl::Decode(void)
 {
-  if(ffmpeg::Packet packet = ReadAudio(format_))
+  if(Packet packet = ReadAudio(format_))
   {
     while(packet)
     {

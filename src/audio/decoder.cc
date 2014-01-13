@@ -15,7 +15,7 @@ class DecoderImpl
 public:
   DecoderImpl(std::string const& filename);
   void Decode(void);
-  bool Empty(void) const;
+  void Silence(void);
   void Read(uint8_t* buffer, int size);
   Library const ffmpeg_;
   Format format_;
@@ -23,10 +23,11 @@ public:
   Resampler resampler_;
   Frame frame_;
   Buffer buffer_;
-  bool finished_;
+  bool decode_complete_;
+  bool empty_;
 };
 
-DecoderImpl::DecoderImpl(std::string const& filename) : finished_(false)
+DecoderImpl::DecoderImpl(std::string const& filename) : decode_complete_(false), empty_(false)
 {
   format_ = Format(filename);
   codec_ = Codec(format_);
@@ -78,8 +79,14 @@ void DecoderImpl::Decode(void)
   }
   else
   {
-    finished_ = true;
+    decode_complete_ = true;
   }
+}
+
+void DecoderImpl::Silence(void)
+{
+  static const int samples = 1024;
+  buffer_.Add(Samples(samples));
 }
 
 void DecoderImpl::Read(uint8_t* buffer, int size)
@@ -94,10 +101,10 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
     }
     else
     {
-      if(finished_)
+      if(decode_complete_)
       {
-        memset(buffer, 0, size);
-        size = 0;
+        Silence();
+        empty_ = true;
       }
       else
       {
@@ -105,11 +112,6 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
       }
     }
   }
-}
-
-bool DecoderImpl::Empty(void) const
-{
-  return !buffer_ && finished_;
 }
 
 Decoder::Decoder(std::string const& filename)
@@ -124,6 +126,6 @@ void Decoder::Read(uint8_t* buffer, int size)
 
 Decoder::operator bool(void) const
 {
-  return !impl_->Empty();
+  return !impl_->empty_;
 }
 }

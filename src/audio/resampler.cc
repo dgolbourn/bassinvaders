@@ -13,14 +13,13 @@ class ResamplerImpl
 {
 public:
   ResamplerImpl(Codec const& codec);
-  Samples Resample(Frame const& frame);
+  Samples Resample(Codec const& codec, Frame const& frame);
   void Destroy(void);
+  int Samples(Codec const& codec, Frame const& frame);
 
   ~ResamplerImpl(void);
 
   SwrContext* swr_;
-  int input_sample_rate_;
-  int channels_;
 };
 
 void ResamplerImpl::Destroy(void)
@@ -54,9 +53,6 @@ ResamplerImpl::ResamplerImpl(Codec const& codec)
     {
       throw Exception();
     }
-
-    input_sample_rate_ = codec->sample_rate;
-    channels_ = av_get_channel_layout_nb_channels(FFMPEG_CHANNEL_LAYOUT);
   }
   catch(...)
   {
@@ -70,18 +66,22 @@ ResamplerImpl::~ResamplerImpl(void)
   Destroy();
 }
 
-Samples ResamplerImpl::Resample(Frame const& frame)
+int ResamplerImpl::Samples(Codec const& codec, Frame const& frame)
 {
-  int in_samples = frame->nb_samples;
-  int64_t delay = swr_get_delay(swr_, input_sample_rate_) + in_samples;
-  int out_samples = static_cast<int>(av_rescale_rnd(delay, FFMPEG_SAMPLE_RATE, input_sample_rate_, AV_ROUND_UP));   
-  Samples samples(out_samples);
-  int conv_samples = swr_convert(swr_, samples.Data(), out_samples, frame.Data(), in_samples);
+  int64_t delay = swr_get_delay(swr_, codec->sample_rate) + frame->nb_samples;
+  return static_cast<int>(av_rescale_rnd(delay, FFMPEG_SAMPLE_RATE, codec->sample_rate, AV_ROUND_UP));
+}
+
+Samples ResamplerImpl::Resample(Codec const& codec, Frame const& frame)
+{
+  int out_samples = Samples(codec, frame);
+  ffmpeg::Samples samples(out_samples);
+  int conv_samples = swr_convert(swr_, samples.Data(), out_samples, frame.Data(), frame->nb_samples);
   if(conv_samples < 0)
   {
     throw Exception();
   }
-  samples.Size(av_samples_get_buffer_size(nullptr, channels_, conv_samples, FFMPEG_FORMAT, 0));
+  samples.Size(av_samples_get_buffer_size(nullptr, av_get_channel_layout_nb_channels(FFMPEG_CHANNEL_LAYOUT), conv_samples, FFMPEG_FORMAT, 0));
   return samples;
 }
 
@@ -90,8 +90,8 @@ Resampler::Resampler(Codec const& codec)
   impl_ = std::make_shared<ResamplerImpl>(codec);
 }
 
-Samples Resampler::operator()(Frame const& frame)
+Samples Resampler::operator()(Codec const& codec, Frame const& frame)
 {
-  return impl_->Resample(frame);
+  return impl_->Resample(codec, frame);
 }
 }

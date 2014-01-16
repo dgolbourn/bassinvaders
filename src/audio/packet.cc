@@ -2,13 +2,13 @@
 
 namespace ffmpeg
 {
-void FreePacket(AVPacket* packet)
+void FreeAVPacket(AVPacket* packet)
 {
   av_free_packet(packet);
   delete packet;
 }
 
-Packet::Packet(void) : packet_(new AVPacket, FreePacket)
+Packet::Packet(void) : packet_(new AVPacket, FreeAVPacket)
 {
   av_init_packet(packet_.get());
   packet_->data = nullptr;

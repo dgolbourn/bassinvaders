@@ -6,17 +6,13 @@
 
 namespace sdl
 {
-class Deleter
+static void FreeSurface(SDL_Surface* ptr)
 {
-public:
-  void operator()(SDL_Surface* impl)
+  if(ptr)
   {
-    if(impl)
-    {
-      SDL_FreeSurface(impl);
-    }
+    SDL_FreeSurface(ptr);
   }
-};
+}
 
 Surface::Surface(TTF_Font* font, char const* text, SDL_Color fg)
 {
@@ -28,13 +24,13 @@ Surface::Surface(TTF_Font* font, char const* text, SDL_Color fg)
     {
       throw ttf::Exception();
     }
-    impl_ = std::shared_ptr<SDL_Surface>(impl, Deleter());
+    impl_ = std::shared_ptr<SDL_Surface>(impl, FreeSurface);
   }
   catch(...)
   {
-    if(impl_)
+    if(!impl_)
     {
-      Deleter()(impl);
+      FreeSurface(impl);
     }
     throw;
   }
@@ -50,13 +46,13 @@ Surface::Surface(char const* file)
     {
       throw img::Exception();
     }
-    impl_ = std::shared_ptr<SDL_Surface>(impl, Deleter());
+    impl_ = std::shared_ptr<SDL_Surface>(impl, FreeSurface);
   }
   catch(...)
   {
-    if(impl_)
+    if(!impl_)
     {
-      Deleter()(impl);
+      FreeSurface(impl);
     }
     throw;
   }

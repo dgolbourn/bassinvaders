@@ -5,7 +5,7 @@ namespace ffmpeg
 {
 static AVCodecContext* InitAVCodecContext(Format const& format)
 {
-  AVCodecContext* codec = format.audio_stream()->codec;
+  AVCodecContext* codec = format.AudioStream()->codec;
   codec->codec = avcodec_find_decoder(codec->codec_id);
   if(!codec->codec)
   {
@@ -18,7 +18,7 @@ static AVCodecContext* InitAVCodecContext(Format const& format)
   return codec;
 }
 
-Codec::Codec(Format const& format) : codec_(InitAVCodecContext(format), &avcodec_close)
+Codec::Codec(Format const& format) : codec_(InitAVCodecContext(format), avcodec_close)
 {
 }
 

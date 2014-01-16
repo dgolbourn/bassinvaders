@@ -7,6 +7,7 @@
 #include "resampler.h"
 #include "frame.h"
 #include "ffmpeg_exception.h"
+#include "filter.h"
 
 namespace ffmpeg
 {
@@ -21,7 +22,9 @@ public:
   Format format_;
   Codec codec_;
   Resampler resampler_;
-  Frame frame_;
+  Frame in_frame_;
+  Frame out_frame_;
+  Filter filter_;
   Buffer buffer_;
   bool decode_complete_;
   bool empty_;
@@ -32,15 +35,16 @@ DecoderImpl::DecoderImpl(std::string const& filename) : decode_complete_(false),
   format_ = Format(filename);
   codec_ = Codec(format_);
   resampler_ = Resampler(codec_);
+  filter_ = Filter("volume=0.5", format_, codec_);
 }
 
 static Packet ReadAudio(Format const& format)
 {
   bool audio_read = false;
   Packet packet;
-  if(av_read_frame(format.format(), packet) == 0)
+  if(av_read_frame(format, packet) == 0)
   {
-    if(packet->stream_index == format.audio_stream()->index)
+    if(packet->stream_index == format.AudioStream()->index)
     {
       audio_read = true;
     }
@@ -70,10 +74,15 @@ void DecoderImpl::Decode(void)
   {
     while(packet)
     {
-      if(DecodeAudio(codec_, frame_, packet))
+      if(DecodeAudio(codec_, in_frame_, packet))
       {
-        buffer_.Add(resampler_(frame_));
-        frame_.Clear();
+        filter_.Add(in_frame_);
+        while (filter_.Read(out_frame_))
+        {
+          buffer_.Add(resampler_(codec_, out_frame_));
+          out_frame_.Clear();
+        }
+        in_frame_.Clear();
       }
     }
   }

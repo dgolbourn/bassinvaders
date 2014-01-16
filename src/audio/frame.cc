@@ -8,14 +8,10 @@ extern "C"
 
 namespace ffmpeg
 {
-class Deleter
+void FreeAVFrame(AVFrame* frame)
 {
-public:
-  void operator()(AVFrame* frame)
-  {
-    avcodec_free_frame(&frame);
-  }
-};
+  avcodec_free_frame(&frame);
+}
 
 static AVFrame* InitAVFrame(void)
 {
@@ -27,7 +23,7 @@ static AVFrame* InitAVFrame(void)
   return frame;
 }
 
-Frame::Frame(void) : frame_(InitAVFrame(), Deleter())
+Frame::Frame(void) : frame_(InitAVFrame(), FreeAVFrame)
 {
 }
 

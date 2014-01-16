@@ -15,8 +15,8 @@ class Format
 public:
   Format(void) = default;
   Format(std::string const& filename);
-  AVFormatContext* format(void) const;
-  AVStream* audio_stream(void) const;
+  operator AVFormatContext*(void) const;
+  AVStream* AudioStream(void) const;
 private:
   std::shared_ptr<class FormatImpl> impl_;
 };

@@ -2,7 +2,6 @@
 #define RESAMPLER_H_
 
 #include <memory>
-
 #include "codec.h"
 #include "samples.h"
 #include "frame.h"
@@ -14,10 +13,9 @@ class Resampler
 public:
   Resampler(void) = default;
   Resampler(Codec const& codec);
-  Samples operator()(Frame const& frame);
+  Samples operator()(Codec const& codec, Frame const& frame);
 private:
   std::shared_ptr<class ResamplerImpl> impl_;
 };
 }
-
 #endif

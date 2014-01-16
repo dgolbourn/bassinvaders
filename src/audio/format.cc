@@ -71,12 +71,12 @@ Format::Format(std::string const& filename)
   impl_ = std::make_shared<FormatImpl>(filename);
 }
 
-AVFormatContext* Format::format(void) const
+Format::operator AVFormatContext*(void) const
 {
   return impl_->format_;
 }
 
-AVStream* Format::audio_stream(void) const
+AVStream* Format::AudioStream(void) const
 {
   return impl_->audio_stream_;
 }

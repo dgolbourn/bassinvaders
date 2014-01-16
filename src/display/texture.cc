@@ -3,17 +3,13 @@
 
 namespace sdl
 {
-class Deleter
+static void FreeTexture(SDL_Texture* impl)
 {
-public:
-  void operator()(SDL_Texture* impl)
+  if(impl)
   {
-    if(impl)
-    {
-      SDL_DestroyTexture(impl);
-    }
+    SDL_DestroyTexture(impl);
   }
-};
+}
 
 Texture::Texture(SDL_Renderer* renderer, SDL_Surface* surface)
 {
@@ -25,13 +21,13 @@ Texture::Texture(SDL_Renderer* renderer, SDL_Surface* surface)
     {
       throw Exception();
     }
-    impl_ = std::shared_ptr<SDL_Texture>(impl, Deleter());
+    impl_ = std::shared_ptr<SDL_Texture>(impl, FreeTexture);
   }
   catch(...)
   {
-    if(impl_)
+    if(!impl_)
     {
-      Deleter()(impl);
+      FreeTexture(impl);
     }
     throw;
   }

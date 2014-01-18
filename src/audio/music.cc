@@ -13,11 +13,10 @@ public:
   ~MusicImpl(void);
   void Pause(void) const;
   void Resume(void);
-  void Volume(int volume);
+  void Volume(double volume);
 
   mix::Library const mix_;
   ffmpeg::Decoder music_;
-  int volume_;
 };  
 
 static ffmpeg::Decoder* GetCurrentMusic(void)
@@ -52,18 +51,15 @@ void MusicImpl::Resume(void)
   else
   {
     Mix_HookMusic(MixCallback, static_cast<void*>(&music_));
-    (void)Mix_VolumeMusic(volume_);
   }
 }
 
-void MusicImpl::Volume(int volume)
+void MusicImpl::Volume(double volume)
 {
-  volume_ = volume;
-  (void)Mix_VolumeMusic(volume_);
+  music_.Volume(volume);
 }
 
-static int const default_volume = -1;
-MusicImpl::MusicImpl(std::string const& filename) : volume_(default_volume), music_(filename)
+MusicImpl::MusicImpl(std::string const& filename) : music_(filename)
 {
 }
 
@@ -87,7 +83,7 @@ void Music::Resume(void)
   impl_->Resume();
 }
 
-void Music::Volume(int volume)
+void Music::Volume(double volume)
 {
   impl_->Volume(volume);
 }

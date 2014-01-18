@@ -9,22 +9,23 @@ extern "C"
 }
 #include <sstream>
 #include "ffmpeg_exception.h"
-#include <iostream>
+
 namespace ffmpeg
 {
 typedef std::shared_ptr<AVFilterContext> Context;
 typedef std::shared_ptr<AVFilterGraph> Graph;
-typedef std::shared_ptr<AVFilterInOut> InOutList;
 
 class FilterImpl
 {
 public:
-  FilterImpl(std::string const& description, Format const& format, Codec const& codec);
+  FilterImpl(Format const& format, Codec const& codec);
   void Add(Frame const& frame);
   bool Read(Frame const& frame);
+  void Volume(double volume);
   Graph graph_;
   Context sink_;
   Context source_;
+  Context volume_;
 };
 
 static void FreeAVFilterGraph(AVFilterGraph* ptr)
@@ -70,31 +71,34 @@ static AVFilterContext* InitSink(Codec const& codec, Graph& graph)
   return sink;
 }
 
+static AVFilterContext* InitVolume(Graph& graph)
+{
+  AVFilterContext* volume;
+  if(avfilter_graph_create_filter(&volume, avfilter_get_by_name("volume"), "volume", nullptr, nullptr, graph.get()) < 0)
+  {
+    throw Exception();
+  }
+  return volume;
+}
+
 static void FreeAVFilterInOut(AVFilterInOut* ptr)
 {
   avfilter_inout_free(&ptr);
 }
 
-FilterImpl::FilterImpl(std::string const& description, Format const& format, Codec const& codec)
+FilterImpl::FilterImpl(Format const& format, Codec const& codec)
 {
   avfilter_register_all();
   graph_ = Graph(avfilter_graph_alloc(), FreeAVFilterGraph);
   source_ = Context(InitSource(format, codec, graph_), avfilter_free);
   sink_ = Context(InitSink(codec, graph_), avfilter_free);
-  
-  InOutList::element_type* in;
-  InOutList::element_type* out;
-  if(avfilter_graph_parse2(graph_.get(), description.c_str(), &in, &out) < 0)
+  volume_ = Context(InitVolume(graph_), avfilter_free);
+
+  if(avfilter_link(source_.get(), 0, volume_.get(), 0))
   {
     throw Exception();
   }
-  InOutList in_guard(in, FreeAVFilterInOut);
-  InOutList out_guard(out, FreeAVFilterInOut);
-  if(avfilter_link(source_.get(), 0, in->filter_ctx, in->pad_idx))
-  {
-    throw Exception();
-  }
-  if(avfilter_link(out->filter_ctx, out->pad_idx, sink_.get(), 0))
+  if(avfilter_link(volume_.get(), 0, sink_.get(), 0))
   {
     throw Exception();
   }
@@ -127,9 +131,19 @@ bool FilterImpl::Read(Frame const& frame)
   return got_frame;
 }
 
-Filter::Filter(std::string const& description, Format const& format, Codec const& codec)
+void FilterImpl::Volume(double volume)
 {
-  impl_ = std::make_shared<FilterImpl>(description, format, codec);
+  std::stringstream args;
+  args << volume;
+  if(avfilter_graph_send_command(graph_.get(), "volume", "volume", args.str().c_str(), nullptr, 0, AVFILTER_CMD_FLAG_ONE) < 0)
+  {
+    throw Exception();
+  }
+}
+
+Filter::Filter(Format const& format, Codec const& codec)
+{
+  impl_ = std::make_shared<FilterImpl>(format, codec);
 }
 
 void Filter::Add(Frame const& frame)
@@ -140,5 +154,10 @@ void Filter::Add(Frame const& frame)
 bool Filter::Read(Frame const& frame)
 {
   return(impl_->Read(frame));
+}
+
+void Filter::Volume(double volume)
+{
+  impl_->Volume(volume);
 }
 }

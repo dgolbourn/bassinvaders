@@ -18,12 +18,12 @@ public:
   void Decode(void);
   void Silence(void);
   void Read(uint8_t* buffer, int size);
+  void Volume(double volume);
   Library const ffmpeg_;
   Format format_;
   Codec codec_;
   Resampler resampler_;
-  Frame in_frame_;
-  Frame out_frame_;
+  Frame frame_;
   Filter filter_;
   Buffer buffer_;
   bool decode_complete_;
@@ -35,7 +35,7 @@ DecoderImpl::DecoderImpl(std::string const& filename) : decode_complete_(false),
   format_ = Format(filename);
   codec_ = Codec(format_);
   resampler_ = Resampler(codec_);
-  filter_ = Filter("volume=0.5", format_, codec_);
+  filter_ = Filter(format_, codec_);
 }
 
 static Packet ReadAudio(Format const& format)
@@ -70,19 +70,20 @@ static bool DecodeAudio(Codec const& codec, Frame const& frame, Packet& packet)
 
 void DecoderImpl::Decode(void)
 {
+  while(filter_.Read(frame_))
+  {
+    buffer_.Add(resampler_(codec_, frame_));
+    frame_.Clear();
+  }
+
   if(Packet packet = ReadAudio(format_))
   {
     while(packet)
     {
-      if(DecodeAudio(codec_, in_frame_, packet))
+      if(DecodeAudio(codec_, frame_, packet))
       {
-        filter_.Add(in_frame_);
-        while (filter_.Read(out_frame_))
-        {
-          buffer_.Add(resampler_(codec_, out_frame_));
-          out_frame_.Clear();
-        }
-        in_frame_.Clear();
+        filter_.Add(frame_);
+        frame_.Clear();
       }
     }
   }
@@ -123,6 +124,11 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
   }
 }
 
+void DecoderImpl::Volume(double volume)
+{
+  filter_.Volume(volume);
+}
+
 Decoder::Decoder(std::string const& filename)
 {
   impl_ = std::make_shared<DecoderImpl>(filename);
@@ -136,5 +142,10 @@ void Decoder::Read(uint8_t* buffer, int size)
 Decoder::operator bool(void) const
 {
   return !impl_->empty_;
+}
+
+void Decoder::Volume(double volume)
+{
+  impl_->Volume(volume);
 }
 }

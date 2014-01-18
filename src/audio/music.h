@@ -14,7 +14,7 @@ public:
   Music(std::string const& filename);
   void Pause(void) const;
   void Resume(void);
-  void Volume(int volume);
+  void Volume(double volume);
   explicit operator bool(void) const;
   typedef memory::WeakPtr<Music, class MusicImpl> WeakPtr;
 private:

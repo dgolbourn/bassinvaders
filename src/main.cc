@@ -11,8 +11,6 @@
 #include "sound.h"
 #include "timer.h"
 #include "animation.h"
-#include "samples.h"
-#include "buffer.h"
 #include "scene.h"
 #include "command.h"
 #include "hero.h"

@@ -1,6 +1,5 @@
 #include "decoder.h"
 #include "ffmpeg_library.h"
-#include "buffer.h"
 #include "packet.h"
 #include "format.h"
 #include "codec.h"
@@ -8,6 +7,7 @@
 #include "ffmpeg_exception.h"
 #include "filter.h"
 #include "cstd_exception.h"
+#include "audio_format.h"
 
 namespace ffmpeg
 {
@@ -15,21 +15,28 @@ class DecoderImpl
 {
 public:
   DecoderImpl(std::string const& filename);
-  void Decode(void);
   void Read(uint8_t* buffer, int size);
   void Volume(double volume);
+  ~DecoderImpl(void);
   Library const ffmpeg_;
   Format format_;
   Codec codec_;
   Frame frame_;
   Filter filter_;
-  Buffer buffer_;
+  uint8_t* buffer_;
+  uint8_t* buffer_ptr_;
+  int buffer_size_;
   bool decode_complete_;
   bool empty_;
 };
 
-DecoderImpl::DecoderImpl(std::string const& filename) : decode_complete_(false), empty_(false)
+DecoderImpl::DecoderImpl(std::string const& filename)
 {
+  decode_complete_ = false;
+  empty_ = false;
+  buffer_ = nullptr;
+  buffer_ptr_ = nullptr;
+  buffer_size_ = 0;
   format_ = Format(filename);
   codec_ = Codec(format_);
   filter_ = Filter(format_, codec_);
@@ -65,28 +72,11 @@ static bool DecodeAudio(Codec const& codec, Frame const& frame, Packet& packet)
   return frame_finished != 0;
 }
 
-void DecoderImpl::Decode(void)
+static void Copy(uint8_t* destination, uint8_t* source, int size)
 {
-  while(filter_.Read(frame_))
+  if(!memcpy(destination, source, size))
   {
-    buffer_.Add(Samples(frame_));
-    frame_.Clear();
-  }
-
-  if(Packet packet = ReadAudio(format_))
-  {
-    while(packet)
-    {
-      if(DecodeAudio(codec_, frame_, packet))
-      {
-        filter_.Add(frame_);
-        frame_.Clear();
-      }
-    }
-  }
-  else
-  {
-    decode_complete_ = true;
+    throw cstd::Exception();
   }
 }
 
@@ -94,15 +84,73 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
 {
   while(size)
   {
-    if(buffer_)
+    if(buffer_ptr_)
     {
-      int read_size = buffer_.Read(buffer, size);
-      buffer += read_size;
-      size -= read_size;
+      if(buffer_size_ <= size)
+      {
+        Copy(buffer, buffer_ptr_, buffer_size_);
+        buffer += buffer_size_;
+        size -= buffer_size_;
+        buffer_size_ = 0;
+        free(buffer_);
+        buffer_ = nullptr;
+        buffer_ptr_ = nullptr;
+      }
+      else
+      {
+        Copy(buffer, buffer_ptr_, size);
+        buffer += size;
+        buffer_ptr_ += size;
+        buffer_size_ -= size;
+        size = 0;
+      }
     }
     else
     {
-      if(decode_complete_)
+      while(filter_.Read(frame_))
+      {
+        int frame_size = frame_->nb_samples * av_get_channel_layout_nb_channels(FFMPEG_CHANNEL_LAYOUT) * av_get_bytes_per_sample(FFMPEG_FORMAT);
+        if(frame_size <= size)
+        {
+          Copy(buffer, frame_->data[0], frame_size);
+          buffer += frame_size;
+          size -= frame_size;
+        }
+        else
+        {
+          Copy(buffer, frame_->data[0], size);
+          buffer += size;
+          buffer_size_ = frame_size - size;
+          buffer_ = (uint8_t*)malloc(buffer_size_);
+          if(!buffer_)
+          {
+            throw cstd::Exception();
+          }
+          buffer_ptr_ = buffer_;
+          Copy(buffer_, frame_->data[0] + size, buffer_size_);
+          size = 0;
+        }
+        frame_.Clear();
+      }
+      if(!decode_complete_)
+      {
+        if(Packet packet = ReadAudio(format_))
+        {
+          while(packet)
+          {
+            if(DecodeAudio(codec_, frame_, packet))
+            {
+              filter_.Add(frame_);
+              frame_.Clear();
+            }
+          }
+        }
+        else
+        {
+          decode_complete_ = true;
+        }
+      }
+      else
       {
         if(!memset(buffer, 0, size))
         {
@@ -111,10 +159,6 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
         size = 0;
         empty_ = true;
       }
-      else
-      {
-        Decode();
-      }
     }
   }
 }
@@ -122,6 +166,14 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
 void DecoderImpl::Volume(double volume)
 {
   filter_.Volume(volume);
+}
+
+DecoderImpl::~DecoderImpl(void)
+{
+  if(buffer_)
+  {
+    free(buffer_);
+  }
 }
 
 Decoder::Decoder(std::string const& filename)

@@ -4,10 +4,10 @@
 #include "packet.h"
 #include "format.h"
 #include "codec.h"
-#include "resampler.h"
 #include "frame.h"
 #include "ffmpeg_exception.h"
 #include "filter.h"
+#include "cstd_exception.h"
 
 namespace ffmpeg
 {
@@ -16,13 +16,11 @@ class DecoderImpl
 public:
   DecoderImpl(std::string const& filename);
   void Decode(void);
-  void Silence(void);
   void Read(uint8_t* buffer, int size);
   void Volume(double volume);
   Library const ffmpeg_;
   Format format_;
   Codec codec_;
-  Resampler resampler_;
   Frame frame_;
   Filter filter_;
   Buffer buffer_;
@@ -34,7 +32,6 @@ DecoderImpl::DecoderImpl(std::string const& filename) : decode_complete_(false),
 {
   format_ = Format(filename);
   codec_ = Codec(format_);
-  resampler_ = Resampler(codec_);
   filter_ = Filter(format_, codec_);
 }
 
@@ -72,7 +69,7 @@ void DecoderImpl::Decode(void)
 {
   while(filter_.Read(frame_))
   {
-    buffer_.Add(resampler_(codec_, frame_));
+    buffer_.Add(Samples(frame_));
     frame_.Clear();
   }
 
@@ -93,12 +90,6 @@ void DecoderImpl::Decode(void)
   }
 }
 
-void DecoderImpl::Silence(void)
-{
-  static const int samples = 1024;
-  buffer_.Add(Samples(samples));
-}
-
 void DecoderImpl::Read(uint8_t* buffer, int size)
 {
   while(size)
@@ -113,7 +104,11 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
     {
       if(decode_complete_)
       {
-        Silence();
+        if(!memset(buffer, 0, size))
+        {
+          throw cstd::Exception();
+        }
+        size = 0;
         empty_ = true;
       }
       else

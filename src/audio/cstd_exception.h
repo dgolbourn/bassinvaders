@@ -5,8 +5,6 @@
 
 namespace cstd
 {
-/**C standard library exception.  Throw this if a function from the C standard
-library fails.*/
 class Exception : public std::system_error
 {
 public:

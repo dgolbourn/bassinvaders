@@ -6,28 +6,34 @@ extern "C"
 }
 #include "ffmpeg_exception.h"
 #include "audio_format.h"
+#include "cstd_exception.h"
 
 namespace ffmpeg
 {
 class SamplesImpl
 {
 public:
-  SamplesImpl(int samples);
-  ~SamplesImpl(void);
+  SamplesImpl(Frame const& frame);
   int Read(uint8_t* data, int size);
+
+  ~SamplesImpl(void);
 
   uint8_t** data_;
   int size_;
   uint8_t* current_ptr_;
 };
 
-SamplesImpl::SamplesImpl(int samples)
+SamplesImpl::SamplesImpl(Frame const& frame)
 {
-  if(av_samples_alloc_array_and_samples(&data_, nullptr, av_get_channel_layout_nb_channels(FFMPEG_CHANNEL_LAYOUT), samples, FFMPEG_FORMAT, 0) < 0)
+  if(av_samples_alloc_array_and_samples(&data_, nullptr, av_get_channel_layout_nb_channels(FFMPEG_CHANNEL_LAYOUT), frame->nb_samples, FFMPEG_FORMAT, 0) < 0)
   {
     throw Exception();
   }
-  size_ = samples * av_get_channel_layout_nb_channels(FFMPEG_CHANNEL_LAYOUT) * av_get_bytes_per_sample(FFMPEG_FORMAT);
+  size_ = frame->nb_samples * av_get_channel_layout_nb_channels(FFMPEG_CHANNEL_LAYOUT) * av_get_bytes_per_sample(FFMPEG_FORMAT);
+  if(!memcpy(data_[0], frame.Data()[0], size_))
+  {
+    throw cstd::Exception();
+  }
   current_ptr_ = data_[0];
 }
 
@@ -52,19 +58,9 @@ int SamplesImpl::Read(uint8_t* data, int size)
   return size;
 }
 
-Samples::Samples(int samples)
+Samples::Samples(Frame const& frame)
 {
-  impl_ = std::make_shared<SamplesImpl>(samples);
-}
-
-uint8_t** Samples::Data(void)
-{
-  return impl_->data_;
-}
-
-void Samples::Size(int size) const
-{
-  impl_->size_ = size;
+  impl_ = std::make_shared<SamplesImpl>(frame);
 }
 
 int Samples::Read(uint8_t* data, int size)

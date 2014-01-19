@@ -9,6 +9,7 @@ extern "C"
 }
 #include <sstream>
 #include "ffmpeg_exception.h"
+#include "audio_format.h"
 
 namespace ffmpeg
 {
@@ -26,6 +27,7 @@ public:
   Context sink_;
   Context source_;
   Context volume_;
+  Context resample_;
 };
 
 static void FreeAVFilterGraph(AVFilterGraph* ptr)
@@ -49,16 +51,16 @@ static AVFilterContext* InitSource(Format const& format, Codec const& codec, Gra
   return source;
 }
 
-static AVFilterContext* InitSink(Codec const& codec, Graph& graph)
+static AVFilterContext* InitSink(Graph& graph)
 {
   AVFilterContext* sink;
   if(avfilter_graph_create_filter(&sink, avfilter_get_by_name("abuffersink"), "out", nullptr, nullptr, graph.get()) < 0)
   {
     throw Exception();
   }
-  AVSampleFormat sample_fmts[] = {codec->sample_fmt, AV_SAMPLE_FMT_NONE};
-  int64_t channel_layouts[] = {codec->channel_layout, -1};    
-  int sample_rates[] = {codec->sample_rate, -1};
+  AVSampleFormat sample_fmts[] = {FFMPEG_FORMAT, AV_SAMPLE_FMT_NONE};
+  int64_t channel_layouts[] = {FFMPEG_CHANNEL_LAYOUT, -1};    
+  int sample_rates[] = {FFMPEG_SAMPLE_RATE, -1};
   int ret = 0;
   ret |= av_opt_set_int_list(sink, "sample_fmts", sample_fmts, -1, AV_OPT_SEARCH_CHILDREN);   
   ret |= av_opt_set_int_list(sink, "channel_layouts", channel_layouts, -1, AV_OPT_SEARCH_CHILDREN);      
@@ -81,6 +83,20 @@ static AVFilterContext* InitVolume(Graph& graph)
   return volume;
 }
 
+static AVFilterContext* InitResample(Graph& graph)
+{
+  std::stringstream args;
+  args << FFMPEG_SAMPLE_RATE
+    << ":out_sample_fmt=" << av_get_sample_fmt_name(FFMPEG_FORMAT)
+    << ":out_channel_layout=" << std::hex << std::showbase << FFMPEG_CHANNEL_LAYOUT;
+  AVFilterContext* resample;
+  if(avfilter_graph_create_filter(&resample, avfilter_get_by_name("aresample"), "resample", args.str().c_str(), nullptr, graph.get()) < 0)
+  {
+    throw Exception();
+  }
+  return resample;
+}
+
 static void FreeAVFilterInOut(AVFilterInOut* ptr)
 {
   avfilter_inout_free(&ptr);
@@ -91,10 +107,15 @@ FilterImpl::FilterImpl(Format const& format, Codec const& codec)
   avfilter_register_all();
   graph_ = Graph(avfilter_graph_alloc(), FreeAVFilterGraph);
   source_ = Context(InitSource(format, codec, graph_), avfilter_free);
-  sink_ = Context(InitSink(codec, graph_), avfilter_free);
+  sink_ = Context(InitSink(graph_), avfilter_free);
   volume_ = Context(InitVolume(graph_), avfilter_free);
+  resample_ = Context(InitResample(graph_), avfilter_free);
 
-  if(avfilter_link(source_.get(), 0, volume_.get(), 0))
+  if(avfilter_link(source_.get(), 0, resample_.get(), 0))
+  {
+    throw Exception();
+  }
+  if(avfilter_link(resample_.get(), 0, volume_.get(), 0))
   {
     throw Exception();
   }

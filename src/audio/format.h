@@ -7,6 +7,7 @@ extern "C"
 }
 #include <string>
 #include <memory>
+#include "packet.h"
 
 namespace ffmpeg
 {
@@ -17,6 +18,7 @@ public:
   Format(std::string const& filename);
   operator AVFormatContext*(void) const;
   AVStream* AudioStream(void) const;
+  bool Read(Packet& packet);
 private:
   std::shared_ptr<class FormatImpl> impl_;
 };

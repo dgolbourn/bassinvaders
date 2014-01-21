@@ -15,10 +15,12 @@ public:
   Frame(void);
   AVFrame* operator->(void) const;
   operator AVFrame*(void) const;
-  void Clear(void);
-  uint8_t const** Data(void) const;
+  void Seek(void);
+  int Read(uint8_t* buffer, int size);
+  void Close(void);
+  explicit operator bool(void) const;
 private:
-  std::shared_ptr<AVFrame> frame_;
+  std::shared_ptr<class FrameImpl> impl_;
 };
 }
 #endif

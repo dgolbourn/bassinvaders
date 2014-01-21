@@ -1,4 +1,6 @@
 #include "packet.h"
+#include "ffmpeg_exception.h"
+#include "codec.h"
 
 namespace ffmpeg
 {
@@ -25,14 +27,28 @@ Packet::operator AVPacket*(void) const
   return packet_.get();
 }
 
-void Packet::operator+=(int amount_used)
-{
-  packet_->data += amount_used;
-  packet_->size -= amount_used;
-}
-
 Packet::operator bool(void) const
 {
   return packet_->size > 0;
+}
+
+void Packet::Close(void)
+{
+  av_packet_unref(packet_.get());
+}
+
+void Packet::Read(Codec const& codec, Frame const& frame)
+{
+  int frame_read = 0;
+  while(!frame_read)
+  {
+    int amount = avcodec_decode_audio4(codec, frame, &frame_read, packet_.get());
+    if(amount < 0)
+    {
+      throw Exception();
+    }
+    packet_->data += amount;
+    packet_->size -= amount;
+  }
 }
 }

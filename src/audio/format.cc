@@ -80,4 +80,14 @@ AVStream* Format::AudioStream(void) const
 {
   return impl_->audio_stream_;
 }
+
+bool Format::Read(Packet& packet)
+{
+  bool packet_read = false;
+  if(av_read_frame(impl_->format_, packet) == 0)
+  {
+    packet_read = true;
+  }
+  return packet_read;
+}
 }

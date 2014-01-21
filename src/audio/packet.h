@@ -6,6 +6,7 @@ extern "C"
 #include "libavcodec/avcodec.h"
 }
 #include <memory>
+#include "frame.h"
 
 namespace ffmpeg
 {
@@ -15,8 +16,9 @@ public:
   Packet(void);
   AVPacket* operator->(void) const;
   operator AVPacket*(void) const;
-  void operator+=(int amount_used);
   explicit operator bool(void) const;
+  void Close(void);
+  void Read(class Codec const& codec, Frame const& frame);
 private:
   std::shared_ptr<AVPacket> packet_;
 };

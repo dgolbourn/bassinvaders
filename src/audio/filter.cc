@@ -174,7 +174,7 @@ void Filter::Add(Frame const& frame)
 
 bool Filter::Read(Frame const& frame)
 {
-  return(impl_->Read(frame));
+  return impl_->Read(frame);
 }
 
 void Filter::Volume(double volume)

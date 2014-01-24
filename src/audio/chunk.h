@@ -16,7 +16,6 @@ private:
   std::shared_ptr<class ChunkImpl> impl_;
 };
 
-void Free(std::string const& filename);
 void Free(void);
 }
 #endif

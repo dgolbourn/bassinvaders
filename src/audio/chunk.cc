@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "mix_exception.h"
 #include "mix_library.h"
+#include "thread.h"
 
 namespace mix
 {
@@ -15,19 +16,12 @@ public:
   Mix_Chunk* chunk_;
 };
 
+static std::mutex mutex;
 static std::unordered_map<std::string, std::shared_ptr<ChunkImpl>> chunks;
-
-void Free(std::string const& filename)
-{
-  auto fileiter = chunks.find(filename);
-  if (fileiter != chunks.end())
-  {
-    chunks.erase(fileiter);
-  }
-}
 
 void Free(void)
 {
+  thread::Lock lock(mutex);
   chunks.clear();
 }
 
@@ -47,6 +41,7 @@ ChunkImpl::~ChunkImpl(void)
 
 Chunk::Chunk(std::string const& filename)
 {
+  thread::Lock lock(mutex);
   auto fileiter = chunks.find(filename);
   if(fileiter != chunks.end())
   {

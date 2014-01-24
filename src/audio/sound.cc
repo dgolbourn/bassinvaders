@@ -25,7 +25,7 @@ public:
 
 static int const default_volume = -1;
 static sdl::Mutex mutex_;
-typedef std::weak_ptr<class SoundImpl> SoundPtr;
+typedef std::weak_ptr<SoundImpl> SoundPtr;
 static std::unordered_map<int, SoundPtr> active_channels;
 
 static void ChannelFinished(int channel)

@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <string>
-#include "command.h"
 
 namespace audio
 {
@@ -18,7 +17,6 @@ public:
   void Stop(void) const;
   void Fade(int ms) const;
   void Volume(int volume);
-  void End(event::Command const& command);
 private:
   std::shared_ptr<class SoundImpl> impl_;
 };

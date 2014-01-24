@@ -1,52 +1,49 @@
 #include "sound.h"
 #include <unordered_map>
+#include <set>
 #include "SDL_mixer.h"
 #include "chunk.h"
-#include "signal.h"
+#include "mutex.h"
 
 namespace audio
 {
-typedef std::weak_ptr<class SoundImpl> SoundPtr;
-
-class SoundImpl
+class SoundImpl : public std::enable_shared_from_this<SoundImpl>
 {
 public:
   SoundImpl(std::string const& filename);
-  void Play(int repeats, SoundPtr const& impl);
+  void Play(int repeats);
   void Pause(void) const;
   void Resume(void) const;
   void Stop(void) const;
   void Fade(int ms) const;
   void Volume(int volume);
-  void End(event::Command const& command);
 
   mix::Chunk chunk_;
   int volume_;
-  int channel_;
-  event::Signal signal_;
+  std::set<int> channels_;
 };
 
-static int const no_channel = -1;
 static int const default_volume = -1;
-
+static sdl::Mutex mutex_;
+typedef std::weak_ptr<class SoundImpl> SoundPtr;
 static std::unordered_map<int, SoundPtr> active_channels;
 
 static void ChannelFinished(int channel)
 {
+  sdl::Lock lock(mutex_);
   auto sound_iter = active_channels.find(channel);
   if(sound_iter != active_channels.end())
   {
     if(auto sound = sound_iter->second.lock())
     {
-      sound->signal_();
-      Mix_Volume(sound->channel_, default_volume);
-      sound->channel_ = no_channel;
-      (void)active_channels.erase(sound_iter);
+      (void)Mix_Volume(channel, default_volume);
+      (void)sound->channels_.erase(channel);
     }
+    (void)active_channels.erase(sound_iter);
   }
 }
 
-SoundImpl::SoundImpl(std::string const& filename) : chunk_(filename), volume_(default_volume), channel_(no_channel)
+static void InitChannelMixer(void)
 {
   static bool initialised;
   if(!initialised)
@@ -56,56 +53,58 @@ SoundImpl::SoundImpl(std::string const& filename) : chunk_(filename), volume_(de
   }
 }
 
-void SoundImpl::Play(int repeats, SoundPtr const& impl)
+SoundImpl::SoundImpl(std::string const& filename) : chunk_(filename), volume_(default_volume)
 {
-  if(channel_ == no_channel)
-  {
-    channel_ = chunk_.Play(repeats, volume_);
-    active_channels[channel_] = impl;
-  }
+  InitChannelMixer();
+}
+
+void SoundImpl::Play(int repeats)
+{
+  sdl::Lock lock(mutex_);
+  int channel = chunk_.Play(repeats, volume_);
+  (void)channels_.insert(channel);
+  active_channels[channel] = shared_from_this();
 }
 
 void SoundImpl::Pause(void) const
 {
-  if(channel_ != no_channel)
+  for(auto channel : channels_)
   {
-    Mix_Pause(channel_);
+    Mix_Pause(channel);
   }
 }
 
 void SoundImpl::Resume(void) const
 {
-  if(channel_ != no_channel)
+  for(auto channel : channels_)
   {
-    Mix_Resume(channel_);
+    Mix_Resume(channel);
   }
 }
 
 void SoundImpl::Stop(void) const
 {
-  if(channel_ != no_channel)
+  for(auto channel : channels_)
   {
-    (void)Mix_HaltChannel(channel_);
+    (void)Mix_HaltChannel(channel);
   }
 }
 
 void SoundImpl::Fade(int ms) const
 {
-  if(channel_ != no_channel)
+  for(auto channel : channels_)
   {
-    (void)Mix_FadeOutChannel(channel_, ms);
+    (void)Mix_FadeOutChannel(channel, ms);
   }
 }
 
 void SoundImpl::Volume(int volume)
 {
   volume_ = volume;
-  (void)Mix_Volume(channel_, volume_);
-}
-
-void SoundImpl::End(event::Command const& command)
-{
-  signal_.Add(command);
+  for(auto channel : channels_)
+  {
+    (void)Mix_Volume(channel, volume_);
+  }
 }
 
 Sound::Sound(std::string const& filename)
@@ -115,7 +114,7 @@ Sound::Sound(std::string const& filename)
 
 void Sound::Play(int repeats)
 {
-  impl_->Play(repeats, impl_);
+  impl_->Play(repeats);
 }
 
 void Sound::Pause(void) const
@@ -141,10 +140,5 @@ void Sound::Fade(int ms) const
 void Sound::Volume(int volume)
 {
   impl_->Volume(volume);
-}
-
-void Sound::End(event::Command const& command)
-{
-  impl_->End(command);
 }
 }

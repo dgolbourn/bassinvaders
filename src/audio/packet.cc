@@ -37,18 +37,22 @@ void Packet::Close(void)
   av_packet_unref(packet_.get());
 }
 
-void Packet::Read(Codec const& codec, Frame const& frame)
+bool Packet::Read(Codec const& codec, Frame const& frame)
 {
   int frame_read = 0;
-  while(!frame_read)
+  if(packet_->stream_index == codec.Stream())
   {
-    int amount = avcodec_decode_audio4(codec, frame, &frame_read, packet_.get());
-    if(amount < 0)
+    while(!frame_read)
     {
-      throw Exception();
+      int amount = avcodec_decode_audio4(codec, frame, &frame_read, packet_.get());
+      if(amount < 0)
+      {
+        throw Exception();
+      }
+      packet_->data += amount;
+      packet_->size -= amount;
     }
-    packet_->data += amount;
-    packet_->size -= amount;
   }
+  return frame_read != 0;
 }
 }

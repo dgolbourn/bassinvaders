@@ -21,7 +21,7 @@ class FilterImpl
 public:
   FilterImpl(Format const& format, Codec const& codec);
   void Add(Frame const& frame);
-  bool Read(Frame const& frame);
+  bool Read(Frame& frame);
   void Volume(double volume);
   Graph graph_;
   Context sink_;
@@ -37,7 +37,7 @@ static void FreeAVFilterGraph(AVFilterGraph* ptr)
 
 static AVFilterContext* InitSource(Format const& format, Codec const& codec, Graph& graph)
 {
-  AVRational time_base = format.AudioStream()->time_base;
+  AVRational time_base = format->streams[codec.Stream()]->time_base;
   std::stringstream args;
   args << "time_base=" << time_base.num << "/" << time_base.den
     << ":sample_rate=" << codec->sample_rate
@@ -137,7 +137,7 @@ void FilterImpl::Add(Frame const& frame)
   }
 }
   
-bool FilterImpl::Read(Frame const& frame)
+bool FilterImpl::Read(Frame& frame)
 {
   bool got_frame = true;
   int ret = av_buffersink_get_frame(sink_.get(), frame);
@@ -148,6 +148,10 @@ bool FilterImpl::Read(Frame const& frame)
   else if(ret < 0)
   {
     throw Exception();
+  }
+  if(got_frame)
+  {
+    frame.Seek();
   }
   return got_frame;
 }
@@ -172,7 +176,7 @@ void Filter::Add(Frame const& frame)
   impl_->Add(frame);
 }
 
-bool Filter::Read(Frame const& frame)
+bool Filter::Read(Frame& frame)
 {
   return impl_->Read(frame);
 }

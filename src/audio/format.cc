@@ -7,12 +7,10 @@ class FormatImpl
 {
 public:
   FormatImpl(std::string const& filename);
-  void Destroy(void);
 
   ~FormatImpl(void);
 
   AVFormatContext* format_;
-  AVStream* audio_stream_;
 };
 
 FormatImpl::FormatImpl(std::string const& filename)
@@ -27,43 +25,11 @@ FormatImpl::FormatImpl(std::string const& filename)
     avformat_free_context(format_);
     throw Exception();
   }
-
-  try
-  {
-    if(avformat_find_stream_info(format_, nullptr) < 0)
-    {
-      throw Exception();
-    }
-    audio_stream_ = nullptr;
-    for(unsigned int i = 0; i < format_->nb_streams; ++i)
-    {
-      if(AVMEDIA_TYPE_AUDIO == format_->streams[i]->codec->codec_type)
-      {
-        audio_stream_ = format_->streams[i];
-        break;
-      }
-    }
-    if(!audio_stream_)
-    {
-      throw Exception();
-    }
-  }
-  catch(...)
-  {
-    Destroy();
-    throw;
-  }
-}
-
-void FormatImpl::Destroy(void)
-{
-  avformat_close_input(&format_);
-  avformat_free_context(format_);
 }
 
 FormatImpl::~FormatImpl(void)
 {
-  Destroy();
+  avformat_close_input(&format_);
 }
 
 Format::Format(std::string const& filename)
@@ -76,9 +42,9 @@ Format::operator AVFormatContext*(void) const
   return impl_->format_;
 }
 
-AVStream* Format::AudioStream(void) const
+AVFormatContext* Format::operator->(void) const
 {
-  return impl_->audio_stream_;
+  return impl_->format_;
 }
 
 bool Format::Read(Packet& packet)

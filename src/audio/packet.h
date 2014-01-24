@@ -18,7 +18,7 @@ public:
   operator AVPacket*(void) const;
   explicit operator bool(void) const;
   void Close(void);
-  void Read(class Codec const& codec, Frame const& frame);
+  bool Read(class Codec const& codec, Frame const& frame);
 private:
   std::shared_ptr<AVPacket> packet_;
 };

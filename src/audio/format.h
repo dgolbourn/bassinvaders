@@ -17,7 +17,7 @@ public:
   Format(void) = default;
   Format(std::string const& filename);
   operator AVFormatContext*(void) const;
-  AVStream* AudioStream(void) const;
+  AVFormatContext* operator->(void) const;
   bool Read(Packet& packet);
 private:
   std::shared_ptr<class FormatImpl> impl_;

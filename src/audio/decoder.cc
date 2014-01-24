@@ -51,19 +51,27 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
     }
     else if(filter_.Read(frame_))
     {
-      frame_.Seek();
     } 
     else if(packet_)
     {
-      packet_.Read(codec_, frame_);
-      filter_.Add(frame_);
-      frame_.Close();
-      if(!packet_)
+      while(packet_)
       {
-        packet_.Close();
+        if(packet_.Read(codec_, frame_))
+        {
+          filter_.Add(frame_);
+          frame_.Close();
+        }
+        else
+        {
+          break;
+        }
       }
+      packet_.Close();
     }
     else if(format_.Read(packet_))
+    {
+    }
+    else if(codec_.Read(frame_))
     {
     }
     else

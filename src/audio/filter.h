@@ -13,7 +13,7 @@ public:
   Filter(void) = default;
   Filter(Format const& format, Codec const& codec);
   void Add(Frame const& frame);
-  bool Read(Frame const& frame);
+  bool Read(Frame& frame);
   void Volume(double volume);
 private:
   std::shared_ptr<class FilterImpl> impl_;

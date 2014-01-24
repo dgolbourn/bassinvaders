@@ -1,34 +1,87 @@
 #include "codec.h"
 #include "ffmpeg_exception.h"
+#include "packet.h"
 
 namespace ffmpeg
 {
-static AVCodecContext* InitAVCodecContext(Format const& format)
+class CodecImpl
 {
-  AVCodecContext* codec = format.AudioStream()->codec;
-  codec->codec = avcodec_find_decoder(codec->codec_id);
-  if(!codec->codec)
+public:
+  CodecImpl(Format const& format);
+  bool Read(Frame& frame);
+
+  ~CodecImpl(void);
+
+  AVCodecContext* context_;
+  int stream_;
+};
+
+CodecImpl::CodecImpl(Format const& format)
+{
+  context_ = nullptr;
+  if(avformat_find_stream_info(format, nullptr) < 0)
   {
     throw Exception();
   }
-  if(avcodec_open2(codec, codec->codec, nullptr))
+  AVCodec* codec;
+  stream_ = av_find_best_stream(format, AVMEDIA_TYPE_AUDIO, -1, -1, &codec, 0);
+  if(stream_ < 0)
   {
     throw Exception();
   }
-  return codec;
+  context_ = format->streams[stream_]->codec;
+  if(avcodec_open2(context_, codec, nullptr))
+  {
+    throw Exception();
+  }
 }
 
-Codec::Codec(Format const& format) : codec_(InitAVCodecContext(format), avcodec_close)
+CodecImpl::~CodecImpl(void)
 {
+  avcodec_close(context_);
+}
+
+bool CodecImpl::Read(Frame& frame)
+{
+  Packet packet;
+  int frame_read = 0;
+  while(!frame_read)
+  {
+    int amount = avcodec_decode_audio4(context_, frame, &frame_read, packet);
+    if(amount == 0)
+    {
+      break;
+    }
+    if(amount < 0)
+    {
+      throw Exception();
+    }
+  }
+  return frame_read != 0;
+}
+
+Codec::Codec(Format const& format)
+{
+  impl_ = std::make_shared<CodecImpl>(format);
 }
 
 AVCodecContext* Codec::operator->(void) const
 {
-  return codec_.operator->();
+  return impl_->context_;
 }
 
 Codec::operator AVCodecContext*(void) const
 {
-  return codec_.get();
+  return impl_->context_;
+}
+
+int Codec::Stream(void) const
+{
+  return impl_->stream_;
+}
+
+bool Codec::Read(Frame& frame)
+{
+  return impl_->Read(frame);
 }
 }

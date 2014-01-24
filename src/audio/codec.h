@@ -17,8 +17,10 @@ public:
   Codec(Format const& format);
   AVCodecContext* operator->(void) const;
   operator AVCodecContext*(void) const;
+  int Stream(void) const;
+  bool Read(Frame& frame);
 private:
-  std::shared_ptr<AVCodecContext> codec_;
+  std::shared_ptr<class CodecImpl> impl_;
 };
 }
 #endif

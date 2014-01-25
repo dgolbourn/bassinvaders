@@ -10,47 +10,47 @@ void FreeAVPacket(AVPacket* packet)
   delete packet;
 }
 
-Packet::Packet(void) : packet_(new AVPacket, FreeAVPacket)
+Packet::Packet(void) : impl_(new AVPacket, FreeAVPacket)
 {
-  av_init_packet(packet_.get());
-  packet_->data = nullptr;
-  packet_->size = 0;
+  av_init_packet(impl_.get());
+  impl_->data = nullptr;
+  impl_->size = 0;
 }
 
 AVPacket* Packet::operator->(void) const
 {
-  return packet_.operator->();
+  return impl_.operator->();
 }
 
 Packet::operator AVPacket*(void) const
 {
-  return packet_.get();
+  return impl_.get();
 }
 
 Packet::operator bool(void) const
 {
-  return packet_->size > 0;
+  return impl_->size > 0;
 }
 
 void Packet::Close(void)
 {
-  av_packet_unref(packet_.get());
+  av_packet_unref(impl_.get());
 }
 
 bool Packet::Read(Codec const& codec, Frame const& frame)
 {
   int frame_read = 0;
-  if(packet_->stream_index == codec.Stream())
+  if(impl_->stream_index == codec.Stream())
   {
     while(!frame_read)
     {
-      int amount = avcodec_decode_audio4(codec, frame, &frame_read, packet_.get());
+      int amount = avcodec_decode_audio4(codec, frame, &frame_read, impl_.get());
       if(amount < 0)
       {
         throw Exception();
       }
-      packet_->data += amount;
-      packet_->size -= amount;
+      impl_->data += amount;
+      impl_->size -= amount;
     }
   }
   return frame_read != 0;

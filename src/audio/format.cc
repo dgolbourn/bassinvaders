@@ -3,54 +3,39 @@
 
 namespace ffmpeg
 {
-class FormatImpl
+static AVFormatContext* InitAVFormat(std::string const& filename)
 {
-public:
-  FormatImpl(std::string const& filename);
-
-  ~FormatImpl(void);
-
-  AVFormatContext* format_;
-};
-
-FormatImpl::FormatImpl(std::string const& filename)
-{
-  format_ = avformat_alloc_context();
-  if(!format_)
+  AVFormatContext* format = nullptr;
+  if(avformat_open_input(&format, filename.c_str(), nullptr, nullptr))
   {
     throw Exception();
   }
-  if(avformat_open_input(&format_, filename.c_str(), nullptr, nullptr))
-  {
-    avformat_free_context(format_);
-    throw Exception();
-  }
+  return format;
 }
 
-FormatImpl::~FormatImpl(void)
+static void FreeAVFormat(AVFormatContext* format)
 {
-  avformat_close_input(&format_);
+  avformat_close_input(&format);
 }
 
-Format::Format(std::string const& filename)
+Format::Format(std::string const& filename) : impl_(InitAVFormat(filename), FreeAVFormat)
 {
-  impl_ = std::make_shared<FormatImpl>(filename);
 }
 
 Format::operator AVFormatContext*(void) const
 {
-  return impl_->format_;
+  return impl_.get();
 }
 
 AVFormatContext* Format::operator->(void) const
 {
-  return impl_->format_;
+  return impl_.get();
 }
 
 bool Format::Read(Packet& packet)
 {
   bool packet_read = false;
-  if(av_read_frame(impl_->format_, packet) == 0)
+  if(av_read_frame(impl_.get(), packet) == 0)
   {
     packet_read = true;
   }

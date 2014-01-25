@@ -20,7 +20,7 @@ public:
   void Close(void);
   bool Read(class Codec const& codec, Frame const& frame);
 private:
-  std::shared_ptr<AVPacket> packet_;
+  std::shared_ptr<AVPacket> impl_;
 };
 }
 #endif

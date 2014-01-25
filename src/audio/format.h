@@ -20,7 +20,7 @@ public:
   AVFormatContext* operator->(void) const;
   bool Read(Packet& packet);
 private:
-  std::shared_ptr<class FormatImpl> impl_;
+  std::shared_ptr<AVFormatContext> impl_;
 };
 }
 #endif

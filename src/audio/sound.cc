@@ -60,7 +60,6 @@ SoundImpl::SoundImpl(std::string const& filename) : chunk_(filename), volume_(de
 
 void SoundImpl::Play(int repeats)
 {
-  sdl::Lock lock(mutex_);
   int channel = chunk_.Play(repeats, volume_);
   (void)channels_.insert(channel);
   active_channels[channel] = shared_from_this();
@@ -114,31 +113,37 @@ Sound::Sound(std::string const& filename)
 
 void Sound::Play(int repeats)
 {
+  sdl::Lock lock(mutex_);
   impl_->Play(repeats);
 }
 
 void Sound::Pause(void) const
 {
+  sdl::Lock lock(mutex_);
   impl_->Pause();
 }
 
 void Sound::Resume(void) const
 {
+  sdl::Lock lock(mutex_);
   impl_->Resume();
 }
 
 void Sound::Stop(void) const
 {
+  sdl::Lock lock(mutex_);
   impl_->Stop();
 }
 
 void Sound::Fade(int ms) const
 {
+  sdl::Lock lock(mutex_);
   impl_->Fade(ms);
 }
 
 void Sound::Volume(int volume)
 {
+  sdl::Lock lock(mutex_);
   impl_->Volume(volume);
 }
 }

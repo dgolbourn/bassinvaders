@@ -59,9 +59,9 @@ int main(int argc, char *argv[])
       event::Command c = std::bind(S, display::BoundingBox(), box, 1.f, false, 0.);
       Sc.Add(c, -1);
 
-      game::RulesCollision::Channel::Send send = [=](){return std::pair<game::RulesCollision::Rules, bool>(game::RulesCollision::Rules(rand() %10, 0), true); };
-      game::RulesCollision::Channel::Receive receive = [=](game::RulesCollision::Rules const& rules){(void)rules;  std::cout << "hit!" << std::endl; return true; };
-      game::RulesCollision::Channel::Pair channel(send, receive);
+      game::RulesCollision::Send send = [=](){return std::pair<game::RulesCollision::Rules, bool>(game::RulesCollision::Rules(rand() %10, 0), true); };
+      game::RulesCollision::Receive receive = [=](game::RulesCollision::Rules const& rules){(void)rules;  std::cout << "hit!" << std::endl; return true; };
+      game::RulesCollision::Channel channel(send, receive);
       rc.Add(1, box, channel);
     }
 

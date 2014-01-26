@@ -3,13 +3,9 @@
 #include "command.h"
 namespace event
 {
-template<class Message> class Channel
-{
-public:
-  typedef std::function<std::pair<Message, bool>(void)> Send;
-  typedef std::function<bool(Message const&)> Receive;
-  typedef std::pair<Send, Receive> Pair;
-};
+template<class Message> using Send = std::function<std::pair<Message, bool>(void)>;
+template<class Message> using Receive = std::function<bool(Message const&)>;
+template<class Message> using Channel = std::pair<Send<Message>, Receive<Message>>;
 
 template<class Channel> Command Bind(Channel a, Channel b)
 {

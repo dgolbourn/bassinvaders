@@ -257,9 +257,9 @@ void HeroImpl::Init(Scene& scene, RulesCollision& collision)
   event::right.first.Add(event::Bind(&HeroImpl::Right, ptr));
   event::right.second.Add(event::Bind(&HeroImpl::Left, ptr));
   event::button1.first.Add(event::Bind(&HeroImpl::Attack, ptr));
-  RulesCollision::Channel::Send send(event::Bind(&HeroImpl::EnemySend, ptr));
-  RulesCollision::Channel::Receive receive(event::Bind(&HeroImpl::EnemyReceive, ptr));
-  RulesCollision::Channel::Pair channel(send, receive);
+  RulesCollision::Send send(event::Bind(&HeroImpl::EnemySend, ptr));
+  RulesCollision::Receive receive(event::Bind(&HeroImpl::EnemyReceive, ptr));
+  RulesCollision::Channel channel(send, receive);
   collision.Add(0, ptr->collision_box_, channel);
 }
 

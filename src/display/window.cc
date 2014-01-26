@@ -72,11 +72,11 @@ WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_
       "mode", &mode);
 
     Uint32 flags = 0;
-    if(!strcmp(mode, "Fullscreen"))
+    if(!strcmp(mode, "fullscreen"))
     {
       flags |= SDL_WINDOW_FULLSCREEN;
     }
-    else if(!strcmp(mode, "Borderless"))
+    else if(!strcmp(mode, "borderless"))
     {
       flags |= SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED;
     }
@@ -98,7 +98,7 @@ WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_
       throw sdl::Exception();
     }
 
-    view_ = { 0, 0 };
+    view_ = {0, 0};
     zoom_ = 1.f;
   }
   catch(...)

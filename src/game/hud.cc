@@ -1,7 +1,6 @@
 #include "hud.h"
 #include "bind.h"
 #include <limits>
-#include <mutex>
 
 namespace game
 {
@@ -12,7 +11,6 @@ public:
   void Score(int score);
   void Life(int life);
   void Render(void);
-  std::mutex mutex_;
   display::Window window_;
   display::Font font_;
   display::Texture score_;
@@ -63,13 +61,11 @@ void HUDImpl::Render(void)
 
 void HUD::Score(int score)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->Score(score);
 }
 
 void HUD::Life(int life)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->Life(life);
 }
 

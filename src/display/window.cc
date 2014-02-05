@@ -10,7 +10,6 @@
 #include "surface.h"
 #include "hash.h"
 #include "render.h"
-#include "thread.h"
 
 namespace display
 {
@@ -31,7 +30,6 @@ public:
   sdl::Library const sdl_;
   img::Library const img_;
   ttf::Library const ttf_;
-  std::mutex mutex_;
   SDL_Window* window_;
   SDL_Renderer* renderer_;
   std::unordered_map<std::string, sdl::Texture> textures_;
@@ -188,7 +186,6 @@ static void Render(std::shared_ptr<WindowImpl> const& window, sdl::Texture const
     destination_ptr = &destination_copy;
   }
 
-  thread::Lock lock(window->mutex_);
   sdl::Render(window->window_, window->renderer_, texture, source_ptr, destination_ptr, &window->view_, window->zoom_, parallax, tile, angle);
 }
 
@@ -225,37 +222,31 @@ static Texture Bind(std::weak_ptr<WindowImpl> window_ptr, sdl::Texture texture)
 
 Texture Window::Load(std::string const& filename)
 {
-  thread::Lock lock(impl_->mutex_);
   return Bind(impl_, impl_->Load(filename));
 }
 
 Texture Window::Text(std::string const& text, Font const& font)
 {
-  thread::Lock lock(impl_->mutex_);
   return Bind(impl_, impl_->Text(text, font));
 }
 
 void Window::Clear(void) const
 {
-  thread::Lock lock(impl_->mutex_);
   return impl_->Clear();
 }
 
 void Window::Show(void) const
 {
-  thread::Lock lock(impl_->mutex_);
   return impl_->Show();
 }
 
 void Window::Free(void)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->Free();
 }
 
 void Window::View(int x, int y, float zoom)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->View(x, y, zoom);
 }
 }

@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include "mix_exception.h"
 #include "mix_library.h"
-#include "thread.h"
 
 namespace mix
 {
@@ -16,16 +15,14 @@ public:
   Mix_Chunk* chunk_;
 };
 
-static std::mutex mutex;
 static std::unordered_map<std::string, std::shared_ptr<ChunkImpl>> chunks;
 
 void Free(void)
 {
-  thread::Lock lock(mutex);
   chunks.clear();
 }
 
-ChunkImpl::ChunkImpl(std::string const& filename) : mix_()
+ChunkImpl::ChunkImpl(std::string const& filename)
 {
   chunk_ = Mix_LoadWAV(filename.c_str());
   if(!chunk_)
@@ -41,7 +38,6 @@ ChunkImpl::~ChunkImpl(void)
 
 Chunk::Chunk(std::string const& filename)
 {
-  thread::Lock lock(mutex);
   auto fileiter = chunks.find(filename);
   if(fileiter != chunks.end())
   {

@@ -5,7 +5,6 @@
 #include "bounding_box.h"
 #include "bind.h"
 #include <vector>
-#include "thread.h"
 
 namespace game
 {
@@ -20,7 +19,6 @@ public:
   void Play(int loops, bool end_on_first);
   void End(event::Command const& command);
 
-  std::mutex mutex_;
   display::Texture texture_;
   std::vector<display::BoundingBox> frames_;
   std::vector<display::BoundingBox>::iterator frame_;
@@ -99,37 +97,31 @@ void AnimationImpl::End(event::Command const& command)
 Animation::Animation(json::JSON const& json, display::Window& window, event::Queue& queue)
 {
   impl_ = std::make_shared<AnimationImpl>(json, window, queue);
-  thread::Lock lock(impl_->mutex_);
   impl_->timer_.Add(event::Bind(&AnimationImpl::Next, impl_));
 }
 
 void Animation::Render(display::BoundingBox const& destination, float parallax, bool tile, double angle) const
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->Render(destination, parallax, tile, angle);
 }
 
 void Animation::Pause(void)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->Pause();
 }
 
 void Animation::Resume(void)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->Resume();
 }
 
 void Animation::Play(int loops, bool end_on_first)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->Play(loops, end_on_first);
 }
 
 void Animation::End(event::Command const& command)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->End(command);
 }
 }

@@ -13,7 +13,6 @@ public:
   HeroImpl(json::JSON const& json, display::Window& window, event::Queue& queue);
   void Init(Scene& scene, RulesCollision& collision);
   void End(event::Command const& command);
-  std::mutex mutex_;
   State moving_;
   State destroyed_;
   State spawn_;
@@ -265,7 +264,6 @@ void HeroImpl::Life(Hero::Command command)
 
 void Hero::Position(game::Position const& position)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->position_ = position;
   impl_->dynamics_.x(float(position.first));
   impl_->dynamics_.y(float(position.second));
@@ -273,32 +271,27 @@ void Hero::Position(game::Position const& position)
 
 game::Position Hero::Position(void)
 {
-  thread::Lock lock(impl_->mutex_);
   return impl_->position_;
 }
 
 void Hero::End(event::Command const& command)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->End(command);
 }
 
 void Hero::Life(Command const& command)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->Life(command);
 }
 
 void Hero::Step(float dt)
 {
-  thread::Lock lock(impl_->mutex_);
   impl_->Step(dt);
 }
 
 Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesCollision& collision, event::Queue& queue)
 {
   impl_ = std::make_shared<HeroImpl>(json, window, queue);
-  thread::Lock lock(impl_->mutex_);
   impl_->Init(scene, collision);
 }
 }

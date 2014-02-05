@@ -39,8 +39,8 @@ static SDL_TimerID const timer_null = static_cast<SDL_TimerID>(NULL);
 static Uint32 TimerCallback(Uint32, void* param)
 {
   TimerImpl* impl = static_cast<TimerImpl*>(param);
-  Uint32 interval;
   std::unique_lock<std::mutex> lock(impl->mutex_, std::defer_lock);
+  Uint32 interval;
   if(-1 == std::try_lock(lock))
   {
     interval = impl->Update();

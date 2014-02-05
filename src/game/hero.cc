@@ -10,7 +10,7 @@ namespace game
 class HeroImpl : public std::enable_shared_from_this<HeroImpl>
 {
 public:
-  HeroImpl(json::JSON const& json, display::Window& window);
+  HeroImpl(json::JSON const& json, display::Window& window, event::Queue& queue);
   void Init(Scene& scene, RulesCollision& collision);
   void End(event::Command const& command);
   std::mutex mutex_;
@@ -45,7 +45,7 @@ public:
   void EnemyReceive(RulesCollision::Rules const& rules);
   void SignalEnd(void);
   void Reset(void);
-  void Position(Dynamics::Position const& position);
+  void Step(float dt);
   void Change(State& next);
   void Life(Hero::Command command);
 };
@@ -59,21 +59,19 @@ void HeroImpl::Pause(void)
 {
   paused_ = true;
   current_.Pause();
-  dynamics_.Pause();
 }
 
 void HeroImpl::Resume(void)
 {
   paused_ = false;
   current_.Resume();
-  dynamics_.Resume();
 }
 
 void HeroImpl::Attack(void)
 {
 }
 
-static float const dv = 0.25f;
+static float const dv = 250.f;
 static float const sqrt1_2 = std::sqrt(0.5f);
 
 void HeroImpl::Up(void)
@@ -176,10 +174,11 @@ static void BoxUpdate(display::BoundingBox const& source, display::BoundingBox& 
   destination.Copy(temp);
 }
 
-void HeroImpl::Position(Dynamics::Position const& position)
+void HeroImpl::Step(float dt)
 {
-  position_.first = int(position.first); 
-  position_.second = int(position.second);
+  dynamics_.Step(dt);
+  position_.first = int(dynamics_.x()); 
+  position_.second = int(dynamics_.y());
   BoxUpdate(current_.Render(), render_box_, position_, x_facing_);
   BoxUpdate(current_.Collision(), collision_box_, position_, x_facing_);
 }
@@ -200,7 +199,7 @@ void HeroImpl::SignalEnd(void)
   end_();
 }
 
-HeroImpl::HeroImpl(json::JSON const& json, display::Window& window)
+HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, event::Queue& queue)
 {
   json_t* moving;
   json_t* destroyed;
@@ -216,11 +215,11 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window)
     "hit", &hit);
   
   paused_ = true;
-  moving_ = State(moving, window);
-  destroyed_ = State(destroyed, window);
-  idle_ = State(idle, window);
-  hit_ = State(hit, window);
-  spawn_ = State(spawn, window);
+  moving_ = State(moving, window, queue);
+  destroyed_ = State(destroyed, window, queue);
+  idle_ = State(idle, window, queue);
+  hit_ = State(hit, window, queue);
+  spawn_ = State(spawn, window, queue);
   current_ = spawn_;
   current_.Play();
   current_.Pause();
@@ -228,9 +227,6 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window)
   render_box_ = current_.Render().Copy();
   position_ = game::Position(0, 0);
   dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f);
-  dynamics_.Play();
-  dynamics_.Pause();
-
   x_sign_ = 0;
   y_sign_ = 0;
   x_facing_ = 0;
@@ -243,7 +239,6 @@ void HeroImpl::Init(Scene& scene, RulesCollision& collision)
   auto ptr = shared_from_this();
   hit_.End(event::Bind(&HeroImpl::Reset, ptr));
   destroyed_.End(event::Bind(&HeroImpl::SignalEnd, ptr));
-  dynamics_.Add(event::Bind(&HeroImpl::Position, ptr));
   spawn_.End(event::Bind(&HeroImpl::Reset, ptr));
   scene.Add(event::Bind(&HeroImpl::Render, ptr), 0);
   event::pause.first.Add(event::Bind(&HeroImpl::Pause, ptr));
@@ -294,9 +289,15 @@ void Hero::Life(Command const& command)
   impl_->Life(command);
 }
 
-Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesCollision& collision)
+void Hero::Step(float dt)
 {
-  impl_ = std::make_shared<HeroImpl>(json, window);
+  thread::Lock lock(impl_->mutex_);
+  impl_->Step(dt);
+}
+
+Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesCollision& collision, event::Queue& queue)
+{
+  impl_ = std::make_shared<HeroImpl>(json, window, queue);
   thread::Lock lock(impl_->mutex_);
   impl_->Init(scene, collision);
 }

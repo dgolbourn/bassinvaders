@@ -39,61 +39,61 @@ BoundingBox::operator bool(void) const
 
 BoundingBox::operator SDL_Rect(void) const
 {
-  thread::Lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   return impl_->rect_;
 }
 
 void BoundingBox::x(int x)
 {
-  thread::Lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   impl_->rect_.x = x;
 }
 
 void BoundingBox::y(int y)
 {
-  thread::Lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   impl_->rect_.y = y;
 }
 
 void BoundingBox::w(int w)
 {
-  thread::Lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   impl_->rect_.w = w;
 }
 
 void BoundingBox::h(int h)
 {
-  thread::Lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   impl_->rect_.h = h;
 }
 
 int BoundingBox::x(void) const
 {
-  thread::Lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   return impl_->rect_.x;
 }
 
 int BoundingBox::y(void) const
 {
-  thread::Lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   return impl_->rect_.y;
 }
 
 int BoundingBox::w(void) const
 {
-  thread::Lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   return impl_->rect_.w;
 }
 
 int BoundingBox::h(void) const
 {
-  thread::Lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   return impl_->rect_.h;
 }
 
 BoundingBox BoundingBox::Copy(void) const
 {
-  thread::Lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   return BoundingBox(impl_->rect_.x, impl_->rect_.y, impl_->rect_.w, impl_->rect_.h);
 }
 

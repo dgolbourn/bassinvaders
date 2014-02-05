@@ -1,164 +1,87 @@
 #include "dynamics.h"
-#include "timer.h"
-#include "command.h"
-#include "signal.h"
-#include "mutex.h"
-#include "bind.h"
+#include "thread.h"
 
 namespace game
 {
-static int const dt = 10;
-
-class Model
+class DynamicsImpl
 {
 public:
+  DynamicsImpl(float x, float y, float u, float v);
+  void Step(float dt);
+  
+  std::mutex mutex_;
   float x_;
   float y_;
   float u_;
   float v_;
-  void Step(void)
-  {
-    x_ += u_ * float(dt);
-    y_ += v_ * float(dt);
-  }
 };
 
-class DynamicsImpl : public std::enable_shared_from_this<DynamicsImpl>
+void DynamicsImpl::Step(float dt)
 {
-public:
-  sdl::Mutex mutex_;
-  Model model_;
-  event::Signal signal_;
-  event::Timer timer_;
-  DynamicsImpl(float x, float y, float u, float v);
-  void Init(void);
-  void Play(void);
-  void Pause(void);
-  void Resume(void);
-  void Step(void);
-  void Add(Dynamics::Command command);
-};
-
-void DynamicsImpl::Add(Dynamics::Command command)
-{
-  auto bind = [command, this](void)
-  {
-    sdl::Lock(this->mutex_);
-    return command(Dynamics::Position(this->model_.x_, this->model_.y_));
-  };
-  signal_.Add(bind);
+  x_ += u_ * dt;
+  y_ += v_ * dt;
 }
 
-void DynamicsImpl::Step(void)
+DynamicsImpl::DynamicsImpl(float x, float y, float u, float v) : x_(x), u_(u), y_(y), v_(v)
 {
-  model_.Step();
-  signal_();
-}
-
-DynamicsImpl::DynamicsImpl(float x, float y, float u, float v) : timer_(dt)
-{
-  model_.x_ = x;
-  model_.u_ = u;
-  model_.y_ = y;
-  model_.v_ = v;
-}
-
-void DynamicsImpl::Init(void)
-{
-  timer_.Add(event::Bind(&DynamicsImpl::Step, shared_from_this()));
-}
-
-void DynamicsImpl::Play(void)
-{
-  timer_.Play(-1);
-}
-
-void DynamicsImpl::Pause(void)
-{
-  timer_.Pause();
-}
-
-void DynamicsImpl::Resume(void)
-{
-  timer_.Resume();
 }
 
 Dynamics::Dynamics(float x, float y, float u, float v)
 {
   impl_ = std::make_shared<DynamicsImpl>(x, y, u, v);
-  sdl::Lock(impl_->mutex_);
-  impl_->Init();
 }
 
 void Dynamics::x(float x)
 {
-  sdl::Lock(impl_->mutex_);
-  impl_->model_.x_ = x;
+  thread::Lock lock(impl_->mutex_);
+  impl_->x_ = x;
 }
 
 void Dynamics::y(float y)
 {
-  sdl::Lock(impl_->mutex_);
-  impl_->model_.y_ = y;
+  thread::Lock lock(impl_->mutex_);
+  impl_->y_ = y;
 }
 
 void Dynamics::u(float u)
 {
-  sdl::Lock(impl_->mutex_);
-  impl_->model_.u_ = u;
+  thread::Lock lock(impl_->mutex_);
+  impl_->u_ = u;
 }
 
 void Dynamics::v(float v)
 {
-  sdl::Lock(impl_->mutex_);
-  impl_->model_.v_ = v;
+  thread::Lock lock(impl_->mutex_);
+  impl_->v_ = v;
 }
 
 float Dynamics::x(void) const
 {
-  sdl::Lock(impl_->mutex_);
-  return impl_->model_.x_;
+  thread::Lock lock(impl_->mutex_);
+  return impl_->x_;
 }
 
 float Dynamics::y(void) const
 {
-  sdl::Lock(impl_->mutex_);
-  return impl_->model_.y_;
+  thread::Lock lock(impl_->mutex_);
+  return impl_->y_;
 }
 
 float Dynamics::u(void) const
 {
-  sdl::Lock(impl_->mutex_);
-  return impl_->model_.u_;
+  thread::Lock lock(impl_->mutex_);
+  return impl_->u_;
 }
 
 float Dynamics::v(void) const
 {
-  sdl::Lock(impl_->mutex_);
-  return impl_->model_.v_;
+  thread::Lock lock(impl_->mutex_);
+  return impl_->v_;
 }
 
-void Dynamics::Play(void)
+void Dynamics::Step(float dt)
 {
-  sdl::Lock(impl_->mutex_);
-  impl_->Play();
-}
-
-void Dynamics::Pause(void)
-{
-  sdl::Lock(impl_->mutex_);
-  impl_->Pause();
-}
-
-void Dynamics::Resume(void)
-{
-  sdl::Lock(impl_->mutex_);
-  impl_->Resume();
-}
-
-void Dynamics::Add(Dynamics::Command const& command)
-{
-  sdl::Lock(impl_->mutex_);
-  impl_->Add(command);
+  thread::Lock lock(impl_->mutex_);
+  impl_->Step(dt);
 }
 }

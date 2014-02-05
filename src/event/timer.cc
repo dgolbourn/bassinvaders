@@ -3,24 +3,25 @@
 #include "sdl_library.h"
 #include "sdl_exception.h"
 #include "signal.h"
-#include "mutex.h"
+#include "thread.h"
 namespace event
 {
 class TimerImpl
 {
 public:
-  TimerImpl(int interval);
+  TimerImpl(int interval, event::Queue& queue);
   void Play(int loops);
   void Pause(void);
   void Resume(void);
   void Add(Command const& command);
   void End(Command const& command);
+  Uint32 Interval(void);
   Uint32 Update(void);
 
   ~TimerImpl(void);
 
   sdl::Library const sdl_;
-  sdl::Mutex mutex_;
+  std::mutex mutex_;
   Uint32 const interval_;
   Uint32 last_update_;
   Uint32 resume_interval_;
@@ -30,16 +31,25 @@ public:
   int max_loops_;
   bool paused_;
   SDL_TimerID timer_;
+  event::Queue queue_;
 };
 
 static SDL_TimerID const timer_null = static_cast<SDL_TimerID>(NULL);
 
-static Uint32 TimerCallback(Uint32 interval, void* param)
+static Uint32 TimerCallback(Uint32, void* param)
 {
-  (void)interval;
   TimerImpl* impl = static_cast<TimerImpl*>(param);
-  sdl::Lock lock(impl->mutex_);
-  return impl->Update();
+  Uint32 interval;
+  std::unique_lock<std::mutex> lock(impl->mutex_, std::defer_lock);
+  if(-1 == std::try_lock(lock))
+  {
+    interval = impl->Update();
+  }
+  else
+  {
+    interval = 1;
+  }
+  return interval;
 }
 
 static SDL_TimerID AddTimer(Uint32 interval, SDL_TimerCallback callback, void* param)
@@ -60,7 +70,7 @@ static void RemoveTimer(SDL_TimerID id)
   }
 }
 
-TimerImpl::TimerImpl(int interval) : sdl_(SDL_INIT_TIMER), interval_(static_cast<Uint32>(interval))
+TimerImpl::TimerImpl(int interval, event::Queue& queue) : sdl_(SDL_INIT_TIMER), interval_(static_cast<Uint32>(interval)), queue_(queue)
 {
   timer_ = timer_null;
   paused_ = false;
@@ -74,13 +84,23 @@ TimerImpl::~TimerImpl(void)
   }
 }
 
+Uint32 TimerImpl::Interval(void)
+{
+  Uint32 interval = interval_ + last_update_ - SDL_GetTicks();
+  if(interval == 0u || interval > interval_)
+  {
+    interval = 1;
+  }
+  return interval;
+}
+
 void TimerImpl::Pause(void)
 {
   if(timer_)
   {
     RemoveTimer(timer_);
     timer_ = timer_null;
-    resume_interval_ = interval_ - SDL_GetTicks() + last_update_;
+    resume_interval_ = Interval();
     paused_ = true;
   }
 }
@@ -120,55 +140,80 @@ void TimerImpl::End(event::Command const& command)
 
 Uint32 TimerImpl::Update(void)
 {
-  signal_();
-  last_update_ = SDL_GetTicks();
+  Uint32 current_time = SDL_GetTicks();
+  Uint32 update_interval = current_time - last_update_;
   
-  int interval = interval_;
-  if(max_loops_ >= 0)
+  bool end_flag = false;
+  while(update_interval >= interval_)
   {
-    if(loops_ == max_loops_)
+    update_interval -= interval_;
+    if(max_loops_ < 0)
     {
-      end_();
-      interval = 0;
-      timer_ = timer_null;
+      signal_(queue_);
     }
-    ++loops_;
+    else
+    {
+      if(loops_ <= max_loops_)
+      {
+        signal_(queue_);
+      }
+      if(loops_ >= max_loops_)
+      {
+        end_flag = true;
+        break;
+      }
+      ++loops_;
+    }
+  }
+
+  last_update_ = current_time - update_interval;
+
+  Uint32 interval;
+  if(end_flag)
+  {
+    end_(queue_);
+    timer_ = timer_null;
+    interval = 0;
+  }
+  else
+  {
+    interval = Interval();
   }
   return interval;
 }
 
-Timer::Timer(int interval)
+Timer::Timer(int interval, event::Queue& queue)
 {
-  impl_ = std::make_shared<TimerImpl>(interval);
+  impl_ = std::make_shared<TimerImpl>(interval, queue);
 }
 
 void Timer::Pause(void)
 {
-  sdl::Lock lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   impl_->Pause();
 }
 
 void Timer::Resume(void)
 {
-  sdl::Lock lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   impl_->Resume();
 }
 
 void Timer::Add(event::Command const& command)
 {
-  sdl::Lock lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   return impl_->Add(command);
 }
 
 void Timer::End(event::Command const& command)
 {
-  sdl::Lock lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   impl_->End(command);
 }
 
 void Timer::Play(int loops)
 {
-  sdl::Lock lock(impl_->mutex_);
+  thread::Lock lock(impl_->mutex_);
   impl_->Play(loops);
 }
 }

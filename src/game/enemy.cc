@@ -51,14 +51,12 @@ void EnemyImpl::Pause(void)
     paused_ = false;
     animation_.Resume();
     sound_effect_.Resume();
-    dynamics_.Resume();
   }
   else
   {
     paused_ = true;
     animation_.Pause();
     sound_effect_.Pause();
-    dynamics_.Pause();
   }
 }
 
@@ -170,14 +168,14 @@ EnemyImpl::EnemyImpl(json::JSON const& json, display::Window& window)
     "sound effect", &destroyed_sound_effect,
     "collision box", &collision_box);
 
-  moving_animation_ = Animation(moving_animation, window);
+  /*moving_animation_ = Animation(moving_animation, window);
   moving_render_box_ = display::BoundingBox(moving_render_box);
   moving_sound_effect_ = audio::Sound(moving_sound_effect);
     
   destroyed_animation_ = Animation(destroyed_animation, window);
   destroyed_render_box_ = display::BoundingBox(destroyed_render_box);
   destroyed_sound_effect_ = audio::Sound(destroyed_sound_effect);
-  
+  */
   collision_box_ = display::BoundingBox(collision_box);
   paused_ = true;
 
@@ -193,8 +191,6 @@ EnemyImpl::EnemyImpl(json::JSON const& json, display::Window& window)
   left_ = true;
   right_ = true;
   dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f);
-  dynamics_.Play();
-  dynamics_.Pause();
 }
 
 void Enemy::Position(int x, int y)
@@ -244,23 +240,5 @@ Enemy::Enemy(json::JSON const& json, display::Window& window, Scene& scene, Coll
 Enemy::Enemy(std::string const& filename, display::Window& window, Scene& scene, Collision& collision, event::Signal& pause, Role& role) :
 Enemy(json::JSON(filename), window, scene, collision, pause, role)
 {
-}
-
-Enemy::Enemy(Enemy const& other) : impl_(other.impl_)
-{
-}
-
-Enemy::Enemy(Enemy&& other) : impl_(std::move(other.impl_))
-{
-}
-
-Enemy::~Enemy(void)
-{
-}
-
-Enemy& Enemy::operator=(Enemy other)
-{
-  std::swap(impl_, other.impl_);
-  return *this;
 }
 }

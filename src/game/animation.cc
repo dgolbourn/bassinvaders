@@ -12,7 +12,7 @@ namespace game
 class AnimationImpl
 {
 public:
-  AnimationImpl(json::JSON const& json, display::Window& window);
+  AnimationImpl(json::JSON const& json, display::Window& window, event::Queue& queue);
   void Next(void);
   void Render(display::BoundingBox const& destination, float parallax, bool tile, double angle) const;
   void Pause(void);
@@ -27,7 +27,7 @@ public:
   event::Timer timer_;
 };
 
-AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
+AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window, event::Queue& queue)
 {
   char const* sprite_sheet;
   int interval;
@@ -43,7 +43,7 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window)
     "frames", &frames);
 
   texture_ = window.Load(std::string(sprite_sheet));
-  timer_ = event::Timer(interval);
+  timer_ = event::Timer(interval, queue);
   frames_ = std::vector<display::BoundingBox>(json_array_size(frames));
   frame_ = frames_.begin();
 
@@ -96,9 +96,9 @@ void AnimationImpl::End(event::Command const& command)
   timer_.End(command);
 }
 
-Animation::Animation(json::JSON const& json, display::Window& window)
+Animation::Animation(json::JSON const& json, display::Window& window, event::Queue& queue)
 {
-  impl_ = std::make_shared<AnimationImpl>(json, window);
+  impl_ = std::make_shared<AnimationImpl>(json, window, queue);
   thread::Lock lock(impl_->mutex_);
   impl_->timer_.Add(event::Bind(&AnimationImpl::Next, impl_));
 }

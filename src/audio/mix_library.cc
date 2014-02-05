@@ -23,20 +23,20 @@ Library::Library(void) : sdl_(SDL_INIT_AUDIO)
 {
   if(reference_count == 0)
   {
-    int const flags = 0;
+    static int const flags = 0;
     if((Mix_Init(flags) & flags) != flags) 
     {
       throw Exception();
     }
 
-    int const samples = static_cast<int>(1) << 10;
+    static int const samples = static_cast<int>(1) << 10;
     if(Mix_OpenAudio(MIX_SAMPLE_RATE, MIX_FORMAT, MIX_CHANNEL_LAYOUT, samples) == -1)
     {
       MixQuit();
       throw Exception();
     }
 
-    int const mixer_channels = 32;
+    static int const mixer_channels = 32;
     if(Mix_AllocateChannels(mixer_channels) != mixer_channels)
     {
       Mix_CloseAudio();

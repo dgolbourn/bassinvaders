@@ -21,7 +21,7 @@ static void KeydownEvent(SDL_KeyboardEvent const& keyboard_event, Uint32 const& 
     auto iter = key_map.find(keyboard_event.keysym.scancode);
     if(iter != key_map.end())
     {
-      switch (type)
+      switch(type)
       {
       case SDL_KEYDOWN:
         iter->second.first();
@@ -30,7 +30,6 @@ static void KeydownEvent(SDL_KeyboardEvent const& keyboard_event, Uint32 const& 
         iter->second.second();
         break;
       }
-      
     }
   }
 }

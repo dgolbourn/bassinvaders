@@ -58,9 +58,9 @@ static AVFilterContext* InitSink(Graph& graph)
   {
     throw Exception();
   }
-  AVSampleFormat sample_fmts[] = {FFMPEG_FORMAT, AV_SAMPLE_FMT_NONE};
-  int64_t channel_layouts[] = {FFMPEG_CHANNEL_LAYOUT, -1};    
-  int sample_rates[] = {FFMPEG_SAMPLE_RATE, -1};
+  static AVSampleFormat const sample_fmts[] = { FFMPEG_FORMAT, AV_SAMPLE_FMT_NONE };
+  static int64_t const channel_layouts[] = {FFMPEG_CHANNEL_LAYOUT, -1};    
+  static int const sample_rates[] = {FFMPEG_SAMPLE_RATE, -1};
   int ret = 0;
   ret |= av_opt_set_int_list(sink, "sample_fmts", sample_fmts, -1, AV_OPT_SEARCH_CHILDREN);   
   ret |= av_opt_set_int_list(sink, "channel_layouts", channel_layouts, -1, AV_OPT_SEARCH_CHILDREN);      

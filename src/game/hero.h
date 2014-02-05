@@ -10,19 +10,21 @@
 #include "rules_collision.h"
 #include "position.h"
 #include "weak_ptr.h"
+#include "queue.h"
 
 namespace game
 {
 class Hero
 {
 public:
-  Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesCollision& collision);
+  Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesCollision& collision, event::Queue& queue);
   Hero(void) = default;
   void Position(game::Position const& position);
   game::Position Position(void);
   typedef std::function<bool(int)> Command;
   void Life(Command const& command);
   void End(event::Command const& command);
+  void Step(float dt);
   typedef memory::WeakPtr<Hero, class HeroImpl> WeakPtr;
 private:
   std::shared_ptr<class HeroImpl> impl_;

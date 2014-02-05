@@ -5,12 +5,13 @@
 #include "window.h"
 #include "position.h"
 #include "command.h"
+#include "queue.h"
 namespace game
 {
 class State
 {
 public:
-  State(json::JSON const& json, display::Window& window);
+  State(json::JSON const& json, display::Window& window, event::Queue& queue);
   State(void) = default;
   bool operator==(State const& other) const;
   void Play(void);

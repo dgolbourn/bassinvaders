@@ -2,14 +2,14 @@
 #define TIMER_H_
 #include <memory>
 #include "command.h"
-
+#include "queue.h"
 namespace event
 {
 class Timer
 {
 public:
   Timer(void) = default;
-  Timer(int interval);
+  Timer(int interval, event::Queue& queue);
   void Play(int loops = 0);
   void Pause(void);
   void Resume(void);

@@ -7,13 +7,14 @@ namespace game
 class StateImpl
 {
 public:
-  StateImpl(json::JSON const& json, display::Window& window);
+  StateImpl(json::JSON const& json, display::Window& window, event::Queue& queue);
   void Play(void);
   void Pause(void);
   void Resume(void);
   void Stop(void);
   void Render(display::BoundingBox const& bounding_box);
   void End(event::Command const& command);
+
   Animation animation_;
   display::BoundingBox render_box_;
   audio::Sound sound_;
@@ -21,7 +22,7 @@ public:
   int loops_;
 };
 
-StateImpl::StateImpl(json::JSON const& json, display::Window& window)
+StateImpl::StateImpl(json::JSON const& json, display::Window& window, event::Queue& queue)
 {
   json_t* animation;
   json_t* render_box;
@@ -35,7 +36,7 @@ StateImpl::StateImpl(json::JSON const& json, display::Window& window)
     "collision box", &collision_box,
     "loops", &loops_);
 
-  animation_ = Animation(animation, window);
+  animation_ = Animation(animation, window, queue);
   render_box_ = display::BoundingBox(render_box);
   sound_ = audio::Sound(sound_effect);
   collision_box_ = display::BoundingBox(collision_box);
@@ -122,8 +123,8 @@ bool State::operator==(State const& other) const
   return impl_ == other.impl_;
 }
 
-State::State(json::JSON const& json, display::Window& window)
+State::State(json::JSON const& json, display::Window& window, event::Queue& queue)
 {
-  impl_ = std::make_shared<StateImpl>(json, window);
+  impl_ = std::make_shared<StateImpl>(json, window, queue);
 }
 }

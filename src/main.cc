@@ -20,6 +20,7 @@
 #include "hud.h"
 #include "rules_collision.h"
 #include <atomic>
+#include <chrono>
 
 static std::atomic<bool> run(true);
 static bool Quit(void)
@@ -47,7 +48,8 @@ int main(int argc, char *argv[])
     game::Collision col;
     game::RulesCollision rc(col);
     rc.Link(0, 1);
-    game::Hero h(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json"), w, Sc, rc);
+    event::Queue queue;
+    game::Hero h(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json"), w, Sc, rc, queue);
     h.End(Quit);
     game::HUD hud(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hud.json"), w, Sc);
     h.Life(event::Bind(&game::HUD::Life, hud));
@@ -67,15 +69,22 @@ int main(int argc, char *argv[])
 
     event::pause.second();
     int score = 0;
+    std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
     while(run)
     {
       hud.Score(score++);
       game::Position p = h.Position();
       w.View(p.first, p.second, 1.f);
-      event::Check();
       w.Clear();
       Sc.Render();
       w.Show();
+      event::Check();
+      queue();
+
+      std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+      float t = std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count();
+      t0 = t1;
+      h.Step(t);
       col.Check();
     }
     ret = EXIT_SUCCESS;

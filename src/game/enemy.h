@@ -22,11 +22,6 @@ public:
   void Position(int x, int y);
   game::Position Position(void);
   void End(event::Command const& command);
-
-  ~Enemy(void);
-  Enemy(Enemy const& other);
-  Enemy(Enemy&& other);
-  Enemy& operator=(Enemy other);
 private:
   std::shared_ptr<class EnemyImpl> impl_;
 };

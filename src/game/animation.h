@@ -6,13 +6,14 @@
 #include "window.h"
 #include "json.h"
 #include "command.h"
+#include "queue.h"
 
 namespace game
 {
 class Animation
 {
 public:
-  Animation(json::JSON const& json, display::Window& window);
+  Animation(json::JSON const& json, display::Window& window, event::Queue& queue);
   Animation(void) = default;
   void Render(display::BoundingBox const& destination, float parallax = 0.f, bool tile = false, double angle = 0.) const;
   void Pause(void);

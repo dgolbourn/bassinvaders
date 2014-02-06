@@ -1,5 +1,5 @@
 #include "dynamics.h"
-
+#include <cmath>
 namespace game
 {
 class DynamicsImpl
@@ -31,7 +31,7 @@ static float CollisionTime(float x0, float u0, float w0, float x1, float u1, flo
   float dw = w1 - w0;
   if(du > 0)
   {
-     dx += 0.5f * dw;
+    dx += 0.5f * dw;
   }
   else
   {
@@ -68,7 +68,7 @@ void DynamicsImpl::Collision(DynamicsImpl const& other)
         u_ = game::Collision(u_, m_, c_, other.u_, other.m_, other.c_);
         Step(dtx);
       }
-      else
+      else if(std::isfinite(dty))
       {
         Step(-dty);
         v_ = game::Collision(v_, m_, c_, other.v_, other.m_, other.c_);

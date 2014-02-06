@@ -11,7 +11,7 @@ class HeroImpl : public std::enable_shared_from_this<HeroImpl>
 {
 public:
   HeroImpl(json::JSON const& json, display::Window& window, event::Queue& queue);
-  void Init(Scene& scene, RulesCollision& collision);
+  void Init(Scene& scene, RulesCollision& collision, DynamicsCollision& dcollision);
   void End(event::Command const& command);
   State moving_;
   State destroyed_;
@@ -225,7 +225,7 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, event::Queue
   collision_box_ = current_.Collision().Copy();
   render_box_ = current_.Render().Copy();
   position_ = game::Position(0, 0);
-  dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f);
+  dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f, 10.f, 10.f, 1.0f, 1.0f);
   x_sign_ = 0;
   y_sign_ = 0;
   x_facing_ = 0;
@@ -233,7 +233,7 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, event::Queue
   life_ = 100;
 }
 
-void HeroImpl::Init(Scene& scene, RulesCollision& collision)
+void HeroImpl::Init(Scene& scene, RulesCollision& collision, DynamicsCollision& dcollision)
 {
   auto ptr = shared_from_this();
   hit_.End(event::Bind(&HeroImpl::Reset, ptr));
@@ -254,7 +254,8 @@ void HeroImpl::Init(Scene& scene, RulesCollision& collision)
   RulesCollision::Send send(event::Bind(&HeroImpl::EnemySend, ptr));
   RulesCollision::Receive receive(event::Bind(&HeroImpl::EnemyReceive, ptr));
   RulesCollision::Channel channel(send, receive);
-  collision.Add(0, ptr->collision_box_, channel);
+  collision.Add(0, collision_box_, channel);
+  dcollision.Add(0, dynamics_, collision_box_);
 }
 
 void HeroImpl::Life(Hero::Command command)
@@ -289,9 +290,9 @@ void Hero::Step(float dt)
   impl_->Step(dt);
 }
 
-Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesCollision& collision, event::Queue& queue)
+Hero::Hero(json::JSON const& json, display::Window& window, Scene& scene, RulesCollision& collision, DynamicsCollision& dcollision, event::Queue& queue)
 {
   impl_ = std::make_shared<HeroImpl>(json, window, queue);
-  impl_->Init(scene, collision);
+  impl_->Init(scene, collision, dcollision);
 }
 }

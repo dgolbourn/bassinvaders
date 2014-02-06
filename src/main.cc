@@ -19,10 +19,11 @@
 #include "bind.h"
 #include "hud.h"
 #include "rules_collision.h"
-#include <atomic>
 #include <chrono>
+#include "dynamics.h"
+#include "dynamics_collision.h"
 
-static std::atomic<bool> run(true);
+static bool run = true;
 static bool Quit(void)
 {
   run = false;
@@ -47,14 +48,18 @@ int main(int argc, char *argv[])
     game::Scene Sc(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/scene.json"), w);
     game::Collision col;
     game::RulesCollision rc(col);
-    rc.Link(0, 1);
+ //   rc.Link(0, 1);
+    game::DynamicsCollision dc(col);
+    dc.Link(0, 1);
     event::Queue queue;
-    game::Hero h(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json"), w, Sc, rc, queue);
+    game::Hero h(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json"), w, Sc, rc, dc, queue);
     h.End(Quit);
     game::HUD hud(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hud.json"), w, Sc);
     h.Life(event::Bind(&game::HUD::Life, hud));
 
     std::vector<display::BoundingBox> boxes(100);
+    std::vector<game::Dynamics> dynamics(100);
+    int idx = 0;
     for(auto& box : boxes)
     {
       box = display::BoundingBox(-1500 + (rand() & 3000), -1500 + (rand() % 3000), 50, 50);
@@ -64,7 +69,11 @@ int main(int argc, char *argv[])
       game::RulesCollision::Send send = [=](){return std::pair<game::RulesCollision::Rules, bool>(game::RulesCollision::Rules(rand() %10, 0), true); };
       game::RulesCollision::Receive receive = [=](game::RulesCollision::Rules const& rules){(void)rules;  std::cout << "hit!" << std::endl; return true; };
       game::RulesCollision::Channel channel(send, receive);
-      rc.Add(1, box, channel);
+//      rc.Add(1, box, channel);
+
+      dynamics[idx] = game::Dynamics(box.x() + box.w() / 2, box.y() + box.h() / 2, 0, 0, box.w(), box.h(), 0.0f, -1.0f);
+      dc.Add(1, dynamics[idx], box);
+      ++idx;
     }
 
     event::pause.second();

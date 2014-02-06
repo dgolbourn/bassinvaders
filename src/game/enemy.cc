@@ -190,7 +190,7 @@ EnemyImpl::EnemyImpl(json::JSON const& json, display::Window& window)
   down_ = true;
   left_ = true;
   right_ = true;
-  dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f);
+//  dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f);
 }
 
 void Enemy::Position(int x, int y)

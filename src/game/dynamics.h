@@ -8,7 +8,7 @@ class Dynamics
 {
 public:
   Dynamics(void) = default;
-  Dynamics(float x, float y, float u, float v, float w, float h, float c = 1.f, float m = -1.f);
+  Dynamics(float x, float y, float u, float v, float w, float h, float c = 1.f, float m = std::numeric_limits<float>::infinity());
   void x(float x);
   void y(float y);
   void u(float u);

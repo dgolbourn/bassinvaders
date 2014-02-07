@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
     game::HUD hud(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hud.json"), w, Sc);
     h.Life(event::Bind(&game::HUD::Life, hud));
 
-    std::vector<display::BoundingBox> boxes(100);
-    std::vector<game::Dynamics> dynamics(100);
+    std::vector<display::BoundingBox> boxes(500);
+    std::vector<game::Dynamics> dynamics(500);
     int idx = 0;
     for(auto& box : boxes)
     {
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
       game::RulesCollision::Channel channel(send, receive);
 //      rc.Add(1, box, channel);
 
-      dynamics[idx] = game::Dynamics(box.x() + box.w() / 2, box.y() + box.h() / 2, 0, 0, box.w(), box.h(), 0.0f, -1.0f);
+      dynamics[idx] = game::Dynamics(box.x() + box.w() / 2, box.y() + box.h() / 2, 0, 0, box.w(), box.h(), 0.5f);
       dc.Add(1, dynamics[idx], box);
       ++idx;
     }
@@ -79,11 +79,12 @@ int main(int argc, char *argv[])
     event::pause.second();
     int score = 0;
     std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
+    float t = 30.f;
     while(run)
     {
-      hud.Score(score++);
+      hud.Score(int(1./t));
       game::Position p = h.Position();
-      w.View(p.first, p.second, 1.f);
+      w.View(p.first, p.second, 0.5f);
       w.Clear();
       Sc.Render();
       w.Show();
@@ -91,7 +92,7 @@ int main(int argc, char *argv[])
       queue();
 
       std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-      float t = std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count();
+      t = std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count();
       t0 = t1;
       h.Step(t);
       col.Check();

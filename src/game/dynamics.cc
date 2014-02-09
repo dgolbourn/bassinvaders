@@ -16,28 +16,30 @@ public:
   float h_;
   float c_;
   float m_;
+  float dt_;
 };
 
 void DynamicsImpl::Step(float dt)
 {
   x_ += u_ * dt;
   y_ += v_ * dt;
+  dt_ = dt;
 }
 
 static float CollisionTime(float x0, float u0, float w0, float x1, float u1, float w1)
 {
   float dx = x1 - x0;
-  float du = u1 - u0;
-  float dw = 0.5f * (w1 - w0);
+  float du = u0 - u1;
+  float dw = 0.5f * (w1 + w0);
   if(du > 0.f)
-  {
-    dx += dw;
-  }
-  else
   {
     dx -= dw;
   }
-  return -dx / du;
+  else
+  {
+    dx += dw;
+  }
+  return dx / du;
 }
 
 static float Collision(float u0, float m0, float c0, float u1, float m1, float c1)
@@ -59,29 +61,23 @@ void DynamicsImpl::Collision(DynamicsImpl const& other)
   if(std::isfinite(m_))
   {
     float dtx = CollisionTime(x_, u_, w_, other.x_, other.u_, other.w_);
-    if(dtx > 0.f)
+    float dty = CollisionTime(y_, v_, h_, other.y_, other.v_, other.h_);
+    if(dtx < dty && dtx > 0 && dtx < dt_)
     {
-      float dty = CollisionTime(y_, v_, h_, other.y_, other.v_, other.h_);
-      if(dty > 0.f)
-      {
-        if(dtx < dty)
-        {
-          Step(-dtx);
-          u_ = game::Collision(u_, m_, c_, other.u_, other.m_, other.c_);
-          Step(dtx);
-        }
-        else if(std::isfinite(dty))
-        {
-          Step(-dty);
-          v_ = game::Collision(v_, m_, c_, other.v_, other.m_, other.c_);
-          Step(dty);
-        }
-      }
+      Step(-dtx);
+      u_ = game::Collision(u_, m_, c_, other.u_, other.m_, other.c_);
+      Step(dtx);
+    }
+    else if(dty > 0 && dty < dt_)
+    {
+      Step(-dty);
+      v_ = game::Collision(v_, m_, c_, other.v_, other.m_, other.c_);
+      Step(dty);
     }
   }
 }
 
-DynamicsImpl::DynamicsImpl(float x, float y, float u, float v, float w, float h, float c, float m) : x_(x), u_(u), y_(y), v_(v), w_(w), h_(h), c_(c), m_(m)
+DynamicsImpl::DynamicsImpl(float x, float y, float u, float v, float w, float h, float c, float m) : x_(x), u_(u), y_(y), v_(v), w_(w), h_(h), c_(c), m_(m), dt_(0)
 {
 }
 

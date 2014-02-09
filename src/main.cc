@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
       game::RulesCollision::Channel channel(send, receive);
 //      rc.Add(1, box, channel);
 
-      dynamics[idx] = game::Dynamics(box.x() + box.w() / 2, box.y() + box.h() / 2, 0, 0, box.w(), box.h(), 0.5f);
+      dynamics[idx] = game::Dynamics(box.x() + box.w() / 2, box.y() + box.h() / 2, 0, 0, box.w()/2, box.h()/2, 0.5f);
       dc.Add(1, dynamics[idx], box);
       ++idx;
     }
@@ -79,12 +79,12 @@ int main(int argc, char *argv[])
     event::pause.second();
     int score = 0;
     std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-    float t = 30.f;
+    float dt = 0.f;
     while(run)
     {
-      hud.Score(int(1./t));
+      hud.Score(int(1./dt));
       game::Position p = h.Position();
-      w.View(p.first, p.second, 0.5f);
+      w.View(p.first, p.second, 1.f);
       w.Clear();
       Sc.Render();
       w.Show();
@@ -92,9 +92,9 @@ int main(int argc, char *argv[])
       queue();
 
       std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-      t = std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count();
+      dt = std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count();
       t0 = t1;
-      h.Step(t);
+      h.Step(dt);
       col.Check();
     }
     ret = EXIT_SUCCESS;

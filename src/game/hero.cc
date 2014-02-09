@@ -225,7 +225,7 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, event::Queue
   collision_box_ = current_.Collision().Copy();
   render_box_ = current_.Render().Copy();
   position_ = game::Position(0, 0);
-  dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f, 10.f, 10.f, 1.0f, 1.0f);
+  dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.0f, 1.0f);
   x_sign_ = 0;
   y_sign_ = 0;
   x_facing_ = 0;

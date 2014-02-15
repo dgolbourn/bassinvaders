@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include "mix_exception.h"
 #include "mix_library.h"
+#include <vector>
+#include "decoder.h"
 
 namespace mix
 {
@@ -13,6 +15,7 @@ public:
   ~ChunkImpl(void);
   Library const mix_;
   Mix_Chunk* chunk_;
+  std::vector<Uint8> data_;
 };
 
 static std::unordered_map<std::string, std::shared_ptr<ChunkImpl>> chunks;
@@ -24,7 +27,17 @@ void Free(void)
 
 ChunkImpl::ChunkImpl(std::string const& filename)
 {
-  chunk_ = Mix_LoadWAV(filename.c_str());
+  static int const buffer_size = 4096;
+  Uint8 data[buffer_size];
+  ffmpeg::Decoder decoder(filename);
+  while(int read = decoder.Read(data, buffer_size))
+  {
+    for(int i = 0; i < read; ++i)
+    {
+      data_.push_back(data[i]);
+    }
+  }
+  chunk_ = Mix_QuickLoad_RAW(data_.data(), data_.size());
   if(!chunk_)
   {
     throw Exception();

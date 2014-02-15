@@ -3,6 +3,7 @@
 #include "SDL_mixer.h"
 #include "mix_library.h"
 #include "decoder.h"
+#include "cstd_exception.h"
 
 namespace audio
 {
@@ -39,7 +40,13 @@ void MusicImpl::Pause(void) const
 
 static void MixCallback(void* music, Uint8* stream, int len)
 {
-  static_cast<ffmpeg::Decoder*>(music)->Read(stream, len);
+  int read = static_cast<ffmpeg::Decoder*>(music)->Read(stream, len);
+  stream += read;
+  len -= read;
+  if(!memset(stream, 0, len))
+  {
+    throw cstd::Exception();
+  }
 }
 
 void MusicImpl::Resume(void)

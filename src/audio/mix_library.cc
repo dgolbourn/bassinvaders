@@ -36,7 +36,7 @@ Library::Library(void) : sdl_(SDL_INIT_AUDIO)
       throw Exception();
     }
 
-    static int const mixer_channels = 32;
+    static int const mixer_channels = 128;
     if(Mix_AllocateChannels(mixer_channels) != mixer_channels)
     {
       Mix_CloseAudio();

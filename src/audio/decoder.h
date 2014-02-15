@@ -11,8 +11,7 @@ class Decoder
 {
 public:
   Decoder(std::string const& filename);
-  void Read(uint8_t* buffer, int size);
-  explicit operator bool(void) const;
+  int Read(uint8_t* buffer, int size);
   void Volume(double volume);
 private:
   std::shared_ptr<class DecoderImpl> impl_;

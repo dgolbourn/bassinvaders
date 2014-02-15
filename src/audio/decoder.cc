@@ -6,7 +6,6 @@
 #include "frame.h"
 #include "ffmpeg_exception.h"
 #include "filter.h"
-#include "cstd_exception.h"
 
 namespace ffmpeg
 {
@@ -14,7 +13,7 @@ class DecoderImpl
 {
 public:
   DecoderImpl(std::string const& filename);
-  void Read(uint8_t* buffer, int size);
+  int Read(uint8_t* buffer, int size);
   void Volume(double volume);
   Library const ffmpeg_;
   Format format_;
@@ -22,19 +21,18 @@ public:
   Filter filter_;
   Packet packet_;
   Frame frame_;
-  bool empty_;
 };
 
 DecoderImpl::DecoderImpl(std::string const& filename)
 {
-  empty_ = false;
   format_ = Format(filename);
   codec_ = Codec(format_);
   filter_ = Filter(format_, codec_);
 }
 
-void DecoderImpl::Read(uint8_t* buffer, int size)
+int DecoderImpl::Read(uint8_t* buffer, int size)
 {
+  int start_size = size;
   while(size)
   {
     if(frame_)
@@ -76,14 +74,10 @@ void DecoderImpl::Read(uint8_t* buffer, int size)
     }
     else
     {
-      if(!memset(buffer, 0, size))
-      {
-        throw cstd::Exception();
-      }
-      size = 0;
-      empty_ = true;
+      break;
     }
   }
+  return start_size - size;
 }
 
 void DecoderImpl::Volume(double volume)
@@ -96,14 +90,9 @@ Decoder::Decoder(std::string const& filename)
   impl_ = std::make_shared<DecoderImpl>(filename);
 }
 
-void Decoder::Read(uint8_t* buffer, int size)
+int Decoder::Read(uint8_t* buffer, int size)
 {
-  impl_->Read(buffer, size);
-}
-
-Decoder::operator bool(void) const
-{
-  return !impl_->empty_;
+  return impl_->Read(buffer, size);
 }
 
 void Decoder::Volume(double volume)

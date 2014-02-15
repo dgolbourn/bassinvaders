@@ -41,8 +41,15 @@ static AVFilterContext* InitSource(Format const& format, Codec const& codec, Gra
   std::stringstream args;
   args << "time_base=" << time_base.num << "/" << time_base.den
     << ":sample_rate=" << codec->sample_rate
-    << ":sample_fmt=" << av_get_sample_fmt_name(codec->sample_fmt)
-    << ":channel_layout=" << std::hex << std::showbase << codec->channel_layout;
+    << ":sample_fmt=" << av_get_sample_fmt_name(codec->sample_fmt);
+  if(codec->channel_layout)
+  {
+    args << ":channel_layout=" << std::hex << std::showbase << codec->channel_layout;
+  }
+  if(codec->channels)
+  {
+    args << ":channels=" << codec->channels;
+  }
   AVFilterContext* source;
   if(avfilter_graph_create_filter(&source, avfilter_get_by_name("abuffer"), "in", args.str().c_str(), nullptr, graph.get()) < 0)
   {
@@ -58,7 +65,7 @@ static AVFilterContext* InitSink(Graph& graph)
   {
     throw Exception();
   }
-  static AVSampleFormat const sample_fmts[] = { FFMPEG_FORMAT, AV_SAMPLE_FMT_NONE };
+  static AVSampleFormat const sample_fmts[] = {FFMPEG_FORMAT, AV_SAMPLE_FMT_NONE};
   static int64_t const channel_layouts[] = {FFMPEG_CHANNEL_LAYOUT, -1};    
   static int const sample_rates[] = {FFMPEG_SAMPLE_RATE, -1};
   int ret = 0;

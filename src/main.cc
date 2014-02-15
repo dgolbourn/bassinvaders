@@ -40,15 +40,15 @@ int main(int argc, char *argv[])
     event::quit.Add(Quit);
     display::Window w(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/window.json"));
     display::Texture S = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/petrified_rock_large__x1_iconic_png_1354840406.png");
-    audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
+    //audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
+    audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
     mixer.Volume(0.5);
-    //audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
     event::pause.first.Add(event::Bind(&audio::Music::Pause, mixer));
     event::pause.second.Add(event::Bind(&audio::Music::Resume, mixer));
     game::Scene Sc(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/scene.json"), w);
     game::Collision col;
     game::RulesCollision rc(col);
- //   rc.Link(0, 1);
+    rc.Link(0, 1);
     game::DynamicsCollision dc(col);
     dc.Link(0, 1);
     event::Queue queue;
@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
     game::HUD hud(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hud.json"), w, Sc);
     h.Life(event::Bind(&game::HUD::Life, hud));
 
-    std::vector<display::BoundingBox> boxes(500);
-    std::vector<game::Dynamics> dynamics(500);
+    std::vector<display::BoundingBox> boxes(5000);
+    std::vector<game::Dynamics> dynamics(5000);
     int idx = 0;
     for(auto& box : boxes)
     {
@@ -69,9 +69,9 @@ int main(int argc, char *argv[])
       game::RulesCollision::Send send = [=](){return std::pair<game::RulesCollision::Rules, bool>(game::RulesCollision::Rules(rand() %10, 0), true); };
       game::RulesCollision::Receive receive = [=](game::RulesCollision::Rules const& rules){(void)rules;  std::cout << "hit!" << std::endl; return true; };
       game::RulesCollision::Channel channel(send, receive);
-//      rc.Add(1, box, channel);
+      rc.Add(1, box, channel);
 
-      dynamics[idx] = game::Dynamics(box.x() + box.w() / 2, box.y() + box.h() / 2, 0, 0, box.w()/2, box.h()/2, 0.5f);
+      dynamics[idx] = game::Dynamics(box.x() + box.w() *.5f, box.y() + box.h() *0.5f, 0, 0, box.w()*.5f, box.h()*.5f, 0.5f);
       dc.Add(1, dynamics[idx], box);
       ++idx;
     }

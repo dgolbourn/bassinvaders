@@ -29,7 +29,7 @@ FrameImpl::FrameImpl(void)
   buffer_ptr_ = nullptr;
   buffer_size_ = 0;
   frame_ = avcodec_alloc_frame();
-  if (!frame_)
+  if(!frame_)
   {
     throw Exception();
   }

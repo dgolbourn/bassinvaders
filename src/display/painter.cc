@@ -110,8 +110,16 @@ PainterImpl::PainterImpl(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture
   source_ = source;
   destination_ = *destination;
   angle_ = angle;
-  clip_.x = view->x;
-  clip_.y = view->y;
+  if(view)
+  {
+    clip_.x = view->x;
+    clip_.y = view->y;
+  }
+  else
+  {
+    clip_.x = 0;
+    clip_.y = 0;
+  }
   SDL_GetWindowSize(window, &clip_.w, &clip_.h);
 
   MovementVectors();

@@ -32,10 +32,7 @@ ChunkImpl::ChunkImpl(std::string const& filename)
   ffmpeg::Decoder decoder(filename);
   while(int read = decoder.Read(data, buffer_size))
   {
-    for(int i = 0; i < read; ++i)
-    {
-      data_.push_back(data[i]);
-    }
+    data_.insert(data_.end(), data, data + read);
   }
   chunk_ = Mix_QuickLoad_RAW(data_.data(), data_.size());
   if(!chunk_)

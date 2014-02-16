@@ -75,8 +75,7 @@ void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SD
    
     if(tile)
     {
-      SDL_Point tile_view = {0, 0};
-      algorithm::FloodFill<Painter>()(Painter(window, renderer, texture, source, &adjusted, &tile_view, angle));
+      algorithm::FloodFill<Painter>()(Painter(window, renderer, texture, source, &adjusted, nullptr, angle));
     }
     else
     {

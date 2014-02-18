@@ -12,8 +12,10 @@ class Music
 public:
   Music(void) = default;  
   Music(std::string const& filename);
-  void Pause(void) const;
+  void Pause(void);
   void Resume(void);
+  void Play(void);
+  void Stop(void);
   void Volume(double volume);
   explicit operator bool(void) const;
   typedef memory::WeakPtr<Music, class MusicImpl> WeakPtr;

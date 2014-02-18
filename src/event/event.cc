@@ -53,6 +53,7 @@ void Default(void)
   key_map[SDL_SCANCODE_RIGHT] = right;
   key_map[SDL_SCANCODE_D] = right;
   key_map[SDL_SCANCODE_SPACE] = button1;
+  key_map[SDL_SCANCODE_ESCAPE] = pause;
 }
 
 void Check(void)

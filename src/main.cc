@@ -22,6 +22,7 @@
 #include <chrono>
 #include "dynamics.h"
 #include "dynamics_collision.h"
+#include <thread>
 
 static bool run = true;
 static bool Quit(void)
@@ -43,6 +44,8 @@ int main(int argc, char *argv[])
     //audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
     audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
     mixer.Volume(0.5);
+    mixer.Play();
+    mixer.Pause();
     event::pause.first.Add(event::Bind(&audio::Music::Pause, mixer));
     event::pause.second.Add(event::Bind(&audio::Music::Resume, mixer));
     game::Scene Sc(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/scene.json"), w);
@@ -56,9 +59,9 @@ int main(int argc, char *argv[])
     h.End(Quit);
     game::HUD hud(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hud.json"), w, Sc);
     h.Life(event::Bind(&game::HUD::Life, hud));
-
-    std::vector<display::BoundingBox> boxes(5000);
-    std::vector<game::Dynamics> dynamics(5000);
+    
+    std::vector<display::BoundingBox> boxes(500);
+    std::vector<game::Dynamics> dynamics(500);
     int idx = 0;
     for(auto& box : boxes)
     {
@@ -69,7 +72,7 @@ int main(int argc, char *argv[])
       game::RulesCollision::Send send = [=](){return std::pair<game::RulesCollision::Rules, bool>(game::RulesCollision::Rules(rand() %10, 0), true); };
       game::RulesCollision::Receive receive = [=](game::RulesCollision::Rules const& rules){(void)rules;  std::cout << "hit!" << std::endl; return true; };
       game::RulesCollision::Channel channel(send, receive);
-      rc.Add(1, box, channel);
+      //rc.Add(1, box, channel);
 
       dynamics[idx] = game::Dynamics(box.x() + box.w() *.5f, box.y() + box.h() *0.5f, 0, 0, box.w()*.5f, box.h()*.5f, 0.5f);
       dc.Add(1, dynamics[idx], box);
@@ -77,12 +80,19 @@ int main(int argc, char *argv[])
     }
 
     event::pause.second();
-    int score = 0;
-    std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
-    float dt = 0.f;
-    while(run)
+
+    std::chrono::steady_clock::time_point last = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point tick = last;
+    int frame_rate = 30;
+    std::chrono::milliseconds frame_period_ms(1000/frame_rate);
+    float frame_period_s = 1.f/frame_rate;
+    while (run)
     {
-      hud.Score(int(1./dt));
+      std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+      float dt = std::chrono::duration_cast<std::chrono::duration<float>>(now - last).count();
+      last = now;
+      int current_frame_rate = int(std::round(1./dt));
+      hud.Score(current_frame_rate);
       game::Position p = h.Position();
       w.View(p.first, p.second, 1.f);
       w.Clear();
@@ -90,12 +100,10 @@ int main(int argc, char *argv[])
       w.Show();
       event::Check();
       queue();
-
-      std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-      dt = std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count();
-      t0 = t1;
-      h.Step(dt);
+      h.Step(frame_period_s);
       col.Check();
+      tick += frame_period_ms;
+      std::this_thread::sleep_until(tick);
     }
     ret = EXIT_SUCCESS;
   }

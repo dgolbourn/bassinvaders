@@ -1,8 +1,10 @@
 #include "decoder.h"
 #include "frame.h"
+#include "volume.h"
+#include "graph.h"
+#include "sink.h"
+#include "source.h"
 #include "ffmpeg_exception.h"
-#include "filter.h"
-
 namespace ffmpeg
 {
 class DecoderImpl
@@ -10,14 +12,30 @@ class DecoderImpl
 public:
   DecoderImpl(std::string const& filename);
   int Read(uint8_t* buffer, int size);
-  void Volume(double volume);
-  Filter filter_;
   Frame frame_;
+  Graph graph_;
+  Sink sink_;
+  Source source_;
+  Volume volume_;
 };
+
+static void Link(AVFilterContext* out, AVFilterContext* in)
+{
+  if(avfilter_link(out, 0, in, 0))
+  {
+    throw Exception();
+  }
+}
 
 DecoderImpl::DecoderImpl(std::string const& filename)
 {
-  filter_ = Filter(filename);
+  avfilter_register_all();
+  source_ = Source(filename, graph_);
+  sink_ = Sink(graph_);
+  volume_ = Volume(graph_);
+  Link(source_, volume_);
+  Link(volume_, sink_);
+  graph_();
 }
 
 int DecoderImpl::Read(uint8_t* buffer, int size)
@@ -37,7 +55,7 @@ int DecoderImpl::Read(uint8_t* buffer, int size)
         frame_.Close();
       }
     }
-    else if(filter_.Read(frame_))
+    else if(sink_(frame_))
     {
     } 
     else
@@ -46,11 +64,6 @@ int DecoderImpl::Read(uint8_t* buffer, int size)
     }
   }
   return start_size - size;
-}
-
-void DecoderImpl::Volume(double volume)
-{
-  filter_.Volume(volume);
 }
 
 Decoder::Decoder(std::string const& filename)
@@ -65,6 +78,6 @@ int Decoder::Read(uint8_t* buffer, int size)
 
 void Decoder::Volume(double volume)
 {
-  impl_->Volume(volume);
+  impl_->volume_(volume);
 }
 }

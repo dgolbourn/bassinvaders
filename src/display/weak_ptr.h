@@ -22,11 +22,6 @@ public:
     return object;
   }
 
-  bool owner_before(WeakPtr const& other) const
-  {
-    return impl_.owner_before(other.impl_);
-  }
-
   bool operator<(WeakPtr const& other) const
   {
     return impl_.owner_before(other.impl_);

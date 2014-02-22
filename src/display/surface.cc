@@ -14,12 +14,12 @@ static void FreeSurface(SDL_Surface* ptr)
   }
 }
 
-Surface::Surface(TTF_Font* font, char const* text, SDL_Color fg)
+Surface::Surface(TTF_Font* font, char const* text, SDL_Color colour)
 {
   SDL_Surface* impl = nullptr;
   try
   {
-    impl = TTF_RenderText_Blended(font, text, fg);
+    impl = TTF_RenderText_Blended(font, text, colour);
     if(!impl)
     {
       throw ttf::Exception();

@@ -1,8 +1,4 @@
 #include "decoder.h"
-#include "ffmpeg_library.h"
-#include "packet.h"
-#include "format.h"
-#include "codec.h"
 #include "frame.h"
 #include "ffmpeg_exception.h"
 #include "filter.h"
@@ -15,19 +11,13 @@ public:
   DecoderImpl(std::string const& filename);
   int Read(uint8_t* buffer, int size);
   void Volume(double volume);
-  Library const ffmpeg_;
-  Format format_;
-  Codec codec_;
   Filter filter_;
-  Packet packet_;
   Frame frame_;
 };
 
 DecoderImpl::DecoderImpl(std::string const& filename)
 {
-  format_ = Format(filename);
-  codec_ = Codec(format_);
-  filter_ = Filter(format_, codec_);
+  filter_ = Filter(filename);
 }
 
 int DecoderImpl::Read(uint8_t* buffer, int size)
@@ -50,28 +40,6 @@ int DecoderImpl::Read(uint8_t* buffer, int size)
     else if(filter_.Read(frame_))
     {
     } 
-    else if(packet_)
-    {
-      while(packet_)
-      {
-        if(packet_.Read(codec_, frame_))
-        {
-          filter_.Add(frame_);
-          frame_.Close();
-        }
-        else
-        {
-          break;
-        }
-      }
-      packet_.Close();
-    }
-    else if(format_.Read(packet_))
-    {
-    }
-    else if(codec_.Read(frame_))
-    {
-    }
     else
     {
       break;

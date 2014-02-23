@@ -2,12 +2,57 @@
 #include "sdl_exception.h"
 #include "flood_fill.h"
 #include "painter.h"
+#include "SDL_sysrender.h"
 
 namespace sdl
 {
+static int RenderCopyEx(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* srcrect, SDL_Rect const* dstrect, double angle)
+{
+  SDL_Rect real_srcrect = {0, 0, texture->w, texture->h};
+  if(srcrect) 
+  {
+    if(!SDL_IntersectRect(srcrect, &real_srcrect, &real_srcrect)) 
+    {
+      return 0;
+    }
+  }
+
+  SDL_FRect frect;
+  if(dstrect) 
+  {
+    frect.x = dstrect->x;
+    frect.y = dstrect->y;
+    frect.w = dstrect->w;
+    frect.h = dstrect->h;
+  } 
+  else 
+  {
+    SDL_Rect real_dstrect = {0, 0, 0, 0};
+    SDL_RenderGetViewport(renderer, &real_dstrect);
+    frect.x = real_dstrect.x;
+    frect.y = real_dstrect.y;
+    frect.w = real_dstrect.w;
+    frect.h = real_dstrect.h;
+  }
+
+  SDL_FPoint fcenter;
+  fcenter.x = .5f * frect.w;
+  fcenter.y = .5f * frect.h;
+
+  if(texture->native) 
+  {
+    texture = texture->native;
+  }
+  if(renderer->hidden) 
+  {
+    return 0;
+  }
+  return renderer->RenderCopyEx(renderer, texture, &real_srcrect, &frect, angle, &fcenter, SDL_FLIP_NONE);
+}
+
 void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, double angle)
 {
-  if(SDL_RenderCopyEx(renderer, texture, source, destination, angle, nullptr, SDL_FLIP_NONE))
+  if(RenderCopyEx(renderer, texture, source, destination, angle))
   {
     BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
   }
@@ -29,22 +74,13 @@ void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SD
   if(destination)
   {
     SDL_Rect adjusted = *destination;
-
-    if(!adjusted.w || !adjusted.h)
+    if(!adjusted.w)
     {
-      int w, h;
-      if(SDL_QueryTexture(texture, nullptr, nullptr, &w, &h))
-      {
-        BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
-      }
-      if(!adjusted.w)
-      {
-        adjusted.w = w;
-      }
-      if(!adjusted.h)
-      {
-        adjusted.h = h;
-      }
+      adjusted.w = texture->w;
+    }
+    if(!adjusted.h)
+    {
+      adjusted.h = texture->h;
     }
 
     if(parallax > 0.f)

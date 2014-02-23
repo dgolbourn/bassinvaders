@@ -8,7 +8,6 @@
 #include "texture.h"
 #include "font_impl.h"
 #include "surface.h"
-#include "hash.h"
 #include "render.h"
 
 namespace display

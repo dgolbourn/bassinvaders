@@ -1,7 +1,6 @@
 #include "font.h"
 #include "font_impl.h"
 #include "ttf_exception.h"
-
 namespace display
 {
 FontImpl::FontImpl(std::string const& filename, int point, int r, int g, int b, int a) : ttf_(), colour_({r, g, b, a})
@@ -9,7 +8,7 @@ FontImpl::FontImpl(std::string const& filename, int point, int r, int g, int b, 
   font_ = TTF_OpenFont(filename.c_str(), point);
   if(!font_)
   {
-    BOOST_THROW_EXCEPTION(ttf::Exception());
+    BOOST_THROW_EXCEPTION(ttf::Exception() << ttf::Exception::What(ttf::Error()));
   }
 }
 

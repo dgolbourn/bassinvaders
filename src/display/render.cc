@@ -9,7 +9,7 @@ void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source
 {
   if(SDL_RenderCopyEx(renderer, texture, source, destination, angle, nullptr, SDL_FLIP_NONE))
   {
-    throw sdl::Exception();
+    BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
   }
 }
 
@@ -35,7 +35,7 @@ void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SD
       int w, h;
       if(SDL_QueryTexture(texture, nullptr, nullptr, &w, &h))
       {
-        throw sdl::Exception();
+        BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
       }
       if(!adjusted.w)
       {

@@ -6,14 +6,12 @@ extern "C"
 #include "libavutil/frame.h"
 }
 #include <memory>
-
 namespace ffmpeg
 {
 class Frame
 {
 public:
   Frame(void);
-  AVFrame* operator->(void) const;
   operator AVFrame*(void) const;
   void Seek(void);
   int Read(uint8_t* buffer, int size);

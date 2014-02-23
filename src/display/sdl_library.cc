@@ -1,7 +1,7 @@
 #include "sdl_library.h"
 #include <climits>
 #include "sdl_exception.h"
-
+#include "SDL.h"
 namespace sdl
 {
 static bool initialised;
@@ -14,7 +14,7 @@ Library::Library(Uint32 flags) : flags_(flags)
     SDL_SetMainReady();
     if(SDL_Init(flags) < 0)
     {
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
     }
     initialised = true;
   }
@@ -23,7 +23,7 @@ Library::Library(Uint32 flags) : flags_(flags)
     int const init_flags = flags & (SDL_WasInit(0u) ^ flags);
     if(SDL_InitSubSystem(init_flags) < 0)
     {
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
     }
   }
 

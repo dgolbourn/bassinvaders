@@ -82,18 +82,18 @@ WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_
     window_ = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
     if(!window_)
     {
-      throw sdl::Exception();
+      BOOST_THROW_EXCEPTION(sdl::Exception() << sdl::Exception::What(sdl::Error()));
     }
 
     renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
     if(!renderer_)
     {
-      throw sdl::Exception();
+      BOOST_THROW_EXCEPTION(sdl::Exception() << sdl::Exception::What(sdl::Error()));
     }
 
     if(SDL_SetRenderDrawColor(renderer_, 0, 0, 0, SDL_ALPHA_OPAQUE))
     {
-      throw sdl::Exception();
+      BOOST_THROW_EXCEPTION(sdl::Exception() << sdl::Exception::What(sdl::Error()));
     }
 
     view_ = {0, 0};
@@ -139,7 +139,7 @@ void WindowImpl::Clear(void) const
 {
   if(SDL_RenderClear(renderer_))
   {
-    throw sdl::Exception();
+    BOOST_THROW_EXCEPTION(sdl::Exception() << sdl::Exception::What(sdl::Error()));
   }
 }
 

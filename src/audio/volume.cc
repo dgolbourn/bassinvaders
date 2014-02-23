@@ -25,9 +25,10 @@ VolumeImpl::VolumeImpl(Graph& graph)
   context_ = nullptr;
   try
   {
-    if(avfilter_graph_create_filter(&context_, avfilter_get_by_name("volume"), "volume", nullptr, nullptr, graph) < 0)
+    int ret = avfilter_graph_create_filter(&context_, avfilter_get_by_name("volume"), "volume", nullptr, nullptr, graph);
+    if(ret < 0)
     {
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error(ret)));
     }
   }
   catch(...)
@@ -44,9 +45,10 @@ VolumeImpl::~VolumeImpl(void)
 
 void VolumeImpl::operator()(double volume)
 {
-  if(avfilter_process_command(context_, "volume", std::to_string(volume).c_str(), nullptr, 0, AVFILTER_CMD_FLAG_ONE) < 0)
+  int ret = avfilter_process_command(context_, "volume", std::to_string(volume).c_str(), nullptr, 0, AVFILTER_CMD_FLAG_ONE);
+  if(ret < 0)
   {
-    throw Exception();
+    BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error(ret)));
   }
 }
 

@@ -15,7 +15,7 @@ public:
   JSON(std::string const& filename);
   template<class... Args> void Unpack(std::string const& format, Args... args) const
   {
-    pUnpack(format, 0, args...);
+    Unpack_(format, 0, args...);
   }
 
   ~JSON(void);
@@ -23,7 +23,7 @@ public:
   JSON(JSON&& other);
   JSON& operator=(JSON other);
 private:
-  void pUnpack(std::string const& format, int dummy, ...) const;
+  void Unpack_(std::string const& format, int dummy, ...) const;
   json_t* json_;
 };
 }

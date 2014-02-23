@@ -1,15 +1,15 @@
 #ifndef TTF_EXCEPTION_H_
 #define TTF_EXCEPTION_H_
-
+#include "exception.h"
 #include <string>
-#include "SDL_ttf.h"
-
 namespace ttf
 {
-class Exception : public std::runtime_error 
+std::string Error(void);
+
+class Exception : virtual public exception::Exception
 {
 public:
-  Exception() : std::runtime_error(TTF_GetError()) { }
+  typedef boost::error_info<class What, std::string> What;
 };
 }
 #endif

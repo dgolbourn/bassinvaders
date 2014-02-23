@@ -19,7 +19,7 @@ Texture::Texture(SDL_Renderer* renderer, SDL_Surface* surface)
     impl = SDL_CreateTextureFromSurface(renderer, surface);
     if(!impl)
     {
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
     }
     impl_ = std::shared_ptr<SDL_Texture>(impl, FreeTexture);
   }

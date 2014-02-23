@@ -5,7 +5,7 @@
 #include "decoder.h"
 #include "cstd_exception.h"
 #include <atomic>
-
+#include "boost/throw_exception.hpp"
 namespace audio
 {
 class MusicImpl : public std::enable_shared_from_this<MusicImpl>
@@ -36,7 +36,7 @@ static void MixCallback(void*, Uint8* stream, int len)
   }
   if(!memset(stream, 0, len))
   {
-    throw cstd::Exception();
+    BOOST_THROW_EXCEPTION(cstd::Exception());
   }
 }
 

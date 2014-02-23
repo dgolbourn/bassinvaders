@@ -1,15 +1,15 @@
 #ifndef SDL_EXCEPTION_H_
 #define SDL_EXCEPTION_H_
-
+#include "exception.h"
 #include <string>
-#include "SDL.h"
-
 namespace sdl
 {
-class Exception : public std::runtime_error 
+std::string Error(void);
+
+class Exception : virtual public exception::Exception
 {
 public:
-  Exception() : std::runtime_error(SDL_GetError()) { }
+  typedef boost::error_info<class What, std::string> What;
 };
 }
 #endif

@@ -22,7 +22,7 @@ Surface::Surface(TTF_Font* font, char const* text, SDL_Color colour)
     impl = TTF_RenderText_Blended(font, text, colour);
     if(!impl)
     {
-      throw ttf::Exception();
+      BOOST_THROW_EXCEPTION(ttf::Exception() << ttf::Exception::What(ttf::Error()));
     }
     impl_ = std::shared_ptr<SDL_Surface>(impl, FreeSurface);
   }
@@ -44,7 +44,7 @@ Surface::Surface(char const* file)
     impl = IMG_Load(file);
     if(!impl)
     {
-      throw img::Exception();
+      BOOST_THROW_EXCEPTION(img::Exception() << img::Exception::What(img::Error()));
     }
     impl_ = std::shared_ptr<SDL_Surface>(impl, FreeSurface);
   }

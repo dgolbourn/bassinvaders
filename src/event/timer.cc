@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "SDL.h"
 #include "SDL_timer.h"
 #include "sdl_library.h"
 #include "sdl_exception.h"
@@ -57,7 +58,7 @@ static SDL_TimerID AddTimer(Uint32 interval, SDL_TimerCallback callback, void* p
   SDL_TimerID timer = SDL_AddTimer(interval, callback, param);
   if(!timer)
   {
-    throw sdl::Exception();
+    BOOST_THROW_EXCEPTION(sdl::Exception() << sdl::Exception::What(sdl::Error()));
   }
   return timer;
 }
@@ -66,7 +67,7 @@ static void RemoveTimer(SDL_TimerID id)
 {
   if(!SDL_RemoveTimer(id))
   {
-    throw sdl::Exception();
+    BOOST_THROW_EXCEPTION(sdl::Exception() << sdl::Exception::What(sdl::Error()));
   }
 }
 

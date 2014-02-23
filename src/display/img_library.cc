@@ -1,5 +1,6 @@
 #include "img_library.h"
 #include "img_exception.h"
+#include "SDL_image.h"
 #include <climits>
 
 namespace img
@@ -10,7 +11,7 @@ Library::Library(int flags)
 {
   if((flags & IMG_Init(flags)) != flags)
   {
-    throw Exception();
+    BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
   }
   ++reference_count;
 }

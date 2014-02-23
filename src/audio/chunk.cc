@@ -37,7 +37,7 @@ ChunkImpl::ChunkImpl(std::string const& filename)
   chunk_ = Mix_QuickLoad_RAW(data_.data(), data_.size());
   if(!chunk_)
   {
-    throw Exception();
+    BOOST_THROW_EXCEPTION(Exception());
   }
 }
 
@@ -65,7 +65,7 @@ int Chunk::Play(int repeats, int volume)
   int channel = Mix_PlayChannel(-1, impl_->chunk_, repeats);
   if(channel == -1)
   {
-    throw Exception();
+    BOOST_THROW_EXCEPTION(Exception());
   }
   (void)Mix_Volume(channel, volume);
   return channel;

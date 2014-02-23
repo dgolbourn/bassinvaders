@@ -1,19 +1,15 @@
 #ifndef FFMPEG_EXCEPTION_H_
 #define FFMPEG_EXCEPTION_H_
-
-#include <stdexcept>
-extern "C"
-{
-#include "libavutil/common.h"
-#include "libavutil/error.h"
-}
-
+#include "exception.h"
+#include <string>
 namespace ffmpeg
 {
-class Exception : public std::runtime_error 
+std::string Error(int error);
+
+class Exception : virtual public exception::Exception
 {
 public:
-  Exception(int error = AVERROR_BUG);
+  typedef boost::error_info<class What, std::string> What;
 };
 }
 #endif

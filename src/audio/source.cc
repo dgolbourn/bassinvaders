@@ -26,9 +26,10 @@ SourceImpl::SourceImpl(std::string const& filename, Graph& graph)
   {
     std::stringstream args;
     args << "filename='" << filename << "'";
-    if(avfilter_graph_create_filter(&context_, avfilter_get_by_name("amovie"), "in", args.str().c_str(), nullptr, graph) < 0)
+    int ret = avfilter_graph_create_filter(&context_, avfilter_get_by_name("amovie"), "in", args.str().c_str(), nullptr, graph);
+    if(ret < 0)
     {
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error(ret)));
     }
   }
   catch(...)

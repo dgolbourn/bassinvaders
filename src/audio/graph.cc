@@ -19,7 +19,7 @@ GraphImpl::GraphImpl(void)
     graph_ = avfilter_graph_alloc();
     if(!graph_)
     {
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception());
     }
   }
   catch(...)
@@ -36,9 +36,10 @@ GraphImpl::~GraphImpl(void)
 
 void GraphImpl::operator()(void)
 {
-  if(avfilter_graph_config(graph_, nullptr) < 0)
+  int ret = avfilter_graph_config(graph_, nullptr);
+  if(ret < 0)
   {
-    throw Exception();
+    BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error(ret)));
   }
 }
 

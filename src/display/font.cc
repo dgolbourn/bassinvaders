@@ -9,7 +9,7 @@ FontImpl::FontImpl(std::string const& filename, int point, int r, int g, int b, 
   font_ = TTF_OpenFont(filename.c_str(), point);
   if(!font_)
   {
-    throw ttf::Exception();
+    BOOST_THROW_EXCEPTION(ttf::Exception());
   }
 }
 

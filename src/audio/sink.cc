@@ -32,20 +32,21 @@ SinkImpl::SinkImpl(Graph& graph)
   context_ = nullptr;
   try
   {
-    if(avfilter_graph_create_filter(&context_, avfilter_get_by_name("abuffersink"), "out", nullptr, nullptr, graph) < 0)
+    int ret = avfilter_graph_create_filter(&context_, avfilter_get_by_name("abuffersink"), "out", nullptr, nullptr, graph);
+    if(ret < 0)
     {
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error(ret)));
     }
     static AVSampleFormat const sample_fmts[] = {FFMPEG_FORMAT, AV_SAMPLE_FMT_NONE};
     static int64_t const channel_layouts[] = {FFMPEG_CHANNEL_LAYOUT, -1};
     static int const sample_rates[] = {FFMPEG_SAMPLE_RATE, -1};
-    int ret = 0;
+    ret = 0;
     ret |= av_opt_set_int_list(context_, "sample_fmts", sample_fmts, -1, AV_OPT_SEARCH_CHILDREN);
     ret |= av_opt_set_int_list(context_, "channel_layouts", channel_layouts, -1, AV_OPT_SEARCH_CHILDREN);
     ret |= av_opt_set_int_list(context_, "sample_rates", sample_rates, -1, AV_OPT_SEARCH_CHILDREN);
-    if (ret)
+    if(ret)
     {
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error(ret)));
     }
   }
   catch(...)
@@ -70,7 +71,7 @@ bool SinkImpl::operator()(Frame& frame)
   }
   else if(ret < 0)
   {
-    throw Exception();
+    BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error(ret)));
   }
   if(got_frame)
   {

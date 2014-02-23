@@ -1,15 +1,17 @@
 #ifndef JSON_EXCEPTION_H_
 #define JSON_EXCEPTION_H_
-
-#include <stdexcept>
-#include "jansson.h"
-
+#include "exception.h"
+#include <string>
 namespace json
 {
-class Exception : public std::runtime_error 
+class Exception : virtual public exception::Exception
 {
 public:
-  Exception(json_error_t const& error);
+  typedef boost::error_info<class Text, std::string> Text;
+  typedef boost::error_info<class Source, std::string> Source;
+  typedef boost::error_info<class Line, int> Line;
+  typedef boost::error_info<class Column, int> Column;
+  typedef boost::error_info<class Position, int> Position;
 };
 }
 #endif

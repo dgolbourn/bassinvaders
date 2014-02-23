@@ -1,13 +1,11 @@
 #ifndef WINDOW_H_
 #define WINDOW_H_
-
 #include <string>
 #include <memory>
 #include <functional>
 #include "font.h"
 #include "bounding_box.h"
 #include "json.h"
-
 namespace display
 {
 typedef std::function<bool(display::BoundingBox const& source, display::BoundingBox const& destination, float parallax, bool tile, double angle)> Texture;

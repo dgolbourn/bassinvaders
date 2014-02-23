@@ -10,7 +10,7 @@ Library::Library(void)
 {
   if(!TTF_WasInit() && TTF_Init()==-1) 
   {
-    throw Exception();
+    BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
   }
   ++reference_count;
 }

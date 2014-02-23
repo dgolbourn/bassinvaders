@@ -1,8 +1,6 @@
 #ifndef CSTD_EXCEPTION_H_
 #define CSTD_EXCEPTION_H_
-
 #include <system_error>
-
 namespace cstd
 {
 class Exception : public std::system_error

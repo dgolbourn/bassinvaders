@@ -23,7 +23,7 @@ static void Link(AVFilterContext* out, AVFilterContext* in)
 {
   if(avfilter_link(out, 0, in, 0))
   {
-    throw Exception();
+    BOOST_THROW_EXCEPTION(Exception());
   }
 }
 

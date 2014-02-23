@@ -1,7 +1,7 @@
 #include <map>
 #include <string>
 #include "SDL.h"
-#include "mix_library.h"
+#include "SDL_mixer.h"
 #include "mix_library.h"
 #include "sdl_library.h"
 #include "mix_exception.h"
@@ -26,14 +26,14 @@ Library::Library(void) : sdl_(SDL_INIT_AUDIO)
     static int const flags = 0;
     if((Mix_Init(flags) & flags) != flags) 
     {
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
     }
 
     static int const samples = static_cast<int>(1) << 10;
     if(Mix_OpenAudio(MIX_SAMPLE_RATE, MIX_FORMAT, MIX_CHANNEL_LAYOUT, samples) == -1)
     {
       MixQuit();
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
     }
 
     static int const mixer_channels = 128;
@@ -41,7 +41,7 @@ Library::Library(void) : sdl_(SDL_INIT_AUDIO)
     {
       Mix_CloseAudio();
       MixQuit();
-      throw Exception();
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
     }
   }
   reference_count++;

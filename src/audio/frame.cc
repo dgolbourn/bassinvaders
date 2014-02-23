@@ -6,7 +6,6 @@ extern "C"
 #include "ffmpeg_exception.h"
 #include "cstd_exception.h"
 #include "audio_format.h"
-
 namespace ffmpeg
 {
 class FrameImpl
@@ -31,7 +30,7 @@ FrameImpl::FrameImpl(void)
   frame_ = avcodec_alloc_frame();
   if(!frame_)
   {
-    throw Exception();
+    BOOST_THROW_EXCEPTION(Exception());
   }
 }
 
@@ -54,7 +53,7 @@ int FrameImpl::Read(uint8_t* buffer, int size)
   }
   if(!memcpy(buffer, buffer_ptr_, size))
   {
-    throw cstd::Exception();
+    BOOST_THROW_EXCEPTION(cstd::Exception());
   }
   buffer_ptr_ += size;
   buffer_size_ -= size;
@@ -72,12 +71,7 @@ Frame::Frame(void)
   impl_ = std::make_shared<FrameImpl>();
 }
 
-AVFrame* Frame::operator->(void) const
-{
-  return impl_->frame_;
-}
-
-Frame::operator AVFrame* (void) const
+Frame::operator AVFrame*(void) const
 {
   return impl_->frame_;
 }

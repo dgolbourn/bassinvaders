@@ -23,7 +23,9 @@
 #include "dynamics.h"
 #include "dynamics_collision.h"
 #include <thread>
-
+#include "boost/exception/diagnostic_information.hpp"
+#include "ffmpeg_exception.h"
+#include "img_exception.h"
 static bool run = true;
 static bool Quit(void)
 {
@@ -86,7 +88,7 @@ int main(int argc, char *argv[])
     int frame_rate = 30;
     std::chrono::milliseconds frame_period_ms(1000/frame_rate);
     float frame_period_s = 1.f/frame_rate;
-    while (run)
+    while(run)
     {
       std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
       float dt = std::chrono::duration_cast<std::chrono::duration<float>>(now - last).count();
@@ -107,13 +109,9 @@ int main(int argc, char *argv[])
     }
     ret = EXIT_SUCCESS;
   }
-  catch(std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-    ret = EXIT_FAILURE;
-  }
   catch(...)
   {
+    std::cerr << "Unhandled exception:" << std::endl << boost::current_exception_diagnostic_information();
     ret = EXIT_FAILURE;
   }
   return ret;

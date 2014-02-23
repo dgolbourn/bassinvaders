@@ -1,15 +1,15 @@
 #ifndef IMG_EXCEPTION_H_
 #define IMG_EXCEPTION_H_
-
-#include "SDL_image.h"
+#include "exception.h"
 #include <string>
-
 namespace img
 {
-class Exception : public std::runtime_error 
+std::string Error(void);
+
+class Exception : virtual public exception::Exception
 {
 public:
-  Exception() : std::runtime_error(IMG_GetError()) { }
+  typedef boost::error_info<class What, std::string> What;
 };
 }
 #endif

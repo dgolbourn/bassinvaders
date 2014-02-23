@@ -1,15 +1,15 @@
 #ifndef MIX_EXCEPTION_H_
 #define MIX_EXCEPTION_H_
-
 #include <string>
-#include "SDL_mixer.h"
-
+#include "exception.h"
 namespace mix
 {
-class Exception : public std::runtime_error 
+std::string Error(void);
+
+class Exception : virtual public exception::Exception
 {
 public:
-  Exception() : std::runtime_error(Mix_GetError()) { }
+  typedef boost::error_info<class What, std::string> What;
 };
 }
 #endif

@@ -1,7 +1,7 @@
 #ifndef FLOOD_FILL_H_
 #define FLOOD_FILL_H_
 #include <unordered_set>
-#include "hash.h"
+#include "boost/functional/hash.hpp"
 
 namespace algorithm
 {
@@ -10,7 +10,7 @@ typedef std::pair<int, int> NodeCoordinates;
 template<class Node> class FloodFill
 {
 private:
-  typedef std::unordered_set<NodeCoordinates, Hash<int, int>> NodeSet;
+  typedef std::unordered_set<NodeCoordinates, boost::hash<NodeCoordinates>> NodeSet;
 
   NodeSet set_;
   NodeCoordinates coords_;

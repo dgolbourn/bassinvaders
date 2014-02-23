@@ -3,58 +3,31 @@
 #include "flood_fill.h"
 #include "painter.h"
 #include "SDL_sysrender.h"
-
 namespace sdl
 {
-static int RenderCopyEx(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* srcrect, SDL_Rect const* dstrect, double angle)
+void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source_ptr, SDL_Rect const* dstrect, double angle)
 {
-  SDL_Rect real_srcrect = {0, 0, texture->w, texture->h};
-  if(srcrect) 
-  {
-    if(!SDL_IntersectRect(srcrect, &real_srcrect, &real_srcrect)) 
-    {
-      return 0;
-    }
-  }
+  SDL_FRect destination;
+  destination.x = dstrect->x;
+  destination.y = dstrect->y;
+  destination.w = dstrect->w;
+  destination.h = dstrect->h;
 
-  SDL_FRect frect;
-  if(dstrect) 
-  {
-    frect.x = dstrect->x;
-    frect.y = dstrect->y;
-    frect.w = dstrect->w;
-    frect.h = dstrect->h;
-  } 
-  else 
-  {
-    SDL_Rect real_dstrect = {0, 0, 0, 0};
-    SDL_RenderGetViewport(renderer, &real_dstrect);
-    frect.x = real_dstrect.x;
-    frect.y = real_dstrect.y;
-    frect.w = real_dstrect.w;
-    frect.h = real_dstrect.h;
-  }
-
-  SDL_FPoint fcenter;
-  fcenter.x = .5f * frect.w;
-  fcenter.y = .5f * frect.h;
+  SDL_FPoint centre;
+  centre.x = .5f * destination.w;
+  centre.y = .5f * destination.h;
 
   if(texture->native) 
   {
     texture = texture->native;
   }
-  if(renderer->hidden) 
-  {
-    return 0;
-  }
-  return renderer->RenderCopyEx(renderer, texture, &real_srcrect, &frect, angle, &fcenter, SDL_FLIP_NONE);
-}
 
-void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, double angle)
-{
-  if(RenderCopyEx(renderer, texture, source, destination, angle))
+  if(renderer->hidden == SDL_FALSE)
   {
-    BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
+    if(renderer->RenderCopyEx(renderer, texture, source_ptr, &destination, angle, &centre, SDL_FLIP_NONE))
+    {
+      BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
+    }
   }
 }
 
@@ -69,58 +42,74 @@ static int Transform(int x, int new_origin, int width, float zoom, float paralla
   return int(x0);
 }
 
-void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, float zoom, float parallax, bool tile, double angle)
+void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source_ptr, SDL_Rect const* destination_ptr, SDL_Point const* view, float zoom, float parallax, bool tile, double angle)
 {
-  if(destination)
+  bool render = true;
+  SDL_Rect source = {0, 0, texture->w, texture->h};
+  if(source_ptr)
   {
-    SDL_Rect adjusted = *destination;
-    if(!adjusted.w)
+    if(SDL_IntersectRect(source_ptr, &source, &source) == SDL_FALSE)
     {
-      adjusted.w = texture->w;
+      render = false;
     }
-    if(!adjusted.h)
-    {
-      adjusted.h = texture->h;
-    }
+  }
 
-    if(parallax > 0.f)
+  if(render)
+  {
+    SDL_Rect destination;
+    if(destination_ptr)
     {
-      int w, h;
-      SDL_GetWindowSize(window, &w, &h);
-      adjusted.x = Transform(adjusted.x, view->x, w, zoom, parallax);
-      adjusted.y = Transform(adjusted.y, view->y, h, zoom, parallax);
-      adjusted.w = int(zoom * float(adjusted.w));
-      adjusted.h = int(zoom * float(adjusted.h));
-    }
-    else
-    {
-      if((adjusted.x < 0) || (adjusted.y < 0))
+      destination = *destination_ptr;
+      if(!destination.w)
+      {
+        destination.w = texture->w;
+      }
+      if(!destination.h)
+      {
+        destination.h = texture->h;
+      }
+
+      if(parallax > 0.f)
       {
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
-        if(adjusted.x < 0)
+        destination.x = Transform(destination.x, view->x, w, zoom, parallax);
+        destination.y = Transform(destination.y, view->y, h, zoom, parallax);
+        destination.w = int(zoom * float(destination.w));
+        destination.h = int(zoom * float(destination.h));
+      }
+      else
+      {
+        if((destination.x < 0) || (destination.y < 0))
         {
-          adjusted.x += w - adjusted.w;
-        }
-        if(adjusted.h < 0)
-        {
-          adjusted.y += h - adjusted.h;
+          int w, h;
+          SDL_GetWindowSize(window, &w, &h);
+          if(destination.x < 0)
+          {
+            destination.x += w - destination.w;
+          }
+          if(destination.h < 0)
+          {
+            destination.y += h - destination.h;
+          }
         }
       }
+    }
+    else
+    {
+      destination.x = 0;
+      destination.y = 0;
+      SDL_GetWindowSize(window, &destination.w, &destination.h);
     }
    
     if(tile)
     {
-      algorithm::FloodFill<Painter>()(Painter(window, renderer, texture, source, &adjusted, nullptr, angle));
+      algorithm::FloodFill<Painter>()(Painter(window, renderer, texture, &source, &destination, angle));
     }
     else
     {
-      Render(renderer, texture, source, &adjusted, angle);
+      Render(renderer, texture, &source, &destination, angle);
     }
-  }
-  else
-  {
-    Render(renderer, texture, source, nullptr, angle);
   }
 }
 }

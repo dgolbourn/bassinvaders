@@ -2,7 +2,6 @@
 #define FLOOD_FILL_H_
 #include <unordered_set>
 #include "boost/functional/hash.hpp"
-
 namespace algorithm
 {
 typedef std::pair<int, int> NodeCoordinates;

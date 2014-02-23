@@ -9,7 +9,7 @@ class Painter
 {
 public:
   Painter(void) = default;
-  Painter(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, double angle);
+  Painter(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, double angle);
   bool operator()(algorithm::NodeCoordinates const& coords);
 private:
   std::shared_ptr<class PainterImpl> impl_;

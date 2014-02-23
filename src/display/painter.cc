@@ -7,7 +7,7 @@ namespace sdl
 class PainterImpl
 {
 public:
-  PainterImpl(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, double angle);
+  PainterImpl(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, double angle);
   bool operator()(algorithm::NodeCoordinates const& coords);
   void MovementVectors(void);
   void EnclosingRect(void);
@@ -103,23 +103,15 @@ void PainterImpl::MovementVectors(void)
   north_.second = c_ * h_;
 }
 
-PainterImpl::PainterImpl(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, double angle)
+PainterImpl::PainterImpl(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, double angle)
 {
   renderer_ = renderer;
   texture_ = texture;
   source_ = source;
   destination_ = *destination;
   angle_ = angle;
-  if(view)
-  {
-    clip_.x = view->x;
-    clip_.y = view->y;
-  }
-  else
-  {
-    clip_.x = 0;
-    clip_.y = 0;
-  }
+  clip_.x = 0;
+  clip_.y = 0;
   SDL_GetWindowSize(window, &clip_.w, &clip_.h);
 
   MovementVectors();
@@ -156,8 +148,8 @@ bool Painter::operator()(algorithm::NodeCoordinates const& coords)
   return (*impl_)(coords);
 }
 
-Painter::Painter(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, SDL_Point const* view, double angle)
+Painter::Painter(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_Rect const* destination, double angle)
 {
-  impl_ = std::make_shared<PainterImpl>(window, renderer, texture, source, destination, view, angle);
+  impl_ = std::make_shared<PainterImpl>(window, renderer, texture, source, destination, angle);
 }
 }

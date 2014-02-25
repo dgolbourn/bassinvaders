@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
     std::chrono::steady_clock::time_point last = std::chrono::steady_clock::now();
     std::chrono::steady_clock::time_point tick = last;
-    int frame_rate = 30;
+    int frame_rate = 60;
     std::chrono::milliseconds frame_period_ms(1000/frame_rate);
     float frame_period_s = 1.f/frame_rate;
     while(run)

@@ -2,20 +2,13 @@
 #include "sdl_exception.h"
 #include "flood_fill.h"
 #include "painter.h"
-#include "SDL_sysrender.h"
 namespace sdl
 {
-void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source_ptr, SDL_Rect const* dstrect, double angle)
+void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_FRect const* destination, double angle)
 {
-  SDL_FRect destination;
-  destination.x = dstrect->x;
-  destination.y = dstrect->y;
-  destination.w = dstrect->w;
-  destination.h = dstrect->h;
-
   SDL_FPoint centre;
-  centre.x = .5f * destination.w;
-  centre.y = .5f * destination.h;
+  centre.x = .5f * destination->w;
+  centre.y = .5f * destination->h;
 
   if(texture->native) 
   {
@@ -24,25 +17,24 @@ void Render(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source
 
   if(renderer->hidden == SDL_FALSE)
   {
-    if(renderer->RenderCopyEx(renderer, texture, source_ptr, &destination, angle, &centre, SDL_FLIP_NONE))
+    if(renderer->RenderCopyEx(renderer, texture, source, destination, angle, &centre, SDL_FLIP_NONE))
     {
       BOOST_THROW_EXCEPTION(Exception() << Exception::What(Error()));
     }
   }
 }
 
-static int Transform(int x, int new_origin, int width, float zoom, float parallax)
+static float Transform(float x, float new_origin, float width, float zoom, float parallax)
 {
-  float x0 = float(x);
-  float w = .5f * float(width);
-  x0 -= parallax * float(new_origin);
-  x0 -= w;
-  x0 *= zoom;
-  x0 += w;
-  return int(x0);
+  float w = .5f * width;
+  x -= parallax * new_origin;
+  x -= w;
+  x *= zoom;
+  x += w;
+  return x;
 }
 
-void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source_ptr, SDL_Rect const* destination_ptr, SDL_Point const* view, float zoom, float parallax, bool tile, double angle)
+void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source_ptr, SDL_FRect const* destination_ptr, SDL_FPoint const* view, float zoom, float parallax, bool tile, double angle)
 {
   bool render = true;
   SDL_Rect source = {0, 0, texture->w, texture->h};
@@ -56,50 +48,56 @@ void Render(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SD
 
   if(render)
   {
-    SDL_Rect destination;
+    SDL_FRect destination;
     if(destination_ptr)
     {
-      destination = *destination_ptr;
-      if(!destination.w)
+      destination.x = destination_ptr->x;
+      destination.y = destination_ptr->y;
+      destination.w = destination_ptr->w;
+      destination.h = destination_ptr->h;
+      if(destination.w == 0.f)
       {
-        destination.w = texture->w;
+        destination.w = (float)texture->w;
       }
-      if(!destination.h)
+      if(destination.h == 0.f)
       {
-        destination.h = texture->h;
+        destination.h = (float)texture->h;
       }
 
       if(parallax > 0.f)
       {
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
-        destination.x = Transform(destination.x, view->x, w, zoom, parallax);
-        destination.y = Transform(destination.y, view->y, h, zoom, parallax);
-        destination.w = int(zoom * float(destination.w));
-        destination.h = int(zoom * float(destination.h));
+        destination.x = Transform(destination.x, view->x, (float)w, zoom, parallax);
+        destination.y = Transform(destination.y, view->y, (float)h, zoom, parallax);
+        destination.w = zoom * destination.w;
+        destination.h = zoom * destination.h;
       }
       else
       {
-        if((destination.x < 0) || (destination.y < 0))
+        if((destination.x < 0.f) || (destination.y < 0.f))
         {
           int w, h;
           SDL_GetWindowSize(window, &w, &h);
           if(destination.x < 0)
           {
-            destination.x += w - destination.w;
+            destination.x += (float)w - destination.w;
           }
           if(destination.h < 0)
           {
-            destination.y += h - destination.h;
+            destination.y += (float)h - destination.h;
           }
         }
       }
     }
     else
     {
-      destination.x = 0;
-      destination.y = 0;
-      SDL_GetWindowSize(window, &destination.w, &destination.h);
+      int w, h;
+      SDL_GetWindowSize(window, &w, &h);
+      destination.x = 0.f;
+      destination.y = 0.f;
+      destination.w = (float)w;
+      destination.h = (float)h;
     }
    
     if(tile)

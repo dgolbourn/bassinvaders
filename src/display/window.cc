@@ -9,6 +9,7 @@
 #include "font_impl.h"
 #include "surface.h"
 #include "render.h"
+#include "SDL_sysrender.h"
 
 namespace display
 {
@@ -22,7 +23,7 @@ public:
   void Clear(void) const;
   void Show(void) const;
   void Destroy(void);
-  void View(int x, int y, float zoom);
+  void View(float x, float y, float zoom);
 
   ~WindowImpl(void);
 
@@ -32,7 +33,7 @@ public:
   SDL_Window* window_;
   SDL_Renderer* renderer_;
   std::unordered_map<std::string, sdl::Texture> textures_;
-  SDL_Point view_;
+  SDL_FPoint view_;
   float zoom_;
 };
 
@@ -95,7 +96,7 @@ WindowImpl::WindowImpl(json::JSON const& json) : sdl_(SDL_INIT_VIDEO), img_(IMG_
       BOOST_THROW_EXCEPTION(sdl::Exception() << sdl::Exception::What(sdl::Error()));
     }
 
-    view_ = {0, 0};
+    view_ = {0.f, 0.f};
     zoom_ = 1.f;
   }
   catch(...)
@@ -152,13 +153,13 @@ void WindowImpl::Free(void)
   textures_.clear();
 }
 
-void WindowImpl::View(int x, int y, float zoom)
+void WindowImpl::View(float x, float y, float zoom)
 {
   int w;
   int h;
   SDL_GetWindowSize(window_, &w, &h);
-  view_.x = x - w/2;
-  view_.y = y - h/2;
+  view_.x = x - .5f * (float)w;
+  view_.y = y - .5f * (float)h;
   zoom_ = zoom;
 }
 
@@ -173,15 +174,21 @@ static void Render(std::shared_ptr<WindowImpl> const& window, sdl::Texture const
   SDL_Rect source_copy;
   if(source)
   {
-    source_copy = source;
+    source_copy.x = (int)std::round(source.x());
+    source_copy.y = (int)std::round(source.y());
+    source_copy.w = (int)std::round(source.w());
+    source_copy.h = (int)std::round(source.h());
     source_ptr = &source_copy;
   }
 
-  SDL_Rect* destination_ptr = nullptr;
-  SDL_Rect destination_copy;
+  SDL_FRect* destination_ptr = nullptr;
+  SDL_FRect destination_copy;
   if(destination)
   {
-    destination_copy = destination;
+    destination_copy.x = destination.x();
+    destination_copy.y = destination.y();
+    destination_copy.w = destination.w();
+    destination_copy.h = destination.h();
     destination_ptr = &destination_copy;
   }
 
@@ -244,7 +251,7 @@ void Window::Free(void)
   impl_->Free();
 }
 
-void Window::View(int x, int y, float zoom)
+void Window::View(float x, float y, float zoom)
 {
   impl_->View(x, y, zoom);
 }

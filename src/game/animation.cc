@@ -52,7 +52,7 @@ AnimationImpl::AnimationImpl(json::JSON const& json, display::Window& window, ev
     int x;
     int y;
     json::JSON(value).Unpack("[ii]", &x, &y);
-    *frame_ = display::BoundingBox(x, y, width, height);
+    *frame_ = display::BoundingBox((float)x, (float)y, (float)width, (float)height);
     ++frame_;
   }
   frame_ = frames_.begin(); 

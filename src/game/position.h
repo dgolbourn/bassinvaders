@@ -3,6 +3,6 @@
 #include <utility>
 namespace game
 {
-typedef std::pair<int, int> Position;
+typedef std::pair<float, float> Position;
 }
 #endif

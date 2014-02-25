@@ -162,12 +162,12 @@ void HeroImpl::Change(State& next)
 static void BoxUpdate(display::BoundingBox const& source, display::BoundingBox& destination, Position const& position, int x_facing)
 {
   display::BoundingBox temp = source.Copy();
-  int sourcex = temp.x();
+  float sourcex = temp.x();
   temp.x(temp.x() + position.first);
   temp.y(temp.y() + position.second);
   if(x_facing < 0)
   {
-    temp.x(temp.x() - 2 * sourcex);
+    temp.x(temp.x() - 2.f * sourcex);
     temp.w(-temp.w());
   }
   destination.Copy(temp);
@@ -176,8 +176,8 @@ static void BoxUpdate(display::BoundingBox const& source, display::BoundingBox& 
 void HeroImpl::Step(float dt)
 {
   dynamics_.Step(dt);
-  position_.first = int(dynamics_.x()); 
-  position_.second = int(dynamics_.y());
+  position_.first = dynamics_.x(); 
+  position_.second = dynamics_.y();
   BoxUpdate(current_.Render(), render_box_, position_, x_facing_);
   BoxUpdate(current_.Collision(), collision_box_, position_, x_facing_);
 }
@@ -224,8 +224,8 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, event::Queue
   current_.Pause();
   collision_box_ = current_.Collision().Copy();
   render_box_ = current_.Render().Copy();
-  position_ = game::Position(0, 0);
-  dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.0f, 1.0f);
+  position_ = game::Position(0.f, 0.f);
+  dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f);
   x_sign_ = 0;
   y_sign_ = 0;
   x_facing_ = 0;
@@ -266,8 +266,8 @@ void HeroImpl::Life(Hero::Command command)
 void Hero::Position(game::Position const& position)
 {
   impl_->position_ = position;
-  impl_->dynamics_.x(float(position.first));
-  impl_->dynamics_.y(float(position.second));
+  impl_->dynamics_.x(position.first);
+  impl_->dynamics_.y(position.second);
 }
 
 game::Position Hero::Position(void)

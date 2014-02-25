@@ -37,8 +37,8 @@ HUDImpl::HUDImpl(json::JSON const& json, display::Window& window) : window_(wind
     "life position", &life_x, &life_y);
 
   font_ = display::Font(std::string(filename), point, r, g, b, a);
-  score_position_ = display::BoundingBox(score_x, score_y, 0, 0);
-  life_position_ = display::BoundingBox(life_x, life_y, 0, 0);
+  score_position_ = display::BoundingBox((float)score_x, (float)score_y, 0.f, 0.f);
+  life_position_ = display::BoundingBox((float)life_x, (float)life_y, 0.f, 0.f);
   Score(0);
   Life(0);
 }

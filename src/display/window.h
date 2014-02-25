@@ -20,7 +20,7 @@ public:
   void Free(void);
   void Clear(void) const;
   void Show(void) const;
-  void View(int x, int y, float zoom);
+  void View(float x, float y, float zoom);
 private:
   std::shared_ptr<class WindowImpl> impl_;
 };

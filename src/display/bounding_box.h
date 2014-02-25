@@ -6,28 +6,25 @@
 #include "json.h"
 #include "weak_ptr.h"
 
-struct SDL_Rect;
-
 namespace display
 {
 class BoundingBox
 {
 public:
   BoundingBox(void) = default;
-  BoundingBox(int x, int y, int w, int h);
+  BoundingBox(float x, float y, float w, float h);
   BoundingBox(json::JSON const& json);
   bool operator&&(BoundingBox const& other) const;
   bool operator<(BoundingBox const& other) const;
   explicit operator bool(void) const;
-  operator SDL_Rect(void) const;
-  void x(int x);
-  void y(int y);
-  void w(int w);
-  void h(int h);
-  int x(void) const;
-  int y(void) const;
-  int w(void) const;
-  int h(void) const;
+  void x(float x);
+  void y(float y);
+  void w(float w);
+  void h(float h);
+  float x(void) const;
+  float y(void) const;
+  float w(void) const;
+  float h(void) const;
   BoundingBox Copy(void) const;
   void Copy(BoundingBox const& other) const;
   typedef memory::WeakPtr<BoundingBox, class BoundingBoxImpl> WeakPtr;

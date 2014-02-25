@@ -1,5 +1,5 @@
 #include "bounding_box.h"
-#include "SDL_rect.h"
+#include "SDL_sysrender.h"
 #include "rect.h"
 
 namespace display
@@ -7,21 +7,19 @@ namespace display
 class BoundingBoxImpl
 {
 public:
-  BoundingBoxImpl(int x, int y, int w, int h);
+  BoundingBoxImpl(float x, float y, float w, float h);
   BoundingBoxImpl(json::JSON const& json);
-  SDL_Rect rect_;
+  SDL_FRect rect_;
 };
 
 bool BoundingBox::operator&&(BoundingBox const& other) const
 {
-  bool intersection = sdl::Intersection(&impl_->rect_, &other.impl_->rect_);
-  return intersection;
+  return sdl::Intersection(&impl_->rect_, &other.impl_->rect_);
 }
 
 bool BoundingBox::operator<(BoundingBox const& other) const
 {
-  bool less = impl_.owner_before(other.impl_);
-  return less;
+  return impl_.owner_before(other.impl_);
 }
 
 BoundingBox::operator bool(void) const
@@ -29,47 +27,42 @@ BoundingBox::operator bool(void) const
   return bool(impl_);
 }
 
-BoundingBox::operator SDL_Rect(void) const
-{
-  return impl_->rect_;
-}
-
-void BoundingBox::x(int x)
+void BoundingBox::x(float x)
 {
   impl_->rect_.x = x;
 }
 
-void BoundingBox::y(int y)
+void BoundingBox::y(float y)
 {
   impl_->rect_.y = y;
 }
 
-void BoundingBox::w(int w)
+void BoundingBox::w(float w)
 {
   impl_->rect_.w = w;
 }
 
-void BoundingBox::h(int h)
+void BoundingBox::h(float h)
 {
   impl_->rect_.h = h;
 }
 
-int BoundingBox::x(void) const
+float BoundingBox::x(void) const
 {
   return impl_->rect_.x;
 }
 
-int BoundingBox::y(void) const
+float BoundingBox::y(void) const
 {
   return impl_->rect_.y;
 }
 
-int BoundingBox::w(void) const
+float BoundingBox::w(void) const
 {
   return impl_->rect_.w;
 }
 
-int BoundingBox::h(void) const
+float BoundingBox::h(void) const
 {
   return impl_->rect_.h;
 }
@@ -84,18 +77,23 @@ void BoundingBox::Copy(BoundingBox const& other) const
   impl_->rect_ = other.impl_->rect_;
 }
 
-BoundingBox::BoundingBox(int x, int y, int w, int h)
+BoundingBox::BoundingBox(float x, float y, float w, float h)
 {
   impl_ = std::make_shared<BoundingBoxImpl>(x, y, w, h);
 }
 
-BoundingBoxImpl::BoundingBoxImpl(int x, int y, int w, int h) : rect_({x, y, w, h})
+BoundingBoxImpl::BoundingBoxImpl(float x, float y, float w, float h) : rect_({x, y, w, h})
 {
 }
 
 BoundingBoxImpl::BoundingBoxImpl(json::JSON const& json)
 {
-  json.Unpack("[iiii]", &rect_.x, &rect_.y, &rect_.w, &rect_.h);
+  int x, y, w, h;
+  json.Unpack("[iiii]", &x, &y, &w, &h);
+  rect_.x = (float)x;
+  rect_.y = (float)y;
+  rect_.w = (float)w;
+  rect_.h = (float)h;
 }
 
 BoundingBox::BoundingBox(json::JSON const& json)

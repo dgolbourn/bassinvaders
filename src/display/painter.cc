@@ -10,71 +10,51 @@ public:
   PainterImpl(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_FRect const* destination, double angle);
   bool operator()(algorithm::NodeCoordinates const& coords);
   void MovementVectors(void);
-  void EnclosingRect(void);
-  void StartingRect(void);
-
-  std::pair<float, float> north_;
-  std::pair<float, float> east_;
-  SDL_FRect clip_;
-  SDL_FRect collision_box_;
+  void CollisionBox(void);
+  void StartBox(void);
   SDL_Renderer* renderer_;
   SDL_Texture* texture_;
   SDL_Rect const* source_;
+  SDL_FPoint north_;
+  SDL_FPoint east_;
+  SDL_FRect view_;
+  SDL_FRect collision_;
   SDL_FRect destination_;
   double angle_;
   float c_;
   float s_;
-  float w_;
-  float h_;
 };
 
-void PainterImpl::EnclosingRect(void)
+void PainterImpl::CollisionBox(void)
 {
-  float w = .5f * w_;
-  float h = .5f * h_;
-  float cw = c_ * w;
-  float ch = c_ * h;
-  float sw = s_ * w;
-  float sh = s_ * h;
-
-  static int const size = 4;
-  SDL_FPoint points[size];
-  points[0].x = -cw + sh;
-  points[0].y = ch + sw;
-  points[1].x = cw + sh;
-  points[1].y = ch - sw;
-  points[2].x = -cw - sh;
-  points[2].y = -ch + sw;
-  points[3].x = cw - sh;
-  points[3].y = -ch - sw;
-
-  EnclosePoints(points, size, &collision_box_);
-  collision_box_.x += destination_.x + w;
-  collision_box_.y += destination_.y + h;
+  collision_.w = std::max(std::abs(east_.x - north_.x), std::abs(east_.x + north_.x));
+  collision_.h = std::max(std::abs(north_.y - east_.y), std::abs(north_.y + east_.y));
+  collision_.x = destination_.x + .5f * (destination_.w - collision_.w);
+  collision_.y = destination_.y + .5f * (destination_.h - collision_.h);
 }
 
-void PainterImpl::StartingRect(void)
+void PainterImpl::StartBox(void)
 {
-  float a = std::round((c_ * destination_.x + s_ * destination_.y) / w_);
-  float b = std::round((-s_ * destination_.x + c_ * destination_.y) / h_);
-
-  static float const sign[] = {1.f, 0.f, -1.f};
+  float a = std::round((c_ * destination_.x + s_ * destination_.y) / destination_.w);
+  float b = std::round((-s_ * destination_.x + c_ * destination_.y) / destination_.h);
+  SDL_FRect collision;
+  collision.w = collision_.w;
+  collision.h = collision_.h;
+  static float const sign[] = {0.f, 1.f, -1.f};
   for(float i : sign)
   {
     bool break_flag = false;
     for(float j : sign)
     {
       SDL_FPoint adjust;
-      adjust.x = (a + i) * east_.first + (b + j) * north_.first;
-      adjust.y = (a + i) * east_.second + (b + j) * north_.second;
-
-      SDL_FRect temp = collision_box_;
-      temp.x -= adjust.x;
-      temp.y -= adjust.y;
-
-      if(sdl::Intersection(&temp, &clip_))
+      adjust.x = (a + i) * east_.x + (b + j) * north_.x;
+      adjust.y = (a + i) * east_.y + (b + j) * north_.y;
+      collision.x = collision_.x - adjust.x;
+      collision.y = collision_.y - adjust.y;
+      if(Intersection(&collision, &view_))
       {
-        collision_box_ = temp;
+        collision_.x = collision.x;
+        collision_.y = collision.y;
         destination_.x -= adjust.x;
         destination_.y -= adjust.y;
         break_flag = true;
@@ -93,12 +73,10 @@ void PainterImpl::MovementVectors(void)
   double angle = angle_ * M_PI / 180.;
   c_ = (float)std::cos(angle);
   s_ = (float)std::sin(angle);
-  w_ = destination_.w;
-  h_ = destination_.h;
-  east_.first = c_ * w_;
-  east_.second = s_ * w_;
-  north_.first = -s_ * h_;
-  north_.second = c_ * h_;
+  east_.x = c_ * destination_.w;
+  east_.y = s_ * destination_.w;
+  north_.x = -s_ * destination_.h;
+  north_.y = c_ * destination_.h;
 }
 
 PainterImpl::PainterImpl(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect const* source, SDL_FRect const* destination, double angle)
@@ -110,14 +88,13 @@ PainterImpl::PainterImpl(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture
   angle_ = angle;
   int w, h;
   SDL_GetWindowSize(window, &w, &h);
-  clip_.w = (float)w;
-  clip_.h = (float)h;
-  clip_.x = 0.f;
-  clip_.y = 0.f;
-
+  view_.w = (float)w;
+  view_.h = (float)h;
+  view_.x = 0.f;
+  view_.y = 0.f;
   MovementVectors();
-  EnclosingRect();
-  StartingRect();
+  CollisionBox();
+  StartBox();
 }
 
 bool PainterImpl::operator()(algorithm::NodeCoordinates const& coords)
@@ -126,16 +103,18 @@ bool PainterImpl::operator()(algorithm::NodeCoordinates const& coords)
   float east = float(coords.first);
   float north = float(coords.second);
   SDL_FPoint move;
-  move.x = east_.first * east + north_.first * north;
-  move.y = east_.second * east + north_.second * north;
-  SDL_FRect collision_box = collision_box_;
-  collision_box.x += move.x;
-  collision_box.y += move.y;
-  if(sdl::Intersection(&collision_box, &clip_))
+  move.x = east_.x * east + north_.x * north;
+  move.y = east_.y * east + north_.y * north;
+  SDL_FRect collision = collision_;
+  collision.x += move.x;
+  collision.y += move.y;
+  SDL_FRect destination;
+  destination.w = destination_.w;
+  destination.h = destination_.h;
+  if(Intersection(&collision, &view_))
   {
-    SDL_FRect destination = destination_;
-    destination.x += move.x;
-    destination.y += move.y;
+    destination.x = destination_.x + move.x;
+    destination.y = destination_.y + move.y;
     Render(renderer_, texture_, source_, &destination, angle_);
     filled = true;
   }

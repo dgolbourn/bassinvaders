@@ -4,6 +4,5 @@
 namespace sdl
 {
 bool Intersection(SDL_FRect const* a, SDL_FRect const* b);
-void EnclosePoints(SDL_FPoint const* points, int count, SDL_FRect* result);
 }
 #endif

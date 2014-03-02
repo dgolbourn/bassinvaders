@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     event::Default();
     event::quit.Add(Quit);
     display::Window w(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/window.json"));
-    display::Texture S = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/petrified_rock_large__x1_iconic_png_1354840406.png");
+    display::Texture S = w.Load("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/black.png");
     //audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/BassRockinDJJin-LeeRemix.mp3");
     audio::Music mixer("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/Boogie_Belgique_-_01_-_Forever_and_Ever.mp3");
     mixer.Volume(0.5);
@@ -62,12 +62,12 @@ int main(int argc, char *argv[])
     game::HUD hud(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hud.json"), w, Sc);
     h.Life(event::Bind(&game::HUD::Life, hud));
     
-    std::vector<display::BoundingBox> boxes(500);
-    std::vector<game::Dynamics> dynamics(500);
+    std::vector<display::BoundingBox> boxes(100);
+    std::vector<game::Dynamics> dynamics(100);
     int idx = 0;
     for(auto& box : boxes)
     {
-      box = display::BoundingBox(-1500 + (rand() & 3000), -1500 + (rand() % 3000), 50, 50);
+      box = display::BoundingBox(200+rand() % 3000, 200+rand() % 1500, 50, 50);
       event::Command c = std::bind(S, display::BoundingBox(), box, 1.f, false, 0.);
       Sc.Add(c, -1);
 
@@ -76,8 +76,9 @@ int main(int argc, char *argv[])
       game::RulesCollision::Channel channel(send, receive);
       //rc.Add(1, box, channel);
 
-      dynamics[idx] = game::Dynamics(box.x() + box.w() *.5f, box.y() + box.h() *0.5f, 0, 0, box.w()*.5f, box.h()*.5f, 0.5f);
+      dynamics[idx] = game::Dynamics(box.x() + 0.5f * box.w(), box.y() + 0.5f* box.h(), 0, 0, box.w(), box.h(), (rand() % 1000)/1100.f);
       dc.Add(1, dynamics[idx], box);
+      dynamics[idx].k(0.1);
       ++idx;
     }
 

@@ -17,6 +17,10 @@ public:
   void h(float h);
   void c(float c);
   void m(float m);
+  void a(float a);
+  void b(float b);
+  void k(float k);
+  void d(float d);
   float x(void) const;
   float y(void) const;
   float u(void) const;
@@ -25,6 +29,10 @@ public:
   float h(void) const;
   float c(void) const;
   float m(void) const;
+  float a(void) const;
+  float b(void) const;
+  float k(void) const;
+  float d(void) const;
   void Step(float dt);
   void Collision(Dynamics const& other);
   explicit operator bool(void) const;

@@ -70,7 +70,7 @@ void HeroImpl::Attack(void)
 {
 }
 
-static float const dv = 250.f;
+static float const dv = 1500.f;
 static float const sqrt1_2 = std::sqrt(0.5f);
 
 void HeroImpl::Up(void)
@@ -109,8 +109,8 @@ void HeroImpl::Update(void)
     x_facing_ = x_sign_;
   }
 
-  dynamics_.u(float(x_sign_) * v);
-  dynamics_.v(float(y_sign_) * v);
+  dynamics_.a(float(x_sign_) * v);
+  dynamics_.b(float(y_sign_) * v + 1000.f);
 
   if(x_sign_ || y_sign_)
   {
@@ -226,6 +226,7 @@ HeroImpl::HeroImpl(json::JSON const& json, display::Window& window, event::Queue
   render_box_ = current_.Render().Copy();
   position_ = game::Position(0.f, 0.f);
   dynamics_ = Dynamics(0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f);
+  dynamics_.b(1000.f);
   x_sign_ = 0;
   y_sign_ = 0;
   x_facing_ = 0;
@@ -256,6 +257,12 @@ void HeroImpl::Init(Scene& scene, RulesCollision& collision, DynamicsCollision& 
   RulesCollision::Channel channel(send, receive);
   collision.Add(0, collision_box_, channel);
   dcollision.Add(0, dynamics_, collision_box_);
+  dynamics_.x(collision_box_.w()*0.5f);
+  dynamics_.y(collision_box_.h()*0.5f);
+  dynamics_.w(collision_box_.w());
+  dynamics_.h(collision_box_.h());
+  dynamics_.k(0.1f);
+  dynamics_.d(0.01f);
 }
 
 void HeroImpl::Life(Hero::Command command)

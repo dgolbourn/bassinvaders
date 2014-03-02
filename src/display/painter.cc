@@ -11,7 +11,7 @@ public:
   bool operator()(algorithm::NodeCoordinates const& coords);
   void MovementVectors(void);
   void CollisionBox(void);
-  void StartBox(void);
+  void StartPosition(void);
   SDL_Renderer* renderer_;
   SDL_Texture* texture_;
   SDL_Rect const* source_;
@@ -28,12 +28,12 @@ public:
 void PainterImpl::CollisionBox(void)
 {
   collision_.w = std::max(std::abs(east_.x - north_.x), std::abs(east_.x + north_.x));
-  collision_.h = std::max(std::abs(north_.y - east_.y), std::abs(north_.y + east_.y));
+  collision_.h = std::max(std::abs(east_.y - north_.y), std::abs(east_.y + north_.y));
   collision_.x = destination_.x + .5f * (destination_.w - collision_.w);
   collision_.y = destination_.y + .5f * (destination_.h - collision_.h);
 }
 
-void PainterImpl::StartBox(void)
+void PainterImpl::StartPosition(void)
 {
   float a = std::round((c_ * destination_.x + s_ * destination_.y) / destination_.w);
   float b = std::round((-s_ * destination_.x + c_ * destination_.y) / destination_.h);
@@ -94,7 +94,7 @@ PainterImpl::PainterImpl(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture
   view_.y = 0.f;
   MovementVectors();
   CollisionBox();
-  StartBox();
+  StartPosition();
 }
 
 bool PainterImpl::operator()(algorithm::NodeCoordinates const& coords)
@@ -108,13 +108,11 @@ bool PainterImpl::operator()(algorithm::NodeCoordinates const& coords)
   SDL_FRect collision = collision_;
   collision.x += move.x;
   collision.y += move.y;
-  SDL_FRect destination;
-  destination.w = destination_.w;
-  destination.h = destination_.h;
   if(Intersection(&collision, &view_))
   {
-    destination.x = destination_.x + move.x;
-    destination.y = destination_.y + move.y;
+    SDL_FRect destination = destination_;
+    destination.x += move.x;
+    destination.y += move.y;
     Render(renderer_, texture_, source_, &destination, angle_);
     filled = true;
   }

@@ -28,19 +28,32 @@ public:
 
 void DynamicsImpl::Acceleration(float dt)
 {
-  float u = 0;
-  float v = 0;
-  u -= std::copysign(xk_ * k_ * b_, u_);
-  v -= std::copysign(yk_ * k_ * a_, v_);
-
-  u -= d_ * u_;
-  v -= d_ * v_;
-
-  u += a_ * dt;
-  v += b_ * dt;
-
-  u_ += u;
-  v_ += v;
+  float a = 0.f;
+  float b = 0.f;
+  a -= std::copysign(xk_ * k_ * b_, u_);
+  b -= std::copysign(yk_ * k_ * a_, v_);
+  a -= d_ * u_;
+  b -= d_ * v_;
+  a += a_;
+  b += b_;
+  float u = u_ + a * dt;
+  float v = v_ + b * dt;
+  if(std::signbit(u) ^ std::signbit(u_))
+  {
+    u_ = std::copysign(0.f, u);
+  }
+  else
+  {
+    u_ = u;
+  }
+  if(std::signbit(v) ^ std::signbit(v_))
+  {
+    v_ = std::copysign(0.f, v);
+  }
+  else
+  {
+    v_ = v;
+  }
 }
 
 void DynamicsImpl::Step(float dt)

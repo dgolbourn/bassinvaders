@@ -261,8 +261,8 @@ void HeroImpl::Init(Scene& scene, RulesCollision& collision, DynamicsCollision& 
   dynamics_.y(collision_box_.h()*0.5f);
   dynamics_.w(collision_box_.w());
   dynamics_.h(collision_box_.h());
-  dynamics_.k(0.1f);
-  dynamics_.d(0.01f);
+  dynamics_.k(0.9f);
+  dynamics_.d(0.9f);
 }
 
 void HeroImpl::Life(Hero::Command command)

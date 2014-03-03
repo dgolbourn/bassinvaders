@@ -56,6 +56,9 @@ int main(int argc, char *argv[])
     rc.Link(0, 1);
     game::DynamicsCollision dc(col);
     dc.Link(0, 1);
+    dc.Link(1, 2);
+    dc.Link(2, 2);
+    dc.Link(0, 2);
     event::Queue queue;
     game::Hero h(json::JSON("C:/Users/golbo_000/Documents/Visual Studio 2012/Projects/ReBassInvaders/resource/hero.json"), w, Sc, rc, dc, queue);
     h.End(Quit);
@@ -76,9 +79,16 @@ int main(int argc, char *argv[])
       game::RulesCollision::Channel channel(send, receive);
       //rc.Add(1, box, channel);
 
-      dynamics[idx] = game::Dynamics(box.x() + 0.5f * box.w(), box.y() + 0.5f* box.h(), 0, 0, box.w(), box.h(), (rand() % 1000)/1100.f);
+      dynamics[idx] = game::Dynamics(box.x() + 0.5f * box.w(), box.y() + 0.5f* box.h(), 0, 0, box.w(), box.h(), (rand() % 1000)/2000.f);
       dc.Add(1, dynamics[idx], box);
-      dynamics[idx].k(0.1);
+      dynamics[idx].k(0.99);
+      if(idx % 10 == 0)
+      {
+        dc.Add(2, dynamics[idx], box);
+        dynamics[idx].b(1000);
+        dynamics[idx].m(1);
+        dynamics[idx].d(0.9f);
+      }
       ++idx;
     }
 
@@ -97,6 +107,13 @@ int main(int argc, char *argv[])
       int current_frame_rate = int(std::round(1./dt));
       hud.Score(current_frame_rate);
       game::Position p = h.Position();
+      int idx = 0;
+      for(auto& box : boxes)
+      {
+        box.x(dynamics[idx].x() - .5f * box.w());
+        box.y(dynamics[idx].y() - .5f * box.h());
+        ++idx;
+      }
       w.View(p.first, p.second, 1.f);
       w.Clear();
       Sc.Render();
@@ -104,6 +121,10 @@ int main(int argc, char *argv[])
       event::Check();
       queue();
       h.Step(frame_period_s);
+      for(auto& d : dynamics)
+      {
+        d.Step(frame_period_s);
+      }
       col.Check();
       tick += frame_period_ms;
       std::this_thread::sleep_until(tick);
